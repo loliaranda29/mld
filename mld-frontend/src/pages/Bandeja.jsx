@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { useEffect } from 'react'
-import TramiteModal from '../components/TramiteModal'
 
+import { useState } from 'react'
+import TramiteModal from '../components/TramiteModal'
 
 const pestañas = ['Todos', 'Abiertos', 'Cerrados']
 const estados = [
@@ -12,7 +11,6 @@ const estados = [
   'Rechazado',
 ]
 
-// 🚧 Datos simulados
 const mockTramites = [
   {
     id: 1,
@@ -42,6 +40,14 @@ const mockTramites = [
     cuil: '20123456789',
     fecha: '2024-05-08',
   },
+  {
+    id: 5,
+    nombre: 'Cambio de titularidad',
+    estado: 'En prevención',
+    cuil: '20999888777',
+    fecha: '2024-05-22',
+    fechaPrevencion: '2025-05-24' // <-- Fecha reciente
+  }
 ]
 
 function Bandeja() {
@@ -51,6 +57,7 @@ function Bandeja() {
   const [cuil, setCuil] = useState('')
   const [fechaInicio, setFechaInicio] = useState('')
   const [fechaFin, setFechaFin] = useState('')
+  const [tramiteSeleccionado, setTramiteSeleccionado] = useState(null)
 
   const tramitesFiltrados = mockTramites.filter((t) => {
     const coincideTab =
@@ -71,8 +78,6 @@ function Bandeja() {
   return (
     <div>
       <h2 className="text-xl font-semibold text-gray-700 mb-4">📥 Bandeja de Entrada</h2>
-
-      {/* Pestañas */}
       <div className="flex space-x-4 mb-6 border-b">
         {pestañas.map((pestana) => (
           <button
@@ -88,8 +93,6 @@ function Bandeja() {
           </button>
         ))}
       </div>
-
-      {/* Filtros */}
       <div className="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-4 items-end">
         <div>
           <label className="block text-sm text-gray-600 mb-1">Buscar trámite</label>
@@ -101,7 +104,6 @@ function Bandeja() {
             placeholder="Ej: habilitación comercial"
           />
         </div>
-
         <div>
           <label className="block text-sm text-gray-600 mb-1">Estado</label>
           <select
@@ -111,13 +113,10 @@ function Bandeja() {
           >
             <option value="">Todos</option>
             {estados.map((est) => (
-              <option key={est} value={est}>
-                {est}
-              </option>
+              <option key={est} value={est}>{est}</option>
             ))}
           </select>
         </div>
-
         <div>
           <label className="block text-sm text-gray-600 mb-1">CUIL / Correo</label>
           <input
@@ -128,7 +127,6 @@ function Bandeja() {
             placeholder="Ej: 20123456789"
           />
         </div>
-
         <div>
           <label className="block text-sm text-gray-600 mb-1">Desde</label>
           <input
@@ -138,7 +136,6 @@ function Bandeja() {
             className="border px-3 py-1 rounded"
           />
         </div>
-
         <div>
           <label className="block text-sm text-gray-600 mb-1">Hasta</label>
           <input
@@ -149,8 +146,6 @@ function Bandeja() {
           />
         </div>
       </div>
-
-      {/* Tabla de trámites */}
       <div className="bg-white rounded shadow overflow-auto">
         <table className="min-w-full table-auto">
           <thead className="bg-gray-100 text-gray-700 text-sm">
@@ -164,7 +159,11 @@ function Bandeja() {
           </thead>
           <tbody className="text-sm text-gray-800">
             {tramitesFiltrados.map((t) => (
-              <tr key={t.id} className="border-b">
+              <tr
+                key={t.id}
+                className="border-b hover:bg-gray-100 cursor-pointer"
+                onClick={() => setTramiteSeleccionado(t)}
+              >
                 <td className="px-4 py-2">{t.id}</td>
                 <td className="px-4 py-2">{t.nombre}</td>
                 <td className="px-4 py-2">{t.estado}</td>
@@ -182,6 +181,10 @@ function Bandeja() {
           </tbody>
         </table>
       </div>
+      <TramiteModal
+        tramite={tramiteSeleccionado}
+        onClose={() => setTramiteSeleccionado(null)}
+      />
     </div>
   )
 }

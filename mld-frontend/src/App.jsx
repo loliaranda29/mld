@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import RespuestaPrevencion from './pages/RespuestaPrevencion'
 import ListadoTramites from './pages/admin/tramites/ListadoTramites'
+import FormularioBuilder from './pages/admin/FormularioBuilder'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
       }} />} />
       
       <Route path="/admin/tramites" element={<ListadoTramites />} />
+      <Route path="/admin/formulario-builder" element={<FormularioBuilder />} />
     </Routes>
   )
 }

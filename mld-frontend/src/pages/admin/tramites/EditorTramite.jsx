@@ -8,6 +8,56 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
   const [aceptaSolicitudes, setAceptaSolicitudes] = useState(tramiteSeleccionado?.aceptaSolicitudes ?? true)
   const [mostrarInicio, setMostrarInicio] = useState(tramiteSeleccionado?.mostrarInicio ?? false)
 
+  const [formulario, setFormulario] = useState([])
+
+  const agregarSeccion = () => {
+    const nueva = {
+      id: Date.now(),
+      titulo: '',
+      campos: []
+    }
+    setFormulario([...formulario, nueva])
+  }
+
+  const agregarCampo = (seccionId, tipo) => {
+    const actualizado = formulario.map((s) =>
+      s.id === seccionId
+        ? {
+            ...s,
+            campos: [...s.campos, {
+              id: Date.now(),
+              tipo,
+              etiqueta: '',
+              obligatorio: false,
+              pista: ''
+            }]
+          }
+        : s
+    )
+    setFormulario(actualizado)
+  }
+
+  const actualizarCampo = (seccionId, campoId, cambios) => {
+    const actualizado = formulario.map((s) =>
+      s.id === seccionId
+        ? {
+            ...s,
+            campos: s.campos.map((c) =>
+              c.id === campoId ? { ...c, ...cambios } : c
+            )
+          }
+        : s
+    )
+    setFormulario(actualizado)
+  }
+
+  const actualizarTituloSeccion = (seccionId, nuevoTitulo) => {
+    const actualizado = formulario.map((s) =>
+      s.id === seccionId ? { ...s, titulo: nuevoTitulo } : s
+    )
+    setFormulario(actualizado)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const nuevoTramite = {
@@ -17,134 +67,120 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
       publicado,
       aceptaSolicitudes,
       mostrarInicio,
-      fecha: new Date().toISOString().split('T')[0],
+      formulario
     }
+    console.log('Trámite guardado:', nuevoTramite)
     onGuardar(nuevoTramite)
   }
 
   return (
-    <div className="bg-white shadow p-6 rounded w-full max-w-2xl mx-auto">
+    <div className="bg-white shadow p-6 rounded w-full max-w-4xl mx-auto">
       <h2 className="text-xl font-bold text-gray-700 mb-4">
         {tramiteSeleccionado ? 'Editar Trámite' : 'Nuevo Trámite'}
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium mb-1 text-gray-700">Nombre *</label>
+          <label className="block text-sm mb-1 text-gray-700">Nombre *</label>
           <input
             required
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             className="w-full border px-3 py-2 rounded"
-            placeholder="Ej: Habilitación Comercial"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1 text-gray-700">Descripción</label>
+          <label className="block text-sm mb-1 text-gray-700">Descripción</label>
           <textarea
-            rows={3}
             value={descripcion}
             onChange={(e) => setDescripcion(e.target.value)}
             className="w-full border px-3 py-2 rounded"
-            placeholder="Descripción breve del trámite"
+            rows={2}
           />
         </div>
 
-        <div className="flex items-center gap-6 mt-4">
+        <div className="flex gap-4 text-sm">
           <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={publicado}
-              onChange={() => setPublicado(!publicado)}
-            />
-            Trámite publicado
+            <input type="checkbox" checked={publicado} onChange={() => setPublicado(!publicado)} />
+            Publicado
           </label>
-
           <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={aceptaSolicitudes}
-              onChange={() => setAceptaSolicitudes(!aceptaSolicitudes)}
-            />
+            <input type="checkbox" checked={aceptaSolicitudes} onChange={() => setAceptaSolicitudes(!aceptaSolicitudes)} />
             Acepta solicitudes
           </label>
-
           <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={mostrarInicio}
-              onChange={() => setMostrarInicio(!mostrarInicio)}
-            />
+            <input type="checkbox" checked={mostrarInicio} onChange={() => setMostrarInicio(!mostrarInicio)} />
             Mostrar en inicio
           </label>
         </div>
-        <hr className="my-6" />
-        <h3 className="text-lg font-semibold text-gray-700">📄 Ficha para el ciudadano</h3>
 
-        <div className="grid md:grid-cols-2 gap-4 mt-4">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Tutorial</label>
-            <textarea className="w-full border px-3 py-2 rounded" placeholder="Explicación, link o texto..."></textarea>
-          </div>
+        <hr />
+        <h3 className="text-lg font-semibold text-gray-700">🧾 Formulario del trámite</h3>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Modalidad</label>
-            <select className="w-full border px-3 py-2 rounded">
-              <option value="">Seleccionar</option>
-              <option value="presencial">Presencial</option>
-              <option value="online">Online</option>
-              <option value="mixto">Mixto</option>
-            </select>
+        {formulario.map((seccion) => (
+          <div key={seccion.id} className="border rounded p-4 bg-gray-50 mb-4">
+            <input
+              className="w-full mb-3 border px-3 py-1 rounded"
+              placeholder="Título de la sección"
+              value={seccion.titulo}
+              onChange={(e) => actualizarTituloSeccion(seccion.id, e.target.value)}
+            />
+            {seccion.campos.map((campo) => (
+              <div key={campo.id} className="mb-3 p-3 bg-white border rounded">
+                <label className="block text-sm mb-1 text-gray-600">Etiqueta</label>
+                <input
+                  value={campo.etiqueta}
+                  onChange={(e) => actualizarCampo(seccion.id, campo.id, { etiqueta: e.target.value })}
+                  className="w-full mb-2 border px-3 py-1 rounded"
+                />
+                <label className="block text-sm mb-1 text-gray-600">Pista o ayuda</label>
+                <textarea
+                  value={campo.pista}
+                  onChange={(e) => actualizarCampo(seccion.id, campo.id, { pista: e.target.value })}
+                  className="w-full mb-2 border px-3 py-1 rounded"
+                  placeholder="Explicación, link, imagen o video"
+                />
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Tipo: {campo.tipo}</span>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={campo.obligatorio}
+                      onChange={(e) => actualizarCampo(seccion.id, campo.id, { obligatorio: e.target.checked })}
+                    />
+                    Obligatorio
+                  </label>
+                </div>
+              </div>
+            ))}
+            <div className="flex gap-2 mt-2">
+              <button type="button" onClick={() => agregarCampo(seccion.id, 'texto')} className="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+                + Campo de texto
+              </button>
+              <button type="button" onClick={() => agregarCampo(seccion.id, 'fecha')} className="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+                + Campo de fecha
+              </button>
+              <button type="button" onClick={() => agregarCampo(seccion.id, 'archivo')} className="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+                + Campo de archivo
+              </button>
+            </div>
           </div>
+        ))}
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Implica costo</label>
-            <select className="w-full border px-3 py-2 rounded">
-              <option value="">Seleccionar</option>
-              <option value="si">Sí</option>
-              <option value="no">No</option>
-            </select>
-          </div>
+        <button
+          type="button"
+          onClick={agregarSeccion}
+          className="text-sm bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+        >
+          + Agregar sección
+        </button>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Teléfono oficina</label>
-            <input className="w-full border px-3 py-2 rounded" placeholder="Ej: 4989924" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Horario de atención</label>
-            <input className="w-full border px-3 py-2 rounded" placeholder="Ej: Lu a Vi de 8 a 13 hs" />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1 text-gray-700">Descripción del trámite</label>
-            <textarea className="w-full border px-3 py-2 rounded" rows={3}></textarea>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1 text-gray-700">Requisitos</label>
-            <textarea className="w-full border px-3 py-2 rounded" rows={3}></textarea>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1 text-gray-700">Pasos para realizar el trámite</label>
-            <textarea className="w-full border px-3 py-2 rounded" rows={3}></textarea>
-          </div>
-        </div>
-        
         <div className="mt-6 flex gap-4 justify-end">
-          <button
-            type="button"
-            onClick={onCancelar}
-            className="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200"
-          >
+          <button type="button" onClick={onCancelar} className="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200">
             Cancelar
           </button>
-          <button
-            type="submit"
-            className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
-          >
+          <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
             Guardar trámite
           </button>
         </div>

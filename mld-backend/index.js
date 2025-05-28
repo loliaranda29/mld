@@ -1,24 +1,19 @@
-const express = require('express');
-const cors = require('cors');
-const { enviarMailConfirmacion } = require('./mailer');
+import express from 'express'
+import mongoose from 'mongoose'
+import cors from 'cors'
+import tramitesRouter from './routes/tramites.js'
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = express()
+app.use(cors())
+app.use(express.json())
 
-app.post('/api/enviar-confirmacion', async (req, res) => {
-  const { email } = req.body;
+mongoose.connect('mongodb://localhost:27017/mld', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
 
-  if (!email) return res.status(400).json({ error: 'Falta el email' });
+app.use('/api/tramites', tramitesRouter)
 
-  try {
-    await enviarMailConfirmacion(email);
-    res.json({ mensaje: 'Correo enviado' });
-  } catch (err) {
-    console.error('Error enviando el correo:', err);
-    res.status(500).json({ error: 'Error al enviar el correo' });
-  }
-});
+const PORT = 4000
+app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`))
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`Servidor en http://localhost:${PORT}`));

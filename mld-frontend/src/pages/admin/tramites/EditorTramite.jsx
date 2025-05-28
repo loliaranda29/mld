@@ -1,6 +1,6 @@
 
 import { useState } from 'react'
-import VistaPreviaFormulario from './VistaPreviaFormulario'
+import VistaPreviaFormulario from '../../../components/VistaPreviaFormulario'
 
 function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
   const [nombre, setNombre] = useState(tramiteSeleccionado?.nombre || '')
@@ -22,6 +22,7 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
       etiqueta: '',
       obligatorio: false,
       pista: '',
+      opciones: tipo === 'select' ? ['Sí', 'No'] : [],
       condiciones: []
     }
     const actualizado = formulario.map((s) =>
@@ -44,6 +45,28 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
         : s
     )
     setFormulario(actualizado)
+  }
+
+  const actualizarOpcion = (seccionId, campoId, index, value) => {
+    const actualizado = formulario.map((s) => {
+      if (s.id !== seccionId) return s
+      return {
+        ...s,
+        campos: s.campos.map((c) => {
+          if (c.id !== campoId) return c
+          const nuevasOpciones = [...c.opciones]
+          nuevasOpciones[index] = value
+          return { ...c, opciones: nuevasOpciones }
+        })
+      }
+    })
+    setFormulario(actualizado)
+  }
+
+  const agregarOpcion = (seccionId, campoId) => {
+    actualizarCampo(seccionId, campoId, {
+      opciones: [...formulario.find(s => s.id === seccionId).campos.find(c => c.id === campoId).opciones, '']
+    })
   }
 
   const agregarCondicion = (seccionId, campoId) => {
@@ -99,7 +122,7 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">🧠 Editor de Trámite con Condiciones</h2>
+      <h2 className="text-2xl font-bold mb-4">⚙️ Editor de Trámite con Select + Condiciones</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <input
@@ -132,6 +155,30 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
                   className="w-full mb-2 border px-3 py-1 rounded"
                   placeholder="Pista o ayuda"
                 />
+
+                {campo.tipo === 'select' && (
+                  <div className="mb-2 space-y-1">
+                    <label className="text-sm text-gray-600">Opciones:</label>
+                    {campo.opciones.map((op, index) => (
+                      <input
+                        key={index}
+                        value={op}
+                        onChange={(e) =>
+                          actualizarOpcion(seccion.id, campo.id, index, e.target.value)
+                        }
+                        className="w-full border px-2 py-1 rounded mb-1"
+                        placeholder={`Opción ${index + 1}`}
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => agregarOpcion(seccion.id, campo.id)}
+                      className="text-xs text-blue-600 hover:underline"
+                    >
+                      + Agregar opción
+                    </button>
+                  </div>
+                )}
 
                 <div className="text-sm text-gray-700 mb-2">Condiciones:</div>
                 {(campo.condiciones || []).map((cond, index) => (
@@ -199,6 +246,9 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
               <button type="button" onClick={() => agregarCampo(seccion.id, 'fecha')} className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 text-sm">
                 + Campo de fecha
               </button>
+              <button type="button" onClick={() => agregarCampo(seccion.id, 'select')} className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 text-sm">
+                + Campo select
+              </button>
             </div>
           </div>
         ))}
@@ -220,6 +270,9 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
           </button>
         </div>
       </form>
+
+      <hr className="my-10" />
+      <VistaPreviaFormulario formulario={formulario} />
     </div>
   )
 }

@@ -22,8 +22,6 @@ function VistaPreviaFormulario({ formulario }) {
 
   const seDebeMostrar = (campo) => {
     if (!campo.condiciones || campo.condiciones.length === 0) return true
-
-    // Si hay al menos una condición que indica "mostrar" y se cumple
     for (let cond of campo.condiciones) {
       if (cond.accion === 'mostrar' && cumpleCondicion(cond)) return true
       if (cond.accion === 'ocultar' && cumpleCondicion(cond)) return false

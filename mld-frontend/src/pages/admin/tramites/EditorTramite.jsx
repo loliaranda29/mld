@@ -1,13 +1,9 @@
 
 import { useState } from 'react'
+import VistaPreviaFormulario from './VistaPreviaFormulario'
 
 function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
   const [nombre, setNombre] = useState(tramiteSeleccionado?.nombre || '')
-  const [descripcion, setDescripcion] = useState(tramiteSeleccionado?.descripcion || '')
-  const [publicado, setPublicado] = useState(tramiteSeleccionado?.publicado ?? true)
-  const [aceptaSolicitudes, setAceptaSolicitudes] = useState(tramiteSeleccionado?.aceptaSolicitudes ?? true)
-  const [mostrarInicio, setMostrarInicio] = useState(tramiteSeleccionado?.mostrarInicio ?? false)
-
   const [formulario, setFormulario] = useState([])
 
   const agregarSeccion = () => {
@@ -20,18 +16,17 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
   }
 
   const agregarCampo = (seccionId, tipo) => {
+    const nuevoCampo = {
+      id: Date.now(),
+      tipo,
+      etiqueta: '',
+      obligatorio: false,
+      pista: '',
+      condiciones: []
+    }
     const actualizado = formulario.map((s) =>
       s.id === seccionId
-        ? {
-            ...s,
-            campos: [...s.campos, {
-              id: Date.now(),
-              tipo,
-              etiqueta: '',
-              obligatorio: false,
-              pista: ''
-            }]
-          }
+        ? { ...s, campos: [...s.campos, nuevoCampo] }
         : s
     )
     setFormulario(actualizado)
@@ -51,118 +46,158 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
     setFormulario(actualizado)
   }
 
-  const actualizarTituloSeccion = (seccionId, nuevoTitulo) => {
+  const agregarCondicion = (seccionId, campoId) => {
+    const nuevaCond = {
+      campoOrigen: '',
+      operador: '==',
+      valor: '',
+      accion: 'mostrar',
+      campoObjetivo: ''
+    }
     const actualizado = formulario.map((s) =>
-      s.id === seccionId ? { ...s, titulo: nuevoTitulo } : s
+      s.id === seccionId
+        ? {
+            ...s,
+            campos: s.campos.map((c) =>
+              c.id === campoId
+                ? { ...c, condiciones: [...(c.condiciones || []), nuevaCond] }
+                : c
+            )
+          }
+        : s
+    )
+    setFormulario(actualizado)
+  }
+
+  const actualizarCondicion = (seccionId, campoId, index, cambios) => {
+    const actualizado = formulario.map((s) =>
+      s.id === seccionId
+        ? {
+            ...s,
+            campos: s.campos.map((c) =>
+              c.id === campoId
+                ? {
+                    ...c,
+                    condiciones: c.condiciones.map((cond, i) =>
+                      i === index ? { ...cond, ...cambios } : cond
+                    )
+                  }
+                : c
+            )
+          }
+        : s
     )
     setFormulario(actualizado)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    const nuevoTramite = {
-      id: tramiteSeleccionado?.id || Date.now(),
-      nombre,
-      descripcion,
-      publicado,
-      aceptaSolicitudes,
-      mostrarInicio,
-      formulario
-    }
-    console.log('Trámite guardado:', nuevoTramite)
-    onGuardar(nuevoTramite)
+    const tramite = { id: Date.now(), nombre, formulario }
+    console.log('Guardado:', tramite)
+    onGuardar(tramite)
   }
 
   return (
-    <div className="bg-white shadow p-6 rounded w-full max-w-4xl mx-auto">
-      <h2 className="text-xl font-bold text-gray-700 mb-4">
-        {tramiteSeleccionado ? 'Editar Trámite' : 'Nuevo Trámite'}
-      </h2>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">🧠 Editor de Trámite con Condiciones</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm mb-1 text-gray-700">Nombre *</label>
-          <input
-            required
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1 text-gray-700">Descripción</label>
-          <textarea
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            rows={2}
-          />
-        </div>
-
-        <div className="flex gap-4 text-sm">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={publicado} onChange={() => setPublicado(!publicado)} />
-            Publicado
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={aceptaSolicitudes} onChange={() => setAceptaSolicitudes(!aceptaSolicitudes)} />
-            Acepta solicitudes
-          </label>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={mostrarInicio} onChange={() => setMostrarInicio(!mostrarInicio)} />
-            Mostrar en inicio
-          </label>
-        </div>
-
-        <hr />
-        <h3 className="text-lg font-semibold text-gray-700">🧾 Formulario del trámite</h3>
+        <input
+          type="text"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          placeholder="Nombre del trámite"
+          className="w-full border px-3 py-2 rounded"
+        />
 
         {formulario.map((seccion) => (
-          <div key={seccion.id} className="border rounded p-4 bg-gray-50 mb-4">
+          <div key={seccion.id} className="bg-gray-50 p-4 rounded border mb-6">
             <input
-              className="w-full mb-3 border px-3 py-1 rounded"
-              placeholder="Título de la sección"
               value={seccion.titulo}
-              onChange={(e) => actualizarTituloSeccion(seccion.id, e.target.value)}
+              onChange={(e) => actualizarCampo(seccion.id, null, { titulo: e.target.value })}
+              className="w-full mb-3 border px-3 py-1 rounded"
+              placeholder="Título de sección"
             />
             {seccion.campos.map((campo) => (
-              <div key={campo.id} className="mb-3 p-3 bg-white border rounded">
-                <label className="block text-sm mb-1 text-gray-600">Etiqueta</label>
+              <div key={campo.id} className="bg-white p-3 mb-3 rounded border">
                 <input
                   value={campo.etiqueta}
                   onChange={(e) => actualizarCampo(seccion.id, campo.id, { etiqueta: e.target.value })}
                   className="w-full mb-2 border px-3 py-1 rounded"
+                  placeholder="Etiqueta del campo"
                 />
-                <label className="block text-sm mb-1 text-gray-600">Pista o ayuda</label>
                 <textarea
                   value={campo.pista}
                   onChange={(e) => actualizarCampo(seccion.id, campo.id, { pista: e.target.value })}
                   className="w-full mb-2 border px-3 py-1 rounded"
-                  placeholder="Explicación, link, imagen o video"
+                  placeholder="Pista o ayuda"
                 />
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Tipo: {campo.tipo}</span>
-                  <label className="flex items-center gap-2">
+
+                <div className="text-sm text-gray-700 mb-2">Condiciones:</div>
+                {(campo.condiciones || []).map((cond, index) => (
+                  <div key={index} className="flex flex-wrap gap-2 items-center mb-2 text-sm">
                     <input
-                      type="checkbox"
-                      checked={campo.obligatorio}
-                      onChange={(e) => actualizarCampo(seccion.id, campo.id, { obligatorio: e.target.checked })}
+                      placeholder="Campo origen"
+                      value={cond.campoOrigen}
+                      onChange={(e) =>
+                        actualizarCondicion(seccion.id, campo.id, index, { campoOrigen: e.target.value })
+                      }
+                      className="border px-2 py-1 rounded"
                     />
-                    Obligatorio
-                  </label>
-                </div>
+                    <select
+                      value={cond.operador}
+                      onChange={(e) =>
+                        actualizarCondicion(seccion.id, campo.id, index, { operador: e.target.value })
+                      }
+                      className="border px-2 py-1 rounded"
+                    >
+                      <option value="==">==</option>
+                      <option value="!=">!=</option>
+                    </select>
+                    <input
+                      placeholder="Valor esperado"
+                      value={cond.valor}
+                      onChange={(e) =>
+                        actualizarCondicion(seccion.id, campo.id, index, { valor: e.target.value })
+                      }
+                      className="border px-2 py-1 rounded"
+                    />
+                    <select
+                      value={cond.accion}
+                      onChange={(e) =>
+                        actualizarCondicion(seccion.id, campo.id, index, { accion: e.target.value })
+                      }
+                      className="border px-2 py-1 rounded"
+                    >
+                      <option value="mostrar">mostrar</option>
+                      <option value="ocultar">ocultar</option>
+                    </select>
+                    <input
+                      placeholder="Campo objetivo"
+                      value={cond.campoObjetivo}
+                      onChange={(e) =>
+                        actualizarCondicion(seccion.id, campo.id, index, { campoObjetivo: e.target.value })
+                      }
+                      className="border px-2 py-1 rounded"
+                    />
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => agregarCondicion(seccion.id, campo.id)}
+                  className="text-xs text-blue-600 hover:underline mt-1"
+                >
+                  + Agregar condición
+                </button>
               </div>
             ))}
             <div className="flex gap-2 mt-2">
-              <button type="button" onClick={() => agregarCampo(seccion.id, 'texto')} className="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+              <button type="button" onClick={() => agregarCampo(seccion.id, 'texto')} className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 text-sm">
                 + Campo de texto
               </button>
-              <button type="button" onClick={() => agregarCampo(seccion.id, 'fecha')} className="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+              <button type="button" onClick={() => agregarCampo(seccion.id, 'fecha')} className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 text-sm">
                 + Campo de fecha
-              </button>
-              <button type="button" onClick={() => agregarCampo(seccion.id, 'archivo')} className="text-sm bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
-                + Campo de archivo
               </button>
             </div>
           </div>
@@ -171,16 +206,16 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
         <button
           type="button"
           onClick={agregarSeccion}
-          className="text-sm bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+          className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
         >
           + Agregar sección
         </button>
 
-        <div className="mt-6 flex gap-4 justify-end">
-          <button type="button" onClick={onCancelar} className="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200">
-            Cancelar
-          </button>
-          <button type="submit" className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700">
+        <div className="flex justify-end mt-6">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
             Guardar trámite
           </button>
         </div>

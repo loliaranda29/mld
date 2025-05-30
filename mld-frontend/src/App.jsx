@@ -1,26 +1,20 @@
-import { Routes, Route } from 'react-router-dom'
-import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import RespuestaPrevencion from './pages/RespuestaPrevencion'
-import ListadoTramites from './pages/admin/tramites/ListadoTramites'
-import FormularioBuilder from './pages/admin/FormularioBuilder'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './Home';
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
 
-function App() {
+const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/respuesta-prevencion" element={<RespuestaPrevencion tramite={{
-        id: 5,
-        nombre: 'Cambio de titularidad',
-        estado: 'En prevención',
-        observaciones: 'Falta documentación del titular anterior'
-      }} />} />
-      
-      <Route path="/admin/tramites" element={<ListadoTramites />} />
-      <Route path="/admin/formulario-builder" element={<FormularioBuilder />} />
-    </Routes>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
+

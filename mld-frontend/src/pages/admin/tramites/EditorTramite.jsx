@@ -8,15 +8,11 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
 
   const guardarTramite = async () => {
     const tramite = {
-      nombre,
-      formulario,
-      api: {
-        url: '',
-        method: 'POST',
-        headers: {},
-        bodyMapping: {}
-      }
-    }
+  nombre,
+  formulario,
+  api: apiConfig
+}
+
 
     try {
       const res = await fetch('http://localhost:4000/api/tramites', {
@@ -80,6 +76,13 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
     )
     setFormulario(actualizado)
   }
+  const [apiConfig, setApiConfig] = useState({
+  url: '',
+  method: 'POST',
+  headers: {},
+  bodyMapping: {}
+})
+
 
   return (
     <div>
@@ -147,44 +150,63 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
               )}
 
               {/* Condiciones de visibilidad */}
-              <div>
-                <strong>Condiciones de visibilidad</strong>
-                <label>Mostrar este campo si el campo anterior tiene el valor:</label>
+              <div style={{ marginTop: '1rem' }}>
+  <strong>Condiciones de visibilidad</strong>
+  {campo.condiciones?.map((cond, i) => (
+    <div key={i} style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
+      <select
+        value={cond.siCampo}
+        onChange={(e) => {
+          const nuevas = [...campo.condiciones]
+          nuevas[i].siCampo = e.target.value
+          actualizarCampo(seccion.id, campo.id, 'condiciones', nuevas)
+        }}
+      >
+        <option value="">Seleccionar campo</option>
+        {formulario
+          .flatMap((sec) => sec.campos)
+          .filter((c) => c.id !== campo.id)
+          .map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.etiqueta || c.id}
+            </option>
+          ))}
+      </select>
 
-                <select
-                  onChange={(e) =>
-                    actualizarCampo(seccion.id, campo.id, 'condiciones', [
-                      {
-                        siCampo: e.target.value,
-                        si: campo.condiciones?.[0]?.si || ''
-                      }
-                    ])
-                  }
-                  value={campo.condiciones?.[0]?.siCampo || ''}
-                >
-                  <option value="">Seleccionar campo</option>
-                  {formulario
-                    .flatMap((sec) => sec.campos)
-                    .filter((c) => c.id !== campo.id)
-                    .map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.etiqueta || c.id}
-                      </option>
-                    ))}
-                </select>
+      <input
+        type="text"
+        placeholder="Valor esperado"
+        value={cond.si}
+        onChange={(e) => {
+          const nuevas = [...campo.condiciones]
+          nuevas[i].si = e.target.value
+          actualizarCampo(seccion.id, campo.id, 'condiciones', nuevas)
+        }}
+      />
 
-                <input
-                  type="text"
-                  placeholder="Valor que debe tener"
-                  value={campo.condiciones?.[0]?.si || ''}
-                  onChange={(e) => {
-                    const siCampo = campo.condiciones?.[0]?.siCampo || ''
-                    actualizarCampo(seccion.id, campo.id, 'condiciones', [
-                      { siCampo, si: e.target.value }
-                    ])
-                  }}
-                />
-              </div>
+      <button
+        type="button"
+        onClick={() => {
+          const nuevas = campo.condiciones.filter((_, j) => j !== i)
+          actualizarCampo(seccion.id, campo.id, 'condiciones', nuevas)
+        }}
+      >
+        ❌
+      </button>
+    </div>
+  ))}
+
+  <button
+    type="button"
+    onClick={() => {
+      const nuevas = [...(campo.condiciones || []), { siCampo: '', si: '' }]
+      actualizarCampo(seccion.id, campo.id, 'condiciones', nuevas)
+    }}
+  >
+    + Agregar condición
+  </button>
+</div>
+
             </div>
           ))}
         </div>
@@ -192,6 +214,117 @@ function EditorTramite({ tramiteSeleccionado = null, onGuardar, onCancelar }) {
 
       <h3>Vista previa</h3>
       <VistaPreviaFormulario formulario={formulario} />
+      <h3>Configuración de API externa</h3>
+
+<div style={{ border: '1px solid #aaa', padding: '1rem', marginBottom: '2rem' }}>
+  <label>
+    URL del API:
+    <input
+      type="text"
+      value={apiConfig.url}
+      onChange={(e) => setApiConfig({ ...apiConfig, url: e.target.value })}
+    />
+  </label>
+
+  <label>
+    Método:
+    <select
+      value={apiConfig.method}
+      onChange={(e) => setApiConfig({ ...apiConfig, method: e.target.value })}
+    >
+      <option value="POST">POST</option>
+      <option value="GET">GET</option>
+      <option value="PUT">PUT</option>
+      <option value="DELETE">DELETE</option>
+    </select>
+  </label>
+
+  <h4>Headers personalizados</h4>
+  {Object.entries(apiConfig.headers).map(([key, value], i) => (
+    <div key={i}>
+      <input
+        placeholder="Header"
+        value={key}
+        onChange={(e) => {
+          const newHeaders = { ...apiConfig.headers }
+          const oldKey = Object.keys(apiConfig.headers)[i]
+          delete newHeaders[oldKey]
+          newHeaders[e.target.value] = value
+          setApiConfig({ ...apiConfig, headers: newHeaders })
+        }}
+      />
+      <input
+        placeholder="Valor"
+        value={value}
+        onChange={(e) => {
+          const newHeaders = { ...apiConfig.headers }
+          const key = Object.keys(apiConfig.headers)[i]
+          newHeaders[key] = e.target.value
+          setApiConfig({ ...apiConfig, headers: newHeaders })
+        }}
+      />
+    </div>
+  ))}
+
+  <button
+    type="button"
+    onClick={() =>
+      setApiConfig({
+        ...apiConfig,
+        headers: { ...apiConfig.headers, '': '' }
+      })
+    }
+  >
+    + Agregar header
+  </button>
+
+            <h4>Body mapping</h4>
+            {Object.entries(apiConfig.bodyMapping).map(([key, value], i) => (
+              <div key={i}>
+                <input
+                  placeholder="Campo en API"
+                  value={key}
+                  onChange={(e) => {
+                    const newMap = { ...apiConfig.bodyMapping }
+                    const oldKey = Object.keys(apiConfig.bodyMapping)[i]
+                    delete newMap[oldKey]
+                    newMap[e.target.value] = value
+                    setApiConfig({ ...apiConfig, bodyMapping: newMap })
+                  }}
+                />
+                <select
+                  value={value}
+                  onChange={(e) => {
+                    const key = Object.keys(apiConfig.bodyMapping)[i]
+                    setApiConfig({
+                      ...apiConfig,
+                      bodyMapping: { ...apiConfig.bodyMapping, [key]: e.target.value }
+                    })
+                  }}
+                >
+                  <option value="">Seleccionar campo</option>
+                  {formulario.flatMap((sec) => sec.campos).map((campo) => (
+                    <option key={campo.id} value={campo.id}>
+                      {campo.etiqueta || campo.id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setApiConfig({
+                  ...apiConfig,
+                  bodyMapping: { ...apiConfig.bodyMapping, '': '' }
+                })
+              }
+            >
+              + Agregar mapeo
+            </button>
+          </div>
+
 
       <button onClick={guardarTramite} style={{ marginTop: '1rem' }}>
         Guardar Trámite

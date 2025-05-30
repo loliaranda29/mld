@@ -1,27 +1,23 @@
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
-// Función para generar el esquema Zod dinámico
+// Generador dinámico del esquema de validación
 const generarEsquemaZod = (campos) => {
   const schema = {}
 
   campos.forEach((campo) => {
     let validacion = z.string()
     if (campo.obligatorio) validacion = validacion.min(1, 'Este campo es obligatorio')
-
-    if (campo.tipo === 'email') {
-      validacion = z.string().email('Email no válido')
-    }
-
+    if (campo.tipo === 'email') validacion = z.string().email('Email no válido')
     schema[campo.id] = validacion
   })
 
   return z.object(schema)
 }
 
-function VistaPreviaFormulario({ formulario }) {
+function VistaPreviaFormulario({ formulario, idTramite }) {
   const campos = formulario.flatMap((seccion) => seccion.campos)
   const schema = useMemo(() => generarEsquemaZod(campos), [formulario])
 
@@ -29,26 +25,42 @@ function VistaPreviaFormulario({ formulario }) {
     control,
     handleSubmit,
     formState: { errors },
-    getValues
   } = useForm({
     resolver: zodResolver(schema),
   })
 
   const respuestas = useWatch({ control })
+  const [resultado, setResultado] = useState(null)
+  const [error, setError] = useState(null)
 
-  // Función para saber si un campo debe mostrarse según condiciones
   const campoVisible = (campo) => {
     if (!campo.condiciones || campo.condiciones.length === 0) return true
 
     return campo.condiciones.every((cond) => {
-      const valorActual = respuestas[cond.siCampo]
-      return valorActual === cond.si
+      const valor = respuestas[cond.siCampo]
+      return valor === cond.si
     })
   }
 
-  const onSubmit = (data) => {
-    console.log('Formulario válido enviado:', data)
-    alert('Formulario enviado correctamente ✅')
+  const onSubmit = async (data) => {
+    setResultado(null)
+    setError(null)
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/tramites/${idTramite}/ejecutar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+
+      const json = await res.json()
+
+      if (!res.ok) throw new Error(json.error || 'Error al ejecutar el trámite')
+
+      setResultado(json.resultado)
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   return (
@@ -59,7 +71,6 @@ function VistaPreviaFormulario({ formulario }) {
         return (
           <div key={campo.id}>
             <label>{campo.etiqueta}</label>
-
             <Controller
               name={campo.id}
               control={control}
@@ -88,6 +99,19 @@ function VistaPreviaFormulario({ formulario }) {
       })}
 
       <button type="submit">Enviar</button>
+
+      {resultado && (
+        <div style={{ background: '#ddf', marginTop: '1rem', padding: '1rem' }}>
+          <strong>Respuesta:</strong>
+          <pre>{JSON.stringify(resultado, null, 2)}</pre>
+        </div>
+      )}
+
+      {error && (
+        <div style={{ background: '#fdd', marginTop: '1rem', padding: '1rem' }}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
     </form>
   )
 }

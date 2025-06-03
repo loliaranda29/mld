@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { User, Briefcase } from 'lucide-react'
 import { useState } from 'react'
 

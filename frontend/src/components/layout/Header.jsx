@@ -1,4 +1,6 @@
-import PerfilSwitcher from './PerfilSwitcher'
+import React from 'react';
+
+import PerfilSwitcher from '../PerfilSwitcher'
 
 function Header() {
   return (

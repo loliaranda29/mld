@@ -1,13 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { BrowserRouter } from 'react-router-dom';
-import './index.css'; // Tailwind u otro estilo global
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import './index.css';
+import { BrowserRouter } from "react-router-dom";
+import { ToastProvider } from "./context/ToastContext";
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

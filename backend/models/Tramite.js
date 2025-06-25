@@ -23,7 +23,7 @@ const SeccionSchema = new mongoose.Schema({
 
 const ApiConfigSchema = new mongoose.Schema({
   url: String,
-  method: { type: String, enum: ['GET', 'POST', 'PUT', 'DELETE'], default: 'POST' },
+  method: { type: String, enum: ['GET', 'POSST', 'PUT', 'DELETE'], default: 'POST' },
   headers: { type: Map, of: String },
   bodyMapping: { type: Map, of: String }
 })

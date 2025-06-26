@@ -1,3 +1,4 @@
+
 # Mi Luján Digital - Proyecto de Modernización de Trámites
 
 ## Objetivo General
@@ -7,27 +8,28 @@ Desarrollar una nueva versión moderna, responsiva, modular y escalable de la pl
 - **Frontend**: React + TailwindCSS
 - **Backend**: Node.js + Express
 - **Base de datos**: SQL Server
-- **Integraciones**: APIs externas (RENAPER, Mi Argentina, ARCA, sistema municipal, WhatsApp, etc.), Blockchain (QuarkID), firma digital, certificados verificables.
+- **Integraciones**: APIs externas (RENAPER, Mi Argentina, ARCA, sistema municipal), Blockchain (QuarkID), firma digital, certificados verificables.
 
 ## Funcionalidades Clave
 - Login con identidad verificada (RENAPER, ARCA, Mi Argentina).
 - Trámites por pasos con formularios condicionales y configurables.
 - Secciones con lógica condicional y pistas enriquecidas.
-- Etapas de trámites con responsables múltiples y posibilidad de volver a cualquier etapa.
-- Configuración avanzada de etapas: pagos, responsables, condiciones, documentos previos.
-- Sistema de notificaciones por mail y WhatsApp.
-- Bandejas de entrada por rol (ciudadano, funcionario, administrador).
+- Etapas de trámites con responsables múltiples y posibilidad de volver a cualquier etapa específica.
+- Configuración avanzada de etapas: pagos (fijos o variables), responsables, condiciones, documentos previos.
+- Bandejas de entrada por rol (ciudadano, funcionario, administrador), con filtros por etapa, padrón, titular y orden de actualización.
 - Dashboard ciudadano con acceso a sus trámites, turnos, mensajes, wallet, perfil.
-- Perfil editable y verificable del ciudadano, con asociación de padrón y servicios.
-- Apoderados y perfiles especiales (empresa, profesional).
-- Permisos automáticos y certificados verificables.
+- Perfil editable y verificable del ciudadano, con asociación automática a padrón y servicios municipales.
+- Apoderados y perfiles especiales (empresa, profesional), con validación municipal.
+- Permisos automáticos previos a etapas o certificados finales.
 - Trámites internos para áreas municipales.
-- Subtrámites y trámites globales (ej: loteos con subtrámites).
+- Subtrámites y agrupación en trámites globales (ej: loteos).
 - Checklist de funcionario por etapa.
 - Vista administrativa para edición de trámites, filtros por área, catalogación.
 - Parametrización visual y simplificada de trámites.
-- Reapertura de trámites cerrados o rechazados.
-- Plataforma PWA instalable y responsive.
+- Reapertura o reversión de trámites cerrados o rechazados.
+- Plataforma PWA instalable y responsive (notificaciones desde app).
+- Recordatorios automatizados al ciudadano (vencimiento de impuestos, permisos, etc.).
+- Módulo de capacitaciones con exámenes configurables y certificados emitibles.
 
 ## Identidad y UX
 - Nombre del sistema de identidad digital: **ILUDI** (Identidad Lujanina Digital)
@@ -49,7 +51,7 @@ Desarrollar una nueva versión moderna, responsiva, modular y escalable de la pl
 - Implementar roles y permisos.
 - Configurador de formularios visual.
 - Validaciones y pruebas.
-- App movil (PWA completa o React Native en segunda etapa).
+- App móvil (PWA completa o React Native en segunda etapa).
 - Subida al servidor municipal.
 
 ## Documentos relacionados

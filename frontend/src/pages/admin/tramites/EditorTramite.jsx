@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../../components/layout/Layout";
 import PasoTramite from "./PasoTramite";
-import EtapasTramite from "./EtapasTramite";
+import EtapasEditor from "./EtapasEditor";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import { useToast } from "../../../context/ToastContext";
 
@@ -12,6 +12,7 @@ export default function EditorTramite() {
   const [descripcion, setDescripcion] = useState("");
   const [pasos, setPasos] = useState([]);
   const [etapas, setEtapas] = useState([]);
+  const [etapaInicial, setEtapaInicial] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ export default function EditorTramite() {
       descripcion,
       pasos,
       etapas,
+      etapaInicial
     };
 
     try {
@@ -139,7 +141,7 @@ export default function EditorTramite() {
           )}
 
           {tab === "etapas" && (
-            <EtapasTramite etapas={etapas} setEtapas={setEtapas} />
+            <EtapasEditor etapas={etapas} setEtapas={setEtapas} etapaInicial={etapaInicial} setEtapaInicial={setEtapaInicial} />
           )}
 
           {/* Botón Guardar */}

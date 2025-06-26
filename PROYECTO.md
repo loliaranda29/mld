@@ -1,43 +1,4 @@
-# Mi Luján Digital - Plataforma Mejorada
-
-Este repositorio contiene el código fuente de la nueva versión de la plataforma **Mi Luján Digital**, incluyendo frontend y backend.
-
-## 📁 Estructura del proyecto
-
-```
-.
-├── frontend/       # Aplicación web (React + Vite + Tailwind)
-├── backend/        # API backend (Node.js + Express + SQL Server)
-├── .gitignore
-└── README.md
-```
-
-## 🚀 Cómo iniciar el proyecto
-
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### Backend
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-## 🧪 Variables de entorno
-
-Creá archivos `.env` tanto en `frontend/` como en `backend/` con los valores necesarios. No los subas al repo.
-
-## 📌 Rama principal
-- `main`: versión estable
-- `dev`: integración de funcionalidades
-- `feature/*`: desarrollo de módulos específicos
-
----
+# Mi Luján Digital - Proyecto de Modernización de Trámites
 
 ## Objetivo General
 Desarrollar una nueva versión moderna, responsiva, modular y escalable de la plataforma Mi Luján Digital, con tecnologías actuales y mejoras significativas en la experiencia de usuario, funcionalidades, integraciones y eficiencia administrativa.
@@ -53,7 +14,6 @@ Desarrollar una nueva versión moderna, responsiva, modular y escalable de la pl
 - Trámites por pasos con formularios condicionales y configurables.
 - Secciones con lógica condicional y pistas enriquecidas.
 - Etapas de trámites con responsables múltiples y posibilidad de volver a cualquier etapa.
-- Selección personalizada de etapa a la que se quiere volver.
 - Configuración avanzada de etapas: pagos, responsables, condiciones, documentos previos.
 - Sistema de notificaciones por mail y WhatsApp.
 - Bandejas de entrada por rol (ciudadano, funcionario, administrador).
@@ -67,7 +27,6 @@ Desarrollar una nueva versión moderna, responsiva, modular y escalable de la pl
 - Vista administrativa para edición de trámites, filtros por área, catalogación.
 - Parametrización visual y simplificada de trámites.
 - Reapertura de trámites cerrados o rechazados.
-- Solicitud de reversión de etapa en caso de error.
 - Plataforma PWA instalable y responsive.
 
 ## Identidad y UX
@@ -90,7 +49,7 @@ Desarrollar una nueva versión moderna, responsiva, modular y escalable de la pl
 - Implementar roles y permisos.
 - Configurador de formularios visual.
 - Validaciones y pruebas.
-- App móvil (PWA completa o React Native en segunda etapa).
+- App movil (PWA completa o React Native en segunda etapa).
 - Subida al servidor municipal.
 
 ## Documentos relacionados

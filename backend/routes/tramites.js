@@ -1,18 +1,16 @@
-import express from "express";
-import Tramite from "../models/Tramite.js";
+// backend/routes/tramite.js
+// Rutas para la gestión de trámites
+
+import express from 'express';
+import { obtenerTramites } from '../controllers/tramiteController.js';
 
 const router = express.Router();
-// Simulación de usuario autenticado
-const CIUDADANO_ID = "123456";
 
-router.get("/tramites", async (req, res) => {
-  try {
-    const tramites = await Tramite.find({ ciudadanoId: CIUDADANO_ID });
-    res.json(tramites);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al obtener trámites del ciudadano" });
-  }
-});
+/**
+ * Ruta GET /api/tramites
+ * Devuelve los trámites asociados al ciudadano autenticado
+ * (Por ahora se simula el ID hasta implementar JWT)
+ */
+router.get('/', obtenerTramites);
 
 export default router;

@@ -1,21 +1,21 @@
-import express from 'express'
-import mongoose from 'mongoose'
-import cors from 'cors'
-import tramitesRouter from './routes/tramites.js'
-import ciudadanoRoutes from './routes/ciudadano.js'
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import sequelize from './config/database.js';
+import tramiteRouter from './routes/tramite.js';
 
-const app = express()
-app.use(cors())
-app.use(express.json())
+dotenv.config();
+const app = express();
 
-mongoose.connect('mongodb://localhost:27017/mld', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+app.use(cors());
+app.use(express.json());
 
-app.use('/api/tramites', tramitesRouter)
-app.use('/api/ciudadano', ciudadanoRoutes)
+app.use('/api/tramites', tramiteRouter);
 
-const PORT = 4000
-app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`))
+const PORT = process.env.PORT || 4000;
 
+sequelize.sync().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+  });
+}).catch(err => console.error('Error conectando a SQL Server:', err));

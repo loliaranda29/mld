@@ -3,15 +3,21 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../../../components/layout/Layout";
 import PasoTramite from "./PasoTramite";
 import EtapasEditor from "./EtapasEditor";
+import FormularioEditor from "./FormularioEditor";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import { useToast } from "../../../context/ToastContext";
 
+/**
+ * Componente principal del editor de trámite.
+ * Permite definir: nombre, descripción, pasos, etapas y secciones de formulario.
+ */
 export default function EditorTramite() {
   const [tab, setTab] = useState("pasos");
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [pasos, setPasos] = useState([]);
   const [etapas, setEtapas] = useState([]);
+  const [secciones, setSecciones] = useState([]);
   const [etapaInicial, setEtapaInicial] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -47,7 +53,8 @@ export default function EditorTramite() {
       descripcion,
       pasos,
       etapas,
-      etapaInicial
+      etapaInicial,
+      formulario: secciones
     };
 
     try {
@@ -98,29 +105,22 @@ export default function EditorTramite() {
 
           {/* Tabs */}
           <div className="flex space-x-4 border-b pb-2">
-            <button
-              onClick={() => setTab("pasos")}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-                tab === "pasos"
-                  ? "border-[#248B89] text-[#248B89]"
-                  : "border-transparent text-gray-600 hover:text-[#248B89]"
-              }`}
-            >
-              Pasos y Campos
-            </button>
-            <button
-              onClick={() => setTab("etapas")}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-                tab === "etapas"
-                  ? "border-[#248B89] text-[#248B89]"
-                  : "border-transparent text-gray-600 hover:text-[#248B89]"
-              }`}
-            >
-              Etapas del Trámite
-            </button>
+            {["pasos", "formulario", "etapas"].map((tipo) => (
+              <button
+                key={tipo}
+                onClick={() => setTab(tipo)}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                  tab === tipo
+                    ? "border-[#248B89] text-[#248B89]"
+                    : "border-transparent text-gray-600 hover:text-[#248B89]"
+                }`}
+              >
+                {tipo === "pasos" ? "Pasos y Campos" : tipo === "formulario" ? "Formulario" : "Etapas del Trámite"}
+              </button>
+            ))}
           </div>
 
-          {/* Contenido de tabs */}
+          {/* Contenido por tab */}
           {tab === "pasos" && (
             <div>
               {pasos.map((paso, index) => (
@@ -140,8 +140,17 @@ export default function EditorTramite() {
             </div>
           )}
 
+          {tab === "formulario" && (
+            <FormularioEditor secciones={secciones} setSecciones={setSecciones} />
+          )}
+
           {tab === "etapas" && (
-            <EtapasEditor etapas={etapas} setEtapas={setEtapas} etapaInicial={etapaInicial} setEtapaInicial={setEtapaInicial} />
+            <EtapasEditor
+              etapas={etapas}
+              setEtapas={setEtapas}
+              etapaInicial={etapaInicial}
+              setEtapaInicial={setEtapaInicial}
+            />
           )}
 
           {/* Botón Guardar */}
@@ -155,7 +164,7 @@ export default function EditorTramite() {
           </div>
         </div>
 
-        {/* Modal de Confirmación */}
+        {/* Modal Confirmación */}
         <ConfirmModal
           open={showModal}
           onCancel={() => setShowModal(false)}

@@ -1,8 +1,8 @@
 import React from "react";
-import Card from "../../../components/ui/card";
-import { Input } from "../../../components/ui/input";
-import { Button } from "../../../components/ui/button";
-import { Select } from "../../../components/ui/select";
+import Card from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Select } from "../../components/ui/select";
 
 export default function EtapasEditor({ etapas, setEtapas, etapaInicial, setEtapaInicial }) {
   const agregarEtapa = () => {

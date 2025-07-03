@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../../components/layout/Layout";
-import PasoTramite from "./PasoTramite";
-import EtapasEditor from "./EtapasEditor";
+import PasoTramite from "../../../features/tramites/PasoTramite";
+import EtapasEditor from "../../../features/tramites/EtapasEditor";
 import FormularioEditor from "./FormularioEditor";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import { useToast } from "../../../context/ToastContext";

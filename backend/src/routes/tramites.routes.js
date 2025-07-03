@@ -2,7 +2,7 @@
 // Rutas para la gestión de trámites
 
 import express from 'express';
-import { obtenerTramites } from '../controllers/tramiteController.js';
+import { obtenerTramites } from '../controllers/tramite.controller.js';
 
 const router = express.Router();
 

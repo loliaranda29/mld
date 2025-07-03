@@ -1,6 +1,10 @@
-import React, { useState } from "react";
-import CampoEditor from "./CampoEditor";
+import React from "react";
+import CampoEditor from "../../../features/tramites/components/CampoEditor";
 
+/**
+ * Editor para un formulario dividido por secciones.
+ * Cada sección puede tener múltiples campos configurables.
+ */
 export default function FormularioEditor({ secciones, setSecciones }) {
   const agregarSeccion = () => {
     setSecciones([
@@ -13,46 +17,78 @@ export default function FormularioEditor({ secciones, setSecciones }) {
     ]);
   };
 
-  const actualizarSeccion = (index, seccionActualizada) => {
-    const nuevasSecciones = [...secciones];
-    nuevasSecciones[index] = seccionActualizada;
-    setSecciones(nuevasSecciones);
+  const actualizarTitulo = (index, nuevoTitulo) => {
+    const nuevas = [...secciones];
+    nuevas[index].titulo = nuevoTitulo;
+    setSecciones(nuevas);
+  };
+
+  const agregarCampo = (index) => {
+    const nuevas = [...secciones];
+    nuevas[index].campos.push({
+      id: Date.now(),
+      tipo: "texto",
+      etiqueta: "",
+      obligatorio: false
+    });
+    setSecciones(nuevas);
+  };
+
+  const actualizarCampo = (index, campoIndex, campoActualizado) => {
+    const nuevas = [...secciones];
+    nuevas[index].campos[campoIndex] = campoActualizado;
+    setSecciones(nuevas);
+  };
+
+  const eliminarCampo = (index, campoIndex) => {
+    const nuevas = [...secciones];
+    nuevas[index].campos = nuevas[index].campos.filter((_, i) => i !== campoIndex);
+    setSecciones(nuevas);
   };
 
   const eliminarSeccion = (index) => {
-    const nuevasSecciones = secciones.filter((_, i) => i !== index);
-    setSecciones(nuevasSecciones);
+    const nuevas = secciones.filter((_, i) => i !== index);
+    setSecciones(nuevas);
   };
 
   return (
     <div className="space-y-6">
       {secciones.map((seccion, index) => (
-        <div key={seccion.id} className="border p-4 rounded-lg bg-white shadow">
-          <div className="flex justify-between items-center">
+        <div key={seccion.id} className="border p-4 rounded-lg bg-white shadow-sm">
+          <div className="flex justify-between items-center mb-4">
             <input
               type="text"
               placeholder="Título de la sección"
               value={seccion.titulo}
-              onChange={(e) =>
-                actualizarSeccion(index, { ...seccion, titulo: e.target.value })
-              }
-              className="text-lg font-semibold w-full p-2 mb-4 border rounded"
+              onChange={(e) => actualizarTitulo(index, e.target.value)}
+              className="text-lg font-semibold w-full border p-2 rounded"
             />
             <button
               onClick={() => eliminarSeccion(index)}
-              className="text-red-500 text-sm"
+              className="text-sm text-red-600 hover:underline ml-4"
             >
               Eliminar sección
             </button>
           </div>
-          <CampoEditor
-            campos={seccion.campos}
-            onChange={(camposActualizados) =>
-              actualizarSeccion(index, { ...seccion, campos: camposActualizados })
-            }
-          />
+
+          {seccion.campos.map((campo, campoIndex) => (
+            <CampoEditor
+              key={campo.id}
+              campo={campo}
+              onChange={(actualizado) => actualizarCampo(index, campoIndex, actualizado)}
+              onEliminar={() => eliminarCampo(index, campoIndex)}
+            />
+          ))}
+
+          <button
+            onClick={() => agregarCampo(index)}
+            className="mt-2 text-sm text-[#248B89] font-medium hover:underline"
+          >
+            + Agregar campo
+          </button>
         </div>
       ))}
+
       <button
         onClick={agregarSeccion}
         className="bg-[#248B89] text-white px-4 py-2 rounded-md font-semibold hover:bg-[#1f706e]"

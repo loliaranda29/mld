@@ -1,5 +1,5 @@
 import express from "express";
-import Tramite from "../models/Tramite.js";
+import Tramite from "../models/tramite.model.js";
 
 const router = express.Router();
 

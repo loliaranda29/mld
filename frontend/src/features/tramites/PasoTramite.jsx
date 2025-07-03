@@ -1,28 +1,33 @@
-import React, { useState } from "react";
-import CampoFormulario from "./CampoFormulario";
+import React from "react";
+import CampoEditor from "./components/CampoEditor";
 
+/**
+ * PasoTramite permite definir un paso dentro de un flujo de trámite,
+ * incluyendo nombre, instrucciones y campos a completar por el usuario.
+ */
 export default function PasoTramite({ paso, onChange, onEliminar }) {
-  const handleChange = (campo, valor) => {
-    onChange({ ...paso, [campo]: valor });
+  const handleChange = (prop, value) => {
+    onChange({ ...paso, [prop]: value });
   };
 
   const agregarCampo = () => {
     const nuevoCampo = {
-      nombre: "",
+      id: Date.now(),
       tipo: "texto",
-      requerido: false,
+      etiqueta: "",
+      obligatorio: false
     };
     handleChange("campos", [...(paso.campos || []), nuevoCampo]);
   };
 
   const actualizarCampo = (index, campoActualizado) => {
-    const nuevosCampos = [...paso.campos];
+    const nuevosCampos = [...(paso.campos || [])];
     nuevosCampos[index] = campoActualizado;
     handleChange("campos", nuevosCampos);
   };
 
   const eliminarCampo = (index) => {
-    const nuevosCampos = paso.campos.filter((_, i) => i !== index);
+    const nuevosCampos = (paso.campos || []).filter((_, i) => i !== index);
     handleChange("campos", nuevosCampos);
   };
 
@@ -45,7 +50,7 @@ export default function PasoTramite({ paso, onChange, onEliminar }) {
             type="text"
             value={paso.nombre}
             onChange={(e) => handleChange("nombre", e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-[#248B89] focus:border-[#248B89]"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2"
           />
         </div>
 
@@ -54,21 +59,22 @@ export default function PasoTramite({ paso, onChange, onEliminar }) {
           <textarea
             value={paso.instrucciones}
             onChange={(e) => handleChange("instrucciones", e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-[#248B89] focus:border-[#248B89]"
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2"
             rows={3}
           ></textarea>
         </div>
 
         <div>
-          <h4 className="text-sm font-semibold text-gray-700">Campos</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Campos del paso</h4>
           {(paso.campos || []).map((campo, index) => (
-            <CampoFormulario
-              key={index}
+            <CampoEditor
+              key={campo.id}
               campo={campo}
               onChange={(actualizado) => actualizarCampo(index, actualizado)}
               onEliminar={() => eliminarCampo(index)}
             />
           ))}
+
           <button
             onClick={agregarCampo}
             className="mt-2 text-sm text-[#248B89] font-medium hover:underline"

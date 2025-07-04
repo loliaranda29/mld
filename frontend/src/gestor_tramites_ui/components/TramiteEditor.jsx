@@ -1,67 +1,22 @@
-// src/components/TramiteEditor.jsx
-
 import React, { useState } from 'react';
+import TramiteTree from './TramiteTree';
+import TramiteForm from './TramiteForm';
 
 const TramiteEditor = () => {
-  const [tramites, setTramites] = useState([
-    {
-      id: 'madre-1',
-      nombre: 'Licencia de Conducir',
-      hijos: [
-        { id: 'sub-1', nombre: 'Renovación' },
-        { id: 'sub-2', nombre: 'Duplicado' },
-      ],
-    },
-  ]);
+    const [selectedNode, setSelectedNode] = useState(null);
+    const [treeData, setTreeData] = useState([]);
 
-  const agregarSubtramite = (idMadre) => {
-    const nuevoNombre = prompt('Nombre del subtrámite:');
-    if (!nuevoNombre) return;
+    const handleNodeSelect = (node) => setSelectedNode(node);
+    const handleSave = (formData) => {
+        // Lógica para guardar/actualizar el nodo
+    };
 
-    const nuevoTramites = tramites.map((t) =>
-      t.id === idMadre
-        ? {
-            ...t,
-            hijos: [
-              ...t.hijos,
-              {
-                id: `sub-${Date.now()}`,
-                nombre: nuevoNombre,
-              },
-            ],
-          }
-        : t
-    );
-    setTramites(nuevoTramites);
-  };
-
-  const renderArbol = () => {
-    return tramites.map((madre) => (
-      <div key={madre.id} className="mb-4">
-        <div className="font-bold">{madre.nombre}</div>
-        <div className="ml-4">
-          {madre.hijos.map((sub) => (
-            <div key={sub.id} className="ml-2">
-              └─ {sub.nombre}
-            </div>
-          ))}
+    return (
+        <div className="flex h-full">
+            <TramiteTree data={treeData} onSelectNode={handleNodeSelect} />
+            <TramiteForm selectedNode={selectedNode} onSave={handleSave} />
         </div>
-        <button
-          onClick={() => agregarSubtramite(madre.id)}
-          className="mt-2 text-sm text-blue-500 hover:underline"
-        >
-          + Agregar subtrámite
-        </button>
-      </div>
-    ));
-  };
-
-  return (
-    <div className="p-4">
-      <h2 className="text-lg font-semibold mb-4">Editor de Trámites</h2>
-      {renderArbol()}
-    </div>
-  );
+    );
 };
 
 export default TramiteEditor;

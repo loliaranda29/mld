@@ -1,60 +1,80 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import Layout from "../../../components/layout/Layout";
-import PasoTramite from "../../../features/tramites/PasoTramite";
+import FormularioBuilder from "../../../features/tramites/components/FormularioBuilder";
 import EtapasEditor from "../../../features/tramites/EtapasEditor";
-import FormularioEditor from "./FormularioEditor";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import { useToast } from "../../../context/ToastContext";
 
-/**
- * Componente principal del editor de trámite.
- * Permite definir: nombre, descripción, pasos, etapas y secciones de formulario.
- */
+// Modal de vista previa
+function VistaPreviaModal({ abierto, onClose, secciones }) {
+  if (!abierto) return null;
+
+  const CampoPreview = ({ campo }) => (
+    <div className="mb-4">
+      <label className="block text-sm font-semibold text-gray-700 mb-1">{campo.etiqueta}</label>
+      {campo.tipo === "texto" && <input type="text" className="border px-3 py-2 rounded w-full" />}
+      {campo.tipo === "numero" && <input type="number" className="border px-3 py-2 rounded w-full" />}
+      {campo.tipo === "fecha" && <input type="date" className="border px-3 py-2 rounded w-full" />}
+      {campo.tipo === "archivo" && <input type="file" className="border px-3 py-2 rounded w-full" />}
+      {campo.tipo === "select" && (
+        <select className="border px-3 py-2 rounded w-full">
+          {(campo.opciones || []).map((opt, i) => (
+            <option key={i} value={opt}>{opt}</option>
+          ))}
+        </select>
+      )}
+      {campo.pistaTexto && <p className="text-xs text-gray-500 mt-1">{campo.pistaTexto}</p>}
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
+      <div className="fixed inset-0 bg-white overflow-y-auto p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Vista previa del trámite</h2>
+          <button onClick={onClose} className="text-red-500 font-semibold">✖️ Cerrar</button>
+        </div>
+        {secciones.length === 0 ? (
+          <p className="text-gray-500">No hay secciones definidas.</p>
+        ) : (
+          secciones.map((seccion, idx) => (
+            <div key={idx} className="mb-8">
+              <h3 className="text-lg font-semibold text-[#248B89] mb-2">{seccion.titulo}</h3>
+              <div className="bg-gray-50 p-4 rounded shadow-sm">
+                {seccion.campos.map((campo) => (
+                  <CampoPreview key={campo.id} campo={campo} />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function EditorTramite() {
-  const [tab, setTab] = useState("pasos");
+  const [tab, setTab] = useState("formulario");
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [pasos, setPasos] = useState([]);
+  const [formulario, setFormulario] = useState([]);
   const [etapas, setEtapas] = useState([]);
-  const [secciones, setSecciones] = useState([]);
   const [etapaInicial, setEtapaInicial] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
 
   const navigate = useNavigate();
   const { showToast } = useToast();
-
-  const agregarPaso = () => {
-    const nuevoPaso = {
-      numero: pasos.length + 1,
-      nombre: "",
-      instrucciones: "",
-      campos: [],
-    };
-    setPasos([...pasos, nuevoPaso]);
-  };
-
-  const actualizarPaso = (index, pasoActualizado) => {
-    const nuevosPasos = [...pasos];
-    nuevosPasos[index] = pasoActualizado;
-    setPasos(nuevosPasos);
-  };
-
-  const eliminarPaso = (index) => {
-    const nuevosPasos = pasos
-      .filter((_, i) => i !== index)
-      .map((p, i) => ({ ...p, numero: i + 1 }));
-    setPasos(nuevosPasos);
-  };
 
   const handleGuardar = async () => {
     const tramite = {
       nombre,
       descripcion,
-      pasos,
+      formulario,
       etapas,
-      etapaInicial,
-      formulario: secciones
+      etapaInicial
     };
 
     try {
@@ -82,7 +102,6 @@ export default function EditorTramite() {
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Nuevo Trámite</h1>
 
         <div className="space-y-6">
-          {/* Nombre y descripción */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Nombre del Trámite</label>
             <input
@@ -105,43 +124,31 @@ export default function EditorTramite() {
 
           {/* Tabs */}
           <div className="flex space-x-4 border-b pb-2">
-            {["pasos", "formulario", "etapas"].map((tipo) => (
-              <button
-                key={tipo}
-                onClick={() => setTab(tipo)}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-                  tab === tipo
-                    ? "border-[#248B89] text-[#248B89]"
-                    : "border-transparent text-gray-600 hover:text-[#248B89]"
-                }`}
-              >
-                {tipo === "pasos" ? "Pasos y Campos" : tipo === "formulario" ? "Formulario" : "Etapas del Trámite"}
-              </button>
-            ))}
+            <button
+              onClick={() => setTab("formulario")}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                tab === "formulario"
+                  ? "border-[#248B89] text-[#248B89]"
+                  : "border-transparent text-gray-600 hover:text-[#248B89]"
+              }`}
+            >
+              Formulario
+            </button>
+            <button
+              onClick={() => setTab("etapas")}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+                tab === "etapas"
+                  ? "border-[#248B89] text-[#248B89]"
+                  : "border-transparent text-gray-600 hover:text-[#248B89]"
+              }`}
+            >
+              Etapas del Trámite
+            </button>
           </div>
 
-          {/* Contenido por tab */}
-          {tab === "pasos" && (
-            <div>
-              {pasos.map((paso, index) => (
-                <PasoTramite
-                  key={index}
-                  paso={paso}
-                  onChange={(actualizado) => actualizarPaso(index, actualizado)}
-                  onEliminar={() => eliminarPaso(index)}
-                />
-              ))}
-              <button
-                onClick={agregarPaso}
-                className="mt-4 px-4 py-2 border border-[#248B89] text-[#248B89] rounded-md font-semibold hover:bg-[#e7f1f0]"
-              >
-                + Agregar Paso
-              </button>
-            </div>
-          )}
-
+          {/* Contenido de tabs */}
           {tab === "formulario" && (
-            <FormularioEditor secciones={secciones} setSecciones={setSecciones} />
+            <FormularioBuilder secciones={formulario} setSecciones={setFormulario} />
           )}
 
           {tab === "etapas" && (
@@ -153,18 +160,23 @@ export default function EditorTramite() {
             />
           )}
 
-          {/* Botón Guardar */}
-          <div className="pt-6">
+          {/* Botones */}
+          <div className="pt-6 flex gap-4">
             <button
               onClick={() => setShowModal(true)}
               className="bg-[#248B89] text-white px-6 py-2 rounded-md font-semibold hover:bg-[#1f706e]"
             >
               Guardar Trámite
             </button>
+            <button
+              onClick={() => setMostrarVistaPrevia(true)}
+              className="bg-gray-200 text-gray-800 px-6 py-2 rounded-md font-semibold hover:bg-gray-300"
+            >
+              Vista Previa
+            </button>
           </div>
         </div>
 
-        {/* Modal Confirmación */}
         <ConfirmModal
           open={showModal}
           onCancel={() => setShowModal(false)}
@@ -174,6 +186,12 @@ export default function EditorTramite() {
           }}
           title="Confirmar guardado"
           message="¿Estás seguro de que querés guardar este trámite?"
+        />
+
+        <VistaPreviaModal
+          abierto={mostrarVistaPrevia}
+          onClose={() => setMostrarVistaPrevia(false)}
+          secciones={formulario}
         />
       </div>
     </Layout>

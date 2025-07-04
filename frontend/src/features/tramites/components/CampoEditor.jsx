@@ -1,111 +1,186 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-/**
- * Editor de campos individuales dentro de una sección del formulario.
- * Se integra con FormularioBuilder.jsx y permite configurar campos dinámicos.
- */
-const CampoEditor = ({ campo, onChange, onEliminar }) => {
-  const [tipo, setTipo] = useState(campo.tipo || 'texto');
-
-  const handleTipoChange = (e) => {
-    const nuevoTipo = e.target.value;
-    setTipo(nuevoTipo);
-    onChange({ ...campo, tipo: nuevoTipo });
+export default function CampoEditor({ campos, onChange }) {
+  const actualizarCampo = (index, nuevoCampo) => {
+    const actualizados = [...campos];
+    actualizados[index] = nuevoCampo;
+    onChange(actualizados);
   };
 
-  const handleInputChange = (prop, value) => {
-    onChange({ ...campo, [prop]: value });
+  const eliminarCampo = (index) => {
+    onChange(campos.filter((_, i) => i !== index));
   };
 
-  const renderOpciones = () => {
-    if (tipo === 'select') {
-      return (
-        <div className="mt-2">
-          <label className="block text-xs text-gray-600 mb-1">Opciones (separadas por coma)</label>
-          <input
-            type="text"
-            value={campo.opciones?.join(',') || ''}
-            onChange={(e) => handleInputChange('opciones', e.target.value.split(','))}
-            className="w-full border px-3 py-1 rounded text-sm"
-          />
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const renderAvanzado = () => {
-    if (tipo === 'codigo' || tipo === 'api') {
-      return (
-        <div className="mt-2">
-          <label className="block text-xs text-gray-600 mb-1">
-            {tipo === 'codigo' ? 'Código JS personalizado' : 'Configuración de API externa'}
-          </label>
-          <textarea
-            rows={3}
-            value={campo.config || ''}
-            onChange={(e) => handleInputChange('config', e.target.value)}
-            className="w-full border px-3 py-1 rounded text-sm font-mono"
-          />
-        </div>
-      );
-    }
-    return null;
+  const agregarCampo = (tipo) => {
+    onChange([
+      ...campos,
+      {
+        id: Date.now(),
+        tipo,
+        etiqueta: '',
+        obligatorio: false,
+        opciones: [],
+        archivoTipos: [],
+        archivoMaximo: 150,
+        archivoCantidad: 1,
+        pistaTexto: '',
+        pistaLink: '',
+        pistaVideo: '',
+        pistaImagen: '',
+        condicion: '',
+        codigo: '',
+        api: '',
+        logicaSiguiente: '',
+      },
+    ]);
   };
 
   return (
-    <div className="border p-4 rounded-md shadow-sm mb-4 bg-gray-50">
-      <div className="flex justify-between items-center mb-3">
-        <strong className="text-sm text-gray-700">🧩 Campo</strong>
-        <button onClick={onEliminar} className="text-red-600 text-sm font-medium hover:underline">
-          Eliminar
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs text-gray-600">Etiqueta</label>
+    <div className="space-y-4">
+      {campos.map((campo, index) => (
+        <div key={campo.id} className="border p-3 rounded bg-gray-50 space-y-2">
           <input
-            type="text"
-            value={campo.etiqueta || ''}
-            onChange={(e) => handleInputChange('etiqueta', e.target.value)}
-            className="w-full border px-3 py-1 rounded text-sm"
-            placeholder="Ej: Número de documento"
+            value={campo.etiqueta}
+            onChange={(e) => actualizarCampo(index, { ...campo, etiqueta: e.target.value })}
+            placeholder="Etiqueta del campo"
+            className="w-full border px-3 py-1 rounded"
           />
-        </div>
 
-        <div>
-          <label className="block text-xs text-gray-600">Tipo de campo</label>
           <select
-            value={tipo}
-            onChange={handleTipoChange}
-            className="w-full border px-3 py-1 rounded text-sm"
+            value={campo.tipo}
+            onChange={(e) => actualizarCampo(index, { ...campo, tipo: e.target.value })}
+            className="w-full border px-3 py-1 rounded"
           >
             <option value="texto">Texto</option>
             <option value="numero">Número</option>
-            <option value="fecha">Fecha</option>
-            <option value="archivo">Archivo</option>
             <option value="select">Select</option>
-            <option value="codigo">Código JS</option>
-            <option value="api">API externa</option>
+            <option value="archivo">Archivo</option>
+            <option value="codigo">Código</option>
+            <option value="api">API</option>
           </select>
-        </div>
 
-        <div className="flex items-center gap-2 mt-6">
+          {campo.tipo === 'select' && (
+            <input
+              type="text"
+              value={campo.opciones.join(',')}
+              onChange={(e) =>
+                actualizarCampo(index, { ...campo, opciones: e.target.value.split(',') })
+              }
+              placeholder="Opciones separadas por coma"
+              className="w-full border px-3 py-1 rounded"
+            />
+          )}
+
+          {campo.tipo === 'archivo' && (
+            <div className="space-y-2">
+              <input
+                placeholder="Tipos permitidos (jpg,pdf,mp4,...)"
+                value={campo.archivoTipos.join(',')}
+                onChange={(e) =>
+                  actualizarCampo(index, { ...campo, archivoTipos: e.target.value.split(',') })
+                }
+                className="w-full border px-3 py-1 rounded"
+              />
+              <input
+                type="number"
+                placeholder="Cantidad máxima de archivos"
+                value={campo.archivoCantidad}
+                onChange={(e) =>
+                  actualizarCampo(index, { ...campo, archivoCantidad: parseInt(e.target.value) })
+                }
+                className="w-full border px-3 py-1 rounded"
+              />
+              <input
+                type="number"
+                placeholder="Tamaño máximo por archivo (MB)"
+                value={campo.archivoMaximo}
+                onChange={(e) =>
+                  actualizarCampo(index, { ...campo, archivoMaximo: parseInt(e.target.value) })
+                }
+                className="w-full border px-3 py-1 rounded"
+              />
+            </div>
+          )}
+
+          {campo.tipo === 'codigo' && (
+            <textarea
+              rows={3}
+              placeholder="Código personalizado"
+              value={campo.codigo}
+              onChange={(e) => actualizarCampo(index, { ...campo, codigo: e.target.value })}
+              className="w-full border px-3 py-1 rounded font-mono"
+            />
+          )}
+
+          {campo.tipo === 'api' && (
+            <input
+              placeholder="URL del API"
+              value={campo.api}
+              onChange={(e) => actualizarCampo(index, { ...campo, api: e.target.value })}
+              className="w-full border px-3 py-1 rounded"
+            />
+          )}
+
           <input
-            type="checkbox"
-            checked={campo.obligatorio || false}
-            onChange={(e) => handleInputChange('obligatorio', e.target.checked)}
+            type="text"
+            placeholder="Condición lógica (ej: campoX === 'sí')"
+            value={campo.condicion}
+            onChange={(e) => actualizarCampo(index, { ...campo, condicion: e.target.value })}
+            className="w-full border px-3 py-1 rounded"
           />
-          <span className="text-sm text-gray-600">Obligatorio</span>
-        </div>
-      </div>
 
-      {/* Renderizar si es tipo select, código o api */}
-      {renderOpciones()}
-      {renderAvanzado()}
+          <input
+            type="text"
+            placeholder="Texto de ayuda"
+            value={campo.pistaTexto}
+            onChange={(e) => actualizarCampo(index, { ...campo, pistaTexto: e.target.value })}
+            className="w-full border px-3 py-1 rounded"
+          />
+
+          <input
+            type="text"
+            placeholder="Enlace de ayuda"
+            value={campo.pistaLink}
+            onChange={(e) => actualizarCampo(index, { ...campo, pistaLink: e.target.value })}
+            className="w-full border px-3 py-1 rounded"
+          />
+
+          <input
+            type="text"
+            placeholder="Video de ayuda"
+            value={campo.pistaVideo}
+            onChange={(e) => actualizarCampo(index, { ...campo, pistaVideo: e.target.value })}
+            className="w-full border px-3 py-1 rounded"
+          />
+
+          <input
+            type="text"
+            placeholder="Imagen de ayuda"
+            value={campo.pistaImagen}
+            onChange={(e) => actualizarCampo(index, { ...campo, pistaImagen: e.target.value })}
+            className="w-full border px-3 py-1 rounded"
+          />
+
+          <button
+            onClick={() => eliminarCampo(index)}
+            className="text-red-600 text-sm"
+          >
+            Eliminar
+          </button>
+        </div>
+      ))}
+
+      <div className="flex gap-2">
+        {['texto', 'numero', 'select', 'archivo', 'codigo', 'api'].map((tipo) => (
+          <button
+            key={tipo}
+            onClick={() => agregarCampo(tipo)}
+            className="bg-gray-200 px-3 py-1 rounded text-sm"
+          >
+            + {tipo}
+          </button>
+        ))}
+      </div>
     </div>
   );
-};
-
-export default CampoEditor;
+}

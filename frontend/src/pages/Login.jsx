@@ -18,7 +18,7 @@ const Login = () => {
     localStorage.setItem('usuario', JSON.stringify(usuario));
     navigate('/inicio');
   };
-
+  
   return (
     <Layout>
       <div className="max-w-md mx-auto mt-20 bg-white p-8 rounded-2xl shadow">
@@ -30,6 +30,7 @@ const Login = () => {
         </form>
       </div>
     </Layout>
+    
   );
 };
 

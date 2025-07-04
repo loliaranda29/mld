@@ -17,7 +17,7 @@ export default function Home() {
 
         <div className="absolute top-0 right-0 m-6 flex gap-4">
           <Link to="/login" className="px-4 py-2 bg-white text-[#248B89FF] border border-[#248B89FF] rounded-md font-semibold hover:bg-[#e7f1f0]">Iniciar Sesión</Link>
-          <Link to="/registro" className="px-4 py-2 bg-[#248B89FF] text-white rounded-md font-semibold hover:bg-[#1f706e]">Registrarse</Link>
+          <Link to="/registro" className="px-4 py-2 bg-[#248B89FF] text-white rounded-md font-semibold hover:bg-[#1f706e]">Registrate</Link>
           <Link to="/guia-tramites" className="px-4 py-2 bg-white text-[#248B89FF] border border-[#248B89FF] rounded-md font-semibold hover:bg-[#e7f1f0]">Guía de Trámites</Link>
         </div>
       </section>

@@ -110,7 +110,7 @@ export default function EtapasEditor({ etapas, setEtapas, etapaInicial, setEtapa
         </Card>
       ))}
 
-      <Button onClick={agregarEtapa} className="bg-[#248B89]">
+      <Button onClick={agregarEtapa} className="bg-[#1f706e]">
         + Agregar etapa
       </Button>
     </div>

@@ -1,241 +1,73 @@
+import React from 'react';
 import { useState } from 'react';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Eye } from 'lucide-react';
+import CampoEditor from './CampoEditor';
+import VistaPreviaFormulario from './VistaPreviaFormulario';
 
-const tiposCampo = [
-  'texto',
-  'número',
-  'fecha',
-  'hora',
-  'archivo',
-  'select',
-  'código',
-  'api'
-];
+export default function FormularioBuilder({ secciones, setSecciones }) {
+  const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
 
-function FormularioBuilder({ secciones = [], setSecciones }) {
   const agregarSeccion = () => {
     setSecciones([
       ...secciones,
-      {
-        id: Date.now(),
-        titulo: '',
-        campos: []
-      }
+      { id: Date.now(), titulo: '', campos: [] }
     ]);
   };
 
-  const eliminarSeccion = (id) => {
-    setSecciones(secciones.filter((s) => s.id !== id));
+  const actualizarSeccion = (index, nuevaSeccion) => {
+    const nuevas = [...secciones];
+    nuevas[index] = nuevaSeccion;
+    setSecciones(nuevas);
   };
 
-  const agregarCampo = (seccionId) => {
-    const actualizado = secciones.map((s) =>
-      s.id === seccionId
-        ? {
-            ...s,
-            campos: [
-              ...s.campos,
-              {
-                id: Date.now(),
-                tipo: 'texto',
-                etiqueta: '',
-                obligatorio: false,
-                pista: ''
-              }
-            ]
-          }
-        : s
-    );
-    setSecciones(actualizado);
-  };
-
-  const eliminarCampo = (seccionId, campoId) => {
-    const actualizado = secciones.map((s) =>
-      s.id === seccionId
-        ? {
-            ...s,
-            campos: s.campos.filter((c) => c.id !== campoId)
-          }
-        : s
-    );
-    setSecciones(actualizado);
-  };
-
-  const actualizarCampo = (seccionId, campoId, campoActualizado) => {
-    const actualizado = secciones.map((s) =>
-      s.id === seccionId
-        ? {
-            ...s,
-            campos: s.campos.map((c) =>
-              c.id === campoId ? { ...c, ...campoActualizado } : c
-            )
-          }
-        : s
-    );
-    setSecciones(actualizado);
+  const eliminarSeccion = (index) => {
+    setSecciones(secciones.filter((_, i) => i !== index));
   };
 
   return (
     <div className="space-y-6">
-      {secciones.map((seccion) => (
-        <div key={seccion.id} className="border rounded-md p-4 bg-white shadow-sm">
-          <div className="flex justify-between mb-2">
+      {secciones.map((seccion, index) => (
+        <div key={seccion.id} className="border p-4 rounded shadow bg-white">
+          <div className="flex justify-between mb-4">
             <input
               type="text"
-              className="w-full text-lg font-semibold px-3 py-2 border rounded"
               placeholder="Título de la sección"
               value={seccion.titulo}
               onChange={(e) =>
-                setSecciones(secciones.map((s) =>
-                  s.id === seccion.id ? { ...s, titulo: e.target.value } : s
-                ))
+                actualizarSeccion(index, { ...seccion, titulo: e.target.value })
               }
+              className="text-lg font-semibold w-full border p-2 rounded"
             />
-            <button
-              onClick={() => eliminarSeccion(seccion.id)}
-              className="text-red-600 ml-3 text-sm"
-            >
-              Eliminar sección
-            </button>
+            <button onClick={() => eliminarSeccion(index)} className="text-red-600 ml-4">🗑️</button>
           </div>
 
-            {seccion.campos.map((campo) => (
-              <div key={campo.id} className="border p-3 mb-4 rounded bg-gray-50">
-                <div className="flex justify-between items-center mb-1">
-                  <strong>📌 Campo</strong>
-                  <button
-                    onClick={() => eliminarCampo(seccion.id, campo.id)}
-                    className="text-sm text-red-600"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                  <div>
-                    <label className="text-sm font-medium">Etiqueta</label>
-                    <input
-                      type="text"
-                      className="w-full mt-1 px-3 py-1 border rounded text-sm"
-                      value={campo.etiqueta}
-                      onChange={(e) =>
-                        actualizarCampo(seccion.id, campo.id, {
-                          etiqueta: e.target.value
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Tipo de campo</label>
-                    <select
-                      className="w-full mt-1 px-3 py-1 border rounded text-sm"
-                      value={campo.tipo}
-                      onChange={(e) =>
-                        actualizarCampo(seccion.id, campo.id, {
-                          tipo: e.target.value
-                        })
-                      }
-                    >
-                      {tiposCampo.map((tipo) => (
-                        <option key={tipo} value={tipo}>
-                          {tipo.charAt(0).toUpperCase() + tipo.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    checked={campo.obligatorio}
-                    onChange={(e) =>
-                      actualizarCampo(seccion.id, campo.id, {
-                        obligatorio: e.target.checked
-                      })
-                    }
-                  />
-                  <label className="text-sm">Obligatorio</label>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">Pista (opcional)</label>
-                  <input
-                    type="text"
-                    className="w-full mt-1 px-3 py-1 border rounded text-sm"
-                    value={campo.pista || ''}
-                    onChange={(e) =>
-                      actualizarCampo(seccion.id, campo.id, {
-                        pista: e.target.value
-                      })
-                    }
-                  />
-                </div>
-
-                {campo.tipo === 'select' && (
-                  <div className="mt-2">
-                    <label className="text-sm font-medium">Opciones</label>
-                    <input
-                      type="text"
-                      className="w-full mt-1 px-3 py-1 border rounded text-sm"
-                      value={campo.opciones?.join(',') || ''}
-                      onChange={(e) =>
-                        actualizarCampo(seccion.id, campo.id, {
-                          opciones: e.target.value.split(',')
-                        })
-                      }
-                    />
-                  </div>
-                )}
-
-                {(campo.tipo === 'código' || campo.tipo === 'api') && (
-                  <div className="mt-2">
-                    <label className="text-sm font-medium">
-                      {campo.tipo === 'api' ? 'URL/API' : 'Código JS'}
-                    </label>
-                    <textarea
-                      className="w-full mt-1 px-3 py-2 border rounded text-sm font-mono"
-                      rows={3}
-                      value={campo.config || ''}
-                      onChange={(e) =>
-                        actualizarCampo(seccion.id, campo.id, {
-                          config: e.target.value
-                        })
-                      }
-                    />
-                  </div>
-                )}
-
-                {/* Vista previa */}
-                <div className="mt-4">
-                  <label className="text-sm font-medium text-gray-700 block mb-1">
-                    Vista previa
-                  </label>
-                  {renderPreview(campo)}
-                </div>
-              </div>
-            ))}
-
-
-          <button
-            onClick={() => agregarCampo(seccion.id)}
-            className="text-[#248B89] text-sm font-medium hover:underline mt-2"
-          >
-            + Agregar campo
-          </button>
+          <CampoEditor
+            campos={seccion.campos}
+            onChange={(camposActualizados) =>
+              actualizarSeccion(index, { ...seccion, campos: camposActualizados })
+            }
+          />
         </div>
       ))}
 
-      <button
-        onClick={agregarSeccion}
-        className="bg-[#248B89] text-white px-5 py-2 rounded-md font-semibold hover:bg-[#1f706e]"
-      >
-        <PlusCircle size={18} className="inline mr-1" />
-        Agregar Sección
-      </button>
+      <div className="flex gap-4">
+        <button
+          onClick={agregarSeccion}
+          className="bg-[#248B89] text-white px-4 py-2 rounded hover:bg-[#1f706e] flex items-center gap-2"
+        >
+          <PlusCircle size={18} /> Agregar Sección
+        </button>
+        <button
+          onClick={() => setMostrarVistaPrevia(true)}
+          className="flex items-center gap-2 px-4 py-2 border text-[#248B89] border-[#248B89] rounded hover:bg-[#e7f1f0]"
+        >
+          <Eye size={18} /> Vista previa
+        </button>
+      </div>
+
+      {mostrarVistaPrevia && (
+        <VistaPreviaFormulario secciones={secciones} onClose={() => setMostrarVistaPrevia(false)} />
+      )}
     </div>
   );
 }
-
-export default FormularioBuilder;

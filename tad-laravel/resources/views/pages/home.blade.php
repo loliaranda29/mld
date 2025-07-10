@@ -2,7 +2,6 @@
 
 @section('content')
 
-
 <div class="position-relative text-center w-100" style="max-width: 100%;">
   <img
     src="https://firebasestorage.googleapis.com/v0/b/os-arg-lujan-de-cuyo.appspot.com/o/brand%2FuserImages%2Fmld_12%20(1)_time1749138951205.jpg?alt=media&token=06ec261a-793c-41f6-9430-e3bb7bab1fd9"
@@ -10,12 +9,25 @@
     class="img-fluid w-100"
     style="height: auto;">
 
+  <!-- Botón flotante centrado -->
   <a target="_blank"
     href="https://api.whatsapp.com/send/?phone=5492615656170&amp;text&amp;type=phone_number&amp;app_absent=0"
     class="btn btn-outline-custom position-absolute top-50 start-50 translate-middle px-3 py-1 fs-6 fs-md-5 px-md-4 py-md-2">
     Chatea con Luji
   </a>
+
+  <!-- Formulario sobre la imagen, más abajo del botón -->
+  <form
+    class="position-absolute start-50 translate-middle-x"
+    style="top: 65%; width: 60%;">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Buscar un trámite, servicio, etc.">
+      <button class="btn btn-secondary" type="submit">Buscar</button>
+    </div>
+  </form>
 </div>
+
+
 
 {{-- Trámites más buscados --}}
 <div class="box-2">

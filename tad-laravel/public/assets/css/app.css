@@ -1,6 +1,7 @@
 /* app.css o layout */
 main {
     padding-top: 80px; /* Ajustalo al alto real del header */
+    background-color: #f7f7f7;
 }
 
 .box-1 {
@@ -75,8 +76,15 @@ main {
     .tramite-icon {
         margin-bottom: 0.5rem;
     }
+    form.position-absolute {
+        top: 80% !important; /* bajá un poco más el form en móvil */
+        width: 90% !important;
+    }
 }
 
+.svg-color {
+    fill: #298e8c;
+}
 .div-title {
     color: #298e8c;
     font-size: 1.1rem;
@@ -160,4 +168,133 @@ a {
         padding: 3px 5px !important;
         margin-top: 13px;
     }
+}
+
+/*--------------------------------------------------------------
+
+# Estilos Login
+
+--------------------------------------------------------------*/
+
+.left-side {
+    background: url("https://milujandigital.lujandecuyo.gob.ar/_nuxt/img/login-bg.82ea1c9.png")
+        center center / cover no-repeat;
+    color: white;
+    padding: 1rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Capa oscura encima de la imagen */
+.left-side::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(41, 142, 140, 0.5);
+    z-index: 0;
+}
+
+/* Contenido sobre la capa oscura */
+.left-side-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: white;
+    width: 100%;
+}
+
+/* Form container max width */
+.form-container {
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Botones de registro con fondo lineal, borde redondeado y altura fija */
+.btn-register-custom {
+    background: linear-gradient(to right, #003366 25%, #007bce 75%);
+    border-radius: 50px;
+    height: 48px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+/* Contenedor del ícono SVG dentro del botón */
+.btn-register-custom .icon-container {
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Texto centrado en el botón */
+.btn-register-custom .text-center {
+    width: 75%;
+    text-align: center;
+}
+
+/* Botón de mostrar contraseña */
+.btn-show-password {
+    border: 1px solid #ced4da;
+}
+
+/*--------------------------------------------------------------
+
+# Estilos Profile
+
+--------------------------------------------------------------*/
+.card-outline-custom {
+    width: 70%;
+    color: #298e8c;
+    fill: #298e8c;
+    transition: all 0.3s ease;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* sombra suave */
+    border-radius: 12px; /* opcional para bordes más redondos */
+}
+
+.card-outline-custom:hover,
+.card-outline-custom:focus,
+.card-outline-custom:active,
+.card-outline-custom.active {
+    background-color: #298e8c;
+    fill: #fff;
+    color: #fff;
+    border-color: #298e8c;
+}
+/*--------------------------------------------------------------
+
+# Estilos Pagination
+
+--------------------------------------------------------------*/
+
+.pagination .page-link {
+    color: #298e8c;
+    border: 1px solid #298e8c;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #298e8c;
+    color: #fff;
+    border-color: #298e8c;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #298e8c;
+    color: #fff;
+    border-color: #298e8c;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #aaa;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
 }

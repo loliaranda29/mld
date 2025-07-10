@@ -20,7 +20,7 @@
         </a>
       </div>
       <div>
-        <a href="/auth/login" class="btn btn-link text-dark text-decoration-none d-flex align-items-center">
+        <a href="{{route('login')}}" class="btn btn-link text-dark text-decoration-none d-flex align-items-center">
           <i class="mdi mdi-account-outline me-1"></i>
           <span>Iniciá sesión / Registrarse</span>
         </a>

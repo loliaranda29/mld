@@ -5,7 +5,7 @@
   <div class="row">
     <!-- Menú lateral en forma de tarjetas -->
     <div class="col-md-3 mb-4">
-      <div class="row row-cols-1 g-3">
+      <div id="menu-scroll" class="d-flex flex-row overflow-auto gap-3 flex-md-column">
         <div class="col">
           <a href="{{ route('profile.perfil') }}" class="text-decoration-none">
             <div class="card card-outline-custom p-3 rounded-3 {{ $active === 'perfil' ? 'active' : '' }} text-center d-flex flex-column align-items-center justify-content-center">
@@ -120,4 +120,19 @@
     </div>
   </div>
 </div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const scrollContainer = document.getElementById("menu-scroll");
+    const activeCard = scrollContainer.querySelector(".active");
+
+    if (activeCard) {
+      const offsetLeft = activeCard.offsetLeft;
+      scrollContainer.scrollTo({
+        left: offsetLeft - 16, // padding opcional
+        behavior: "smooth"
+      });
+    }
+  });
+</script>
+
 @endsection

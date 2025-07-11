@@ -84,6 +84,11 @@
   </ul>
   <div class="tab-content" id="interesTabsContent">
     <div class="tab-pane fade show active" id="inmueblesTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><i aria-hidden="true" class="v-icon notranslate white--text mr-2 mdi mdi-home theme--light"></i>
+          Inmueble
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -139,6 +144,11 @@
 
     </div>
     <div class="tab-pane fade" id="inicioTramiteTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><i aria-hidden="true" class="v-icon notranslate white--text mr-2 mdi mdi-home theme--light"></i>
+          Inicio del trámite
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -197,6 +207,11 @@
 
     </div>
     <div class="tab-pane fade" id="escribanoTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><!---->
+          Escribano
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -207,6 +222,11 @@
       </form>
     </div>
     <div class="tab-pane fade" id="transmitenteTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><!---->
+          Transmitente
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -234,6 +254,11 @@
 
     </div>
     <div class="tab-pane fade" id="adquirenteTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><!---->
+          Adquirente
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">

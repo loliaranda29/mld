@@ -55,9 +55,9 @@ class ProfileController extends Controller
   public function tramitesShow($id)
   {
     // Buscar el trámite por ID
-    $tramite =  array_filter($this->userData['tramites'], function ($tramite) use ($id) {
+    $tramite = array_values(array_filter($this->userData['tramites'], function ($tramite) use ($id) {
       return $tramite['id'] == $id;
-    })[0];
+    }))[0] ?? null;
     // Retornar la vista con el trámite
     return view('pages.profile.ciudadano.details.tramites', [
       'active' => 'tramites',

@@ -45,7 +45,8 @@
           </div>
 
           <div class="col-md-4 mb-2 d-flex align-items-end">
-            <a href="#" class="btn btn-sm btn-outline-primary ms-auto">Ver detalle</a>
+            <a href="{{ route('profile.tramites.detail', ['id' => $tramite['id']]) }}"
+              class="btn btn-sm btn-outline-primary ms-auto">Ver detalle</a>
           </div>
         </div>
 

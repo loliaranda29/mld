@@ -118,6 +118,49 @@
             "updated_at": "2025-06-25T09:15:00Z"
         }
     ],
+    "documentos": [
+        {
+            "Nombre": "prueba10",
+            "Tipo": "jpg",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "reporte_inspeccion",
+            "Tipo": "png",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "firma_digital_2024",
+            "Tipo": "pdf",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "comprobante_pago_ago",
+            "Tipo": "jpg",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "certificado_catastral",
+            "Tipo": "pdf",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "foto_predio",
+            "Tipo": "png",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "doc_adjuntado",
+            "Tipo": "jpg",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "declaracion_jurada",
+            "Tipo": "pdf",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        }
+    ],
+
     "pagos": [
         {
             "Número de folio": "azlp73MqCiuab1iYKqIj",

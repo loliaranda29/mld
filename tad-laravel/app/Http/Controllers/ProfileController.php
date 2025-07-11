@@ -13,6 +13,7 @@ class ProfileController extends Controller
   protected $pagos;
   protected $inspecciones;
   protected $citas;
+  protected $documentos;
 
   public function __construct()
   {
@@ -20,11 +21,12 @@ class ProfileController extends Controller
     // Por ejemplo, obtenemos el usuario autenticado y lo guardamos como propiedad
     $this->userData = json_decode(file_get_contents(public_path('/json/user.json')), true);
 
-    $this->user = $this->paginator($this->userData['userData']);
+    $this->user = $this->userData['userData'];
     $this->tramites = $this->paginator($this->userData['tramites']);
     $this->pagos = $this->paginator($this->userData['pagos']);
     $this->inspecciones = $this->paginator($this->userData['inspecciones']);
     $this->citas = $this->paginator($this->userData['citas']);
+    $this->documentos = $this->paginator($this->userData['documentos']);
   }
 
   public function index()
@@ -36,7 +38,10 @@ class ProfileController extends Controller
   }
   public function documentos()
   {
-    return view('profile.show', ['active' => 'documentos']);
+    return view('pages.profile.ciudadano.documentos', [
+      'active' => 'documentos',
+      'documentos' => $this->documentos,
+    ]);
   }
 
   public function tramites()
@@ -46,6 +51,20 @@ class ProfileController extends Controller
       'tramites' => $this->tramites,
     ]);
   }
+
+  public function tramitesShow($id)
+  {
+    // Buscar el trámite por ID
+    $tramite =  array_filter($this->userData['tramites'], function ($tramite) use ($id) {
+      return $tramite['id'] == $id;
+    })[0];
+    // Retornar la vista con el trámite
+    return view('pages.profile.ciudadano.details.tramites', [
+      'active' => 'tramites',
+      'tramite' => $tramite,
+    ]);
+  }
+
 
   public function pagos()
   {

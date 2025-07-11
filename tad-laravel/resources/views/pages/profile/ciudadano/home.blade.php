@@ -118,10 +118,10 @@
           <label class="form-label">Referencias</label>
           <input type="text" name="referencias" class="form-control" value="{{ $user['referencias'] }}">
         </div>
-      </div>
-  </div>
 
-  <button type="submit" class="btn btn-outline-success w-100">Guardar cambios</button>
-  </form>
-</div>
-@endsection
+      </div>
+
+      <button type="submit" class="btn btn-outline-success w-100">Guardar cambios</button>
+    </form>
+  </div>
+  @endsection

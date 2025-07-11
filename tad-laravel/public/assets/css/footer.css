@@ -1,0 +1,93 @@
+/* General */
+.footer {
+    background-color: #474747;
+    color: #ffffff;
+    padding: 2rem 1rem;
+    font-size: 0.95rem;
+    font-family: Arial, sans-serif;
+}
+
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: inline-block;
+    padding: 4px 0;
+    transition: color 0.3s ease;
+    line-height: 1.3;
+}
+
+.footer a:hover {
+    color: #cccccc;
+    text-decoration: underline;
+}
+
+/* Para las imágenes dentro de enlaces */
+.footer a img {
+    max-width: 100%;
+    height: auto;
+    vertical-align: middle; /* mejor alineación con texto */
+}
+
+/* Logo principal */
+.footer-logo {
+    max-height: 95px;
+    object-fit: contain;
+}
+
+/* Sección App Soberana */
+.footer-app-logo {
+    max-width: 150px;
+    margin-bottom: 0.5rem;
+}
+
+/* Títulos y subtítulos */
+.footer-app-title {
+    font-weight: 700;
+    margin-top: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.footer-app-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+/* Badges de tiendas */
+.footer-badge {
+    max-height: 70px; /* altura estándar para ambos */
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: transform 0.2s ease;
+}
+
+.footer-badge:hover {
+    transform: scale(1.05);
+}
+
+/* Crédito final */
+.footer-credits {
+    margin-top: 1.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.footer-credits a {
+    color: #ffffff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.footer-credits a:hover {
+    color: #cccccc;
+    text-decoration: underline;
+}
+
+.footer-credits i {
+    font-size: 1rem;
+    margin-right: 0.25rem;
+    line-height: 1;
+}

@@ -1,0 +1,300 @@
+/* app.css o layout */
+main {
+    padding-top: 80px; /* Ajustalo al alto real del header */
+    background-color: #f7f7f7;
+}
+
+.box-1 {
+    background-color: #f7f7f7;
+    padding: 20px;
+}
+.box-2 {
+    background-color: #ffffff;
+    padding: 20px;
+}
+
+.tramites-box h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.tramites-box p.intro {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.tramites-box p.intro a {
+    color: #0d6efd;
+    text-decoration: underline;
+}
+
+.tramite-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+}
+
+.tramite-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tramite-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.div-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.tramite-desc {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* Responsive ajustes */
+@media (max-width: 576px) {
+    .tramite-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .tramite-icon {
+        margin-bottom: 0.5rem;
+    }
+    form.position-absolute {
+        top: 80% !important; /* bajá un poco más el form en móvil */
+        width: 90% !important;
+    }
+}
+
+.svg-color {
+    fill: #298e8c;
+}
+.div-title {
+    color: #298e8c;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.tramite-desc {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+.oficina-card {
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.oficina-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.oficina-icon {
+    font-size: 2rem;
+}
+
+/* Personaliza la pestaña activa */
+.custom-tabs .nav-link {
+    color: #555;
+    position: relative;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Subrayado animado */
+.custom-tabs .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0%;
+    height: 3px;
+    background-color: #298e8c; /* color azul Bootstrap */
+    transition: width 0.3s ease-in-out;
+}
+
+/* Cuando está activa */
+.custom-tabs .nav-link.active {
+    color: #298e8c;
+}
+
+/* Expande la línea solo en el activo */
+.custom-tabs .nav-link.active::after {
+    width: 100%;
+}
+
+.btn-outline-custom {
+    color: #298e8c;
+    border-color: #298e8c;
+}
+
+.btn-outline-custom:hover,
+.btn-outline-custom:focus,
+.btn-outline-custom:active {
+    color: #fff;
+    background-color: #298e8c;
+    border-color: #298e8c;
+}
+@media (max-width: 400px) {
+    .btn-outline-custom {
+        font-size: 10px !important;
+        padding: 3px 5px !important;
+        margin-top: 13px;
+    }
+}
+
+/*--------------------------------------------------------------
+
+# Estilos Login
+
+--------------------------------------------------------------*/
+
+.left-side {
+    background: url("https://milujandigital.lujandecuyo.gob.ar/_nuxt/img/login-bg.82ea1c9.png")
+        center center / cover no-repeat;
+    color: white;
+    padding: 1rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Capa oscura encima de la imagen */
+.left-side::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(41, 142, 140, 0.5);
+    z-index: 0;
+}
+
+/* Contenido sobre la capa oscura */
+.left-side-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: white;
+    width: 100%;
+}
+
+/* Form container max width */
+.form-container {
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Botones de registro con fondo lineal, borde redondeado y altura fija */
+.btn-register-custom {
+    background: linear-gradient(to right, #003366 25%, #007bce 75%);
+    border-radius: 50px;
+    height: 48px;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+/* Contenedor del ícono SVG dentro del botón */
+.btn-register-custom .icon-container {
+    width: 25%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Texto centrado en el botón */
+.btn-register-custom .text-center {
+    width: 75%;
+    text-align: center;
+}
+
+/* Botón de mostrar contraseña */
+.btn-show-password {
+    border: 1px solid #ced4da;
+}
+
+/*--------------------------------------------------------------
+
+# Estilos Profile
+
+--------------------------------------------------------------*/
+.card-outline-custom {
+    width: 70%;
+    color: #298e8c;
+    fill: #298e8c;
+    transition: all 0.3s ease;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* sombra suave */
+    border-radius: 12px; /* opcional para bordes más redondos */
+}
+
+.card-outline-custom:hover,
+.card-outline-custom:focus,
+.card-outline-custom:active,
+.card-outline-custom.active {
+    background-color: #298e8c;
+    fill: #fff;
+    color: #fff;
+    border-color: #298e8c;
+}
+/*--------------------------------------------------------------
+
+# Estilos Pagination
+
+--------------------------------------------------------------*/
+
+.pagination .page-link {
+    color: #298e8c;
+    border: 1px solid #298e8c;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #298e8c;
+    color: #fff;
+    border-color: #298e8c;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #298e8c;
+    color: #fff;
+    border-color: #298e8c;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #aaa;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}

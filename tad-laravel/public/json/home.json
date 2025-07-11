@@ -1,0 +1,256 @@
+{
+    "tramitesMasBuscados": [
+        {
+            "titulo": "Certificado Libre Deuda",
+            "descripcion": "Mediante este trámite podrás obtener un Libre Deuda, siempre que no tengas saldos pendientes ni planes de pago sin regularizar. 📌 Importante: Este certificado no es válido para trámites de Transferencia o Hipoteca.",
+            "icono": "📄",
+            "href": "/modules/ventanillaDigital/procedures/certificadoLibreDeuda"
+        },
+        {
+            "titulo": "Duplicidad de Pagos",
+            "descripcion": "En caso que hayas pagado dos veces un Bimestre de Tasas o Derecho de Comercio, podrás pedir que se aplique a tu deuda o solicitar el reintegro del pago duplicado.",
+            "icono": "💸",
+            "href": "/modules/ventanillaDigital/procedures/duplicidadDePagos"
+        },
+        {
+            "titulo": "Empresas - Intermediación Laboral",
+            "descripcion": "Mediante este Trámite podrás realizar el Pedido de Candidatos para las Vacantes de Empleo.",
+            "icono": "🏢",
+            "href": "/modules/ventanillaDigital/procedures/empresasIntermediacionLaboral"
+        },
+        {
+            "titulo": "Eximición para Bomberos Voluntarios",
+            "descripcion": "Si sos Bombero Voluntario de nuestro Municipio podés gestionar la exención de tus tasas municipales.",
+            "icono": "🚒",
+            "href": "/modules/ventanillaDigital/procedures/eximicionParaBomberosVoluntarios"
+        },
+        {
+            "titulo": "Firma Digital",
+            "descripcion": "Si aún no tenés registrada tu firma digital remota y/o con token, podés gestionarla en nuestro municipio.",
+            "icono": "🖋️",
+            "href": "/modules/ventanillaDigital/procedures/firmaDigital"
+        },
+        {
+            "titulo": "Habilitación Comercial Express Digital",
+            "descripcion": "Iniciando este trámite podrás solicitar el permiso respectivo para el desarrollo de la actividad comercial.",
+            "icono": "🧾",
+            "href": "/modules/ventanillaDigital/procedures/habilitacionComercialExpressDigital"
+        },
+        {
+            "titulo": "Libre deuda de Infracciones viales",
+            "descripcion": "Utilizá este trámite solo si poseés multas del Municipio de Luján de Cuyo. Te servirá para obtener el Libre Deuda de infracciones viales, necesario para tramitar tu Licencia de Conducir.",
+            "icono": "🚗",
+            "href": "/modules/ventanillaDigital/procedures/libreDeudaDeInfraccionesViales"
+        },
+        {
+            "titulo": "Libre deuda por licitaciones",
+            "descripcion": "Trámite para obtener el Libre Deuda requerido en procesos de licitación.",
+            "icono": "📑",
+            "href": "/modules/ventanillaDigital/procedures/libreDeudaPorLicitaciones"
+        },
+        {
+            "titulo": "Notas y Comunicaciones",
+            "descripcion": "Iniciando este trámite podrás realizar tu pedido o consulta a través de una Nota. Para reclamos, ingresá en: https://citymis.co/lujandecuyo/public",
+            "icono": "✉️",
+            "href": "/modules/ventanillaDigital/procedures/notasYComunicaciones"
+        },
+        {
+            "titulo": "Pago Erróneo",
+            "descripcion": "Mediante este trámite podrás solucionar errores si pagaste tasas o derechos de comercio de un padrón que no te pertenece.",
+            "icono": "❌",
+            "href": "/modules/ventanillaDigital/procedures/pagoErroneo"
+        },
+        {
+            "titulo": "Personas - Búsqueda de Empleo",
+            "descripcion": "Si estás en búsqueda de empleo, registrá tus datos para quedar en la base de datos de la Oficina de Empleo de la Municipalidad.",
+            "icono": "🔍",
+            "href": "/modules/ventanillaDigital/procedures/personasBusquedaDeEmpleo"
+        },
+        {
+            "titulo": "Renovación licencia de conducir",
+            "descripcion": "Trámite para renovar tu licencia de conducir vencida o próxima a vencer. También podés solicitar duplicado por extravío, hurto o cambio de datos.",
+            "icono": "🪪",
+            "href": "/modules/ventanillaDigital/procedures/renovacionLicenciaDeConducir"
+        },
+        {
+            "titulo": "Renovación particular mayores de 66 años",
+            "descripcion": "Si sos mayor de 66 años, podés gestionar la renovación de tu Licencia de Conducir Particular dentro del año de vencimiento.",
+            "icono": "👴",
+            "href": "/modules/ventanillaDigital/procedures/renovacionParticularMayoresDe66Anos"
+        }
+    ],
+    "oficinas": [
+        {
+            "titulo": "Aguas Luján",
+            "icono": "💧",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Atención Ciudadana",
+            "icono": "🙋‍♂️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Catastro",
+            "icono": "📐",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Defunciones",
+            "icono": "⚰️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Desarrollo Económico",
+            "icono": "💼",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Desarrollo Humano",
+            "icono": "🤝",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Electromecánica",
+            "icono": "🔧",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Empleo",
+            "icono": "🧑‍💼",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Firma Digital",
+            "icono": "🖋️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Hábitat y Vivienda",
+            "icono": "🏘️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Industria y Comercio",
+            "icono": "🏭",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Inspección de Servicios Públicos",
+            "icono": "🕵️‍♂️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Licencia de Conducir",
+            "icono": "🚗",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Obras Privadas",
+            "icono": "🏗️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Ordenamiento Territorial",
+            "icono": "🗺️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Protección al Consumidor",
+            "icono": "🛡️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Reclamos y Solicitudes",
+            "icono": "📨",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Registro y Regularizaciones",
+            "icono": "📝",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Rentas Municipales",
+            "icono": "💰",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Tránsito",
+            "icono": "🚦",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Unidad de Evaluación",
+            "icono": "📊",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Zoonosis",
+            "icono": "🐶",
+            "href": "/digital-services"
+        }
+    ],
+    "categorias": [
+        {
+            "titulo": "Comercio",
+            "icono": "🛍️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Conexiones y Permisos",
+            "icono": "🔌",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Construcción",
+            "icono": "🏗️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Cuentas y Servicios",
+            "icono": "💳",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Defunciones",
+            "icono": "⚰️",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Empleo y Capacitación",
+            "icono": "🎓",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Identidad",
+            "icono": "🪪",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Medio Ambiente",
+            "icono": "🌱",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Programas de Asistencia",
+            "icono": "🤝",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Servicios Públicos",
+            "icono": "💡",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Tránsito y Vialidad",
+            "icono": "🚦",
+            "href": "/digital-services"
+        },
+        {
+            "titulo": "Vivienda",
+            "icono": "🏠",
+            "href": "/digital-services"
+        }
+    ]
+}

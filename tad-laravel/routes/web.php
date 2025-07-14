@@ -34,7 +34,7 @@ Route::prefix('profile')->name('profile.')->group(function () {
 });
 
 // 👔 Ruta para funcionario
-Route::get('/funcionario', [FuncionarioController::class, 'index'])->name('funcionario.index');
+Route::get('/funcionario', [FuncionarioController::class, 'home'])->name('funcionario.home');
 
 // 🔁 Ruta para cambiar entre perfiles
 Route::post('/profile/switch', function () {
@@ -42,7 +42,6 @@ Route::post('/profile/switch', function () {
     $nuevo = $actual === 'ciudadano' ? 'funcionario' : 'ciudadano';
     session(['perfil_activo' => $nuevo]);
 
-    return redirect()->route($nuevo === 'ciudadano' ? 'ciudadano.index' : 'funcionario.index');
-
+    return redirect()->route($nuevo === 'ciudadano' ? 'perfil.index' : 'funcionario.home');
 })->name('profile.switch');
 

@@ -21,13 +21,12 @@
 <body>
 
   @include('components.header')
+  
 
   {{-- Contenido --}}
   <main>
     @yield('content')
   </main>
-
-
   @include('components.footer')
 
   {{-- JS de Bootstrap --}}

@@ -1,5 +1,4 @@
 @extends('layouts.app')
-
 @section('content')
 <div class="container py-4">
   <div class="row">
@@ -116,6 +115,17 @@
 
     <!-- Panel principal -->
     <div class="col-md-9">
+            @if(session('perfil_activo') && (session('perfil_activo') === 'ciudadano' || session('perfil_activo') === 'funcionario'))
+          <div class="w-full text-end pr-10 pt-4">
+              <form method="POST" action="{{ route('profile.switch') }}">
+                  @csrf
+                  <button class="text-sm text-blue-700 underline hover:text-blue-900">
+                      Cambiar a perfil {{ session('perfil_activo') === 'ciudadano' ? 'Funcionario' : 'Ciudadano' }}
+                  </button>
+              </form>
+          </div>
+      @endif
+
       @yield('profile_content')
     </div>
   </div>

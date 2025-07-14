@@ -3,6 +3,7 @@
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FuncionarioController;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Route;
 
@@ -31,3 +32,17 @@ Route::prefix('profile')->name('profile.')->group(function () {
   Route::get('/inspecciones', [ProfileController::class, 'inspecciones'])->name('inspecciones');
   Route::get('/citas', [ProfileController::class, 'citas'])->name('citas');
 });
+
+// 👔 Ruta para funcionario
+Route::get('/funcionario', [FuncionarioController::class, 'index'])->name('funcionario.index');
+
+// 🔁 Ruta para cambiar entre perfiles
+Route::post('/profile/switch', function () {
+    $actual = session('perfil_activo', 'ciudadano');
+    $nuevo = $actual === 'ciudadano' ? 'funcionario' : 'ciudadano';
+    session(['perfil_activo' => $nuevo]);
+
+    return redirect()->route($nuevo === 'ciudadano' ? 'ciudadano.index' : 'funcionario.index');
+
+})->name('profile.switch');
+

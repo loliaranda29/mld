@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "nombre": "Alicia Aranda",
+  "nivel": "Nivel 1",
+  "rol": "Funcionario",
+  "permisos": ["constructor_ficha", "bandeja_entrada", "usuarios", "estadisticas"]
+}

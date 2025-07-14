@@ -17,6 +17,7 @@
         "direccion": "Av. San Martín 1234, Luján de Cuyo, Mendoza",
         "wallet": "0xAbC1234567890DefABC1234567890defABC12345",
         "llave_publica": "04bfcabf9e3a1c2d...f3a9c2d1e4b5c6d7e8f9",
+        "roles": ["ciudadano", "funcionario"],
         "created_at": "2024-03-01T12:34:56Z",
         "updated_at": "2025-07-10T09:00:00Z"
     },

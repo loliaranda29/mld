@@ -31,9 +31,11 @@ class ProfileController extends Controller
 
   public function index()
   {
+    $perfilActivo = session('perfil_activo', 'ciudadano');
     return view('pages.profile.ciudadano.home', [
       'active' => 'perfil',
-      'user' => $this->user
+      'user' => $this->user,
+      'perfilActivo' => $perfilActivo,
     ]);
   }
   public function documentos()

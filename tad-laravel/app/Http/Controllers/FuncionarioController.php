@@ -8,10 +8,13 @@ use App\Models\Funcionario;
 
 class FuncionarioController extends Controller
 {
-    public function index()
-    {
-        $funcionario = Funcionario::get();
-        return view('pages.profile.funcionario.index', compact('funcionario'));
-    }
+    public function home()
+{
+    $funcionario = Funcionario::get();
+    return view('pages.profile.funcionario.home', [
+        'funcionario' => $funcionario,
+        'active' => 'perfil', // o el nombre de la sección activa
+    ]);
+}
 
 }

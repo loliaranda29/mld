@@ -4,6 +4,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FuncionarioController;
+use App\Http\Controllers\InspeccionesController;
+use App\Http\Controllers\PagosController;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Route;
 
@@ -28,8 +30,18 @@ Route::prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [ProfileController::class, 'tramites'])->name('');
     Route::get('/{id}', [ProfileController::class, 'tramitesShow'])->name('.detail');
   });
-  Route::get('/pagos', [ProfileController::class, 'pagos'])->name('pagos');
-  Route::get('/inspecciones', [ProfileController::class, 'inspecciones'])->name('inspecciones');
+
+  // Pagos
+  Route::prefix('pagos')->name('pagos')->group(function () {
+    Route::get('/', [PagosController::class, 'index'])->name('');
+    Route::get('/{id}', [PagosController::class, 'show'])->name('.detail');
+  });
+  // Inspecciones
+  Route::prefix('inspecciones')->name('inspecciones')->group(function () {
+    Route::get('/', [InspeccionesController::class, 'index'])->name('');
+    Route::get('/{id}', [InspeccionesController::class, 'show'])->name('.detail');
+  });
+
   Route::get('/citas', [ProfileController::class, 'citas'])->name('citas');
 });
 
@@ -38,10 +50,9 @@ Route::get('/funcionario', [FuncionarioController::class, 'home'])->name('funcio
 
 // 🔁 Ruta para cambiar entre perfiles
 Route::post('/profile/switch', function () {
-    $actual = session('perfil_activo', 'ciudadano');
-    $nuevo = $actual === 'ciudadano' ? 'funcionario' : 'ciudadano';
-    session(['perfil_activo' => $nuevo]);
+  $actual = session('perfil_activo', 'ciudadano');
+  $nuevo = $actual === 'ciudadano' ? 'funcionario' : 'ciudadano';
+  session(['perfil_activo' => $nuevo]);
 
-    return redirect()->route($nuevo === 'ciudadano' ? 'perfil.index' : 'funcionario.home');
+  return redirect()->route($nuevo === 'ciudadano' ? 'perfil.index' : 'funcionario.home');
 })->name('profile.switch');
-

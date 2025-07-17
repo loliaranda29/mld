@@ -5,27 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Usuario extends Model
+class Inspeccion extends Model
 {
   use HasFactory;
 
   // Nombre de la tabla (por si no sigue la convención "usuarios")
-  protected $table = 'usuarios';
+  protected $table = 'inspecciones';
 
   // Campos que se pueden asignar masivamente
   protected $fillable = [
-    'nombre',
-    'apellido',
-    'email',
-    'cuil',
+    'folio_inspeccion',
+    'fecha_inspeccion',
+    'estado',
+    'direccion',
   ];
 
-  public function permiso()
+  public function inspector()
   {
-    return $this->belongsTo(Permiso::class, 'permiso_id');
-  }
-  public function pago()
-  {
-    return $this->hasMany(Pago::class, 'usuario_id');
+    return $this->belongsTo(Inspector::class, 'inspector_id');
   }
 }

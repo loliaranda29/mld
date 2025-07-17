@@ -5,27 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Usuario extends Model
+class Permiso extends Model
 {
   use HasFactory;
 
   // Nombre de la tabla (por si no sigue la convención "usuarios")
-  protected $table = 'usuarios';
+  protected $table = 'permisos';
 
   // Campos que se pueden asignar masivamente
   protected $fillable = [
     'nombre',
-    'apellido',
-    'email',
-    'cuil',
   ];
-
-  public function permiso()
-  {
-    return $this->belongsTo(Permiso::class, 'permiso_id');
-  }
-  public function pago()
-  {
-    return $this->hasMany(Pago::class, 'usuario_id');
-  }
 }

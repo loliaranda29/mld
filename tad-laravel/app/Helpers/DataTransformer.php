@@ -85,4 +85,32 @@ class DataTransformer
       "email" => $superior->email,
     ];
   }
+  public static function tramites($tramite)
+  {
+    return [
+      "id" => $tramite->id,
+      "inmueble" => $tramite->inmueble ?? null,
+      "inicio_tramite" => $tramite->inicio_tramite ?? null,
+      "escribano" => $tramite->escribano ?? null,
+      "transmitente" => $tramite->transmitente ?? null,
+      "adquirinte" => $tramite->adquirinte ?? null,
+      "documentos" => $tramite->documentos ?? null,
+      "expediente" => $tramite->expediente ?? null,
+      "fecha_emision" => $tramite->fecha_emision ?? null,
+      "tipo" => $tramite->tipo ?? null,
+      "estatus" => $tramite->estatus ?? null,
+      "etapas" => $tramite->etapas ?? null,
+      "mensaje" => $tramite->mensaje ?? null,
+    ];
+  }
+  public static function citas($cita)
+  {
+    return [
+      "id" => $cita->id,
+      "tramite" => $cita->tramite->expediente ?? null,
+      "tramite_id" => $cita->tramite->id ?? null,
+      "fecha" => $cita->fecha ?? null,
+      "estado" => $cita->estado ?? null,
+    ];
+  }
 }

@@ -6,7 +6,7 @@
     <div class="col-md-3 mb-4">
       <div id="menu-scroll" class="d-flex flex-row overflow-auto gap-3 flex-md-column">
         <div class="col">
-          <a href="{{ route('profile.perfil') }}" class="text-decoration-none">
+          <a href="{{ route('profile.index') }}" class="text-decoration-none">
             <div class="card card-outline-custom p-3 rounded-3 {{ $active === 'perfil' ? 'active' : '' }} text-center d-flex flex-column align-items-center justify-content-center">
               <svg data-v-19bc8e93="" id="Capa_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 391.8 452.64" fill="var(--v-tabDisabled-base)" width="34px" height="34px">
                 <defs>
@@ -115,15 +115,15 @@
 
     <!-- Panel principal -->
     <div class="col-md-9">
-            @if(session('perfil_activo') && (session('perfil_activo') === 'ciudadano' || session('perfil_activo') === 'funcionario'))
-          <div class="w-full text-end pr-10 pt-4">
-              <form method="POST" action="{{ route('profile.switch') }}">
-                  @csrf
-                  <button class="text-sm text-blue-700 underline hover:text-blue-900">
-                      Cambiar a perfil {{ session('perfil_activo') === 'ciudadano' ? 'Funcionario' : 'Ciudadano' }}
-                  </button>
-              </form>
-          </div>
+      @if(session('perfil_activo') && (session('perfil_activo') === 'ciudadano' || session('perfil_activo') === 'funcionario'))
+      <div class="w-full text-end pr-10 pt-4">
+        <form method="POST" action="{{ route('profile.switch') }}">
+          @csrf
+          <button class="text-sm text-blue-700 underline hover:text-blue-900">
+            Cambiar a perfil {{ session('perfil_activo') === 'ciudadano' ? 'Funcionario' : 'Ciudadano' }}
+          </button>
+        </form>
+      </div>
       @endif
 
       @yield('profile_content')

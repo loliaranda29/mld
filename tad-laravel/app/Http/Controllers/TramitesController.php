@@ -9,9 +9,14 @@ use Illuminate\Http\Request;
 
 class tramitesController extends Controller
 {
+  protected $user;
+  public function __construct()
+  {
+    $this->user = auth()->user();
+  }
   public function index(Request $request)
   {
-    $query = Tramite::where('usuario_id', 15104);
+    $query = Tramite::where('usuario_id', $this->user->id);
 
     if ($request->filled('search')) {
       $search = $request->input('search');

@@ -24,9 +24,27 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('forgot-password', function () {
+  return view('auth.forgot-password');
+})->name('password.request');
+
+Route::post('forgot-password', [LoginController::class, 'sendResetLinkEmail'])->name('password.email');
+
+Route::get('reset-password/{token}', function ($token) {
+  return view('auth.reset-password', ['token' => $token]);
+})->name('password.reset');
+
+Route::post('reset-password', [LoginController::class, 'reset'])->name('password.update');
+
+
+
+
 
 Route::prefix('profile')->name('profile.')->group(function () {
-  Route::get('/', [ProfileController::class, 'index'])->name('perfil'); // perfil por defecto
+  Route::get('/', [ProfileController::class, 'index'])->name('index'); // perfil por defecto
   Route::get('/documentos', [ProfileController::class, 'documentos'])->name('documentos');
 
   // Pagos

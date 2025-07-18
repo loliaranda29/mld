@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Usuario;
 
+
 class ProfileController extends Controller
 {
   protected $userData;

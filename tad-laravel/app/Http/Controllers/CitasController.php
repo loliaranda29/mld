@@ -9,9 +9,14 @@ use Illuminate\Http\Request;
 
 class CitasController extends Controller
 {
+  protected $user;
+  public function __construct()
+  {
+    $this->user = auth()->user();
+  }
   public function index(Request $request)
   {
-    $query = Cita::with('tramite')->where('usuario_id', 15104);
+    $query = Cita::with('tramite')->where('usuario_id', $this->user->id);
 
     if ($request->filled('search')) {
       $search = $request->input('search');

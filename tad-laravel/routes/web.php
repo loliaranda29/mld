@@ -10,6 +10,8 @@ use App\Http\Controllers\PagosController;
 use App\Http\Controllers\tramitesController;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,3 +79,12 @@ Route::post('/profile/switch', function () {
 
   return redirect()->route($nuevo === 'ciudadano' ? 'perfil.index' : 'funcionario.home');
 })->name('profile.switch');
+
+Route::post('/logout', function (Request $request) {
+  Auth::logout();
+
+  $request->session()->invalidate();
+  $request->session()->regenerateToken();
+
+  return redirect('/');
+})->name('logout');

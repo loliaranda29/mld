@@ -6,3 +6,4 @@
   <p class="text-sm text-gray-600">Aquí se mostrará el listado de trámites disponibles.</p>
 </div>
 @endsection
+

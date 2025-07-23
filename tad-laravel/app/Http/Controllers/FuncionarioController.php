@@ -17,4 +17,10 @@ class FuncionarioController extends Controller
     ]);
 }
 
+public function listadoTramites()
+{
+    return view('pages.profile.funcionario.listado-tramites');
+}
+
+
 }

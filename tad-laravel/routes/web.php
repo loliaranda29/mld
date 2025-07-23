@@ -55,3 +55,5 @@ Route::post('/logout', function (Request $request) {
 
     return redirect('/');
 })->name('logout');
+
+Route::get('/ventanilla/procedures', [FuncionarioController::class, 'listadoTramites'])->name('ventanilla.procedures');

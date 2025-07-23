@@ -1,63 +1,43 @@
 @extends('layouts.profile')
 
 @section('profile_content')
-<div class="card shadow rounded-4 px-4 py-5 mb-4">
-  <div class="row align-items-center">
+<div class="card shadow rounded-4 p-4 mb-4">
+  <div class="row gy-4 align-items-start">
 
-    <!-- Columna izquierda: Avatar y nombre -->
-    <div class="col-md-5 text-center mb-4 mb-md-0">
-      <div class="d-flex flex-column align-items-center">
-        <!-- Avatar -->
-        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 96px; height: 96px;">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 391.8 452.64" fill="#FFF" width="53px" height="53px">
-            <path d="M358.27,294.16c-6.08-23.69...Z"></path>
-            <path d="M193.28,218.56c54.7,0,98.71-44.14...Z"></path>
-          </svg>
-        </div>
+    {{-- Información del expediente --}}
+    <div class="col-12 col-md-5">
+      <div class="d-flex flex-column h-100 justify-content-between">
+        <div>
+          <p class="text-muted mb-1">Folio/Prefolio del Expediente</p>
+          <h5 class="fw-bold">{{ $tramite['expediente'] }}</h5>
 
-        <!-- Nombre -->
-        <h5 class="fw-bold mb-2">{{ $tramite['titulo'] }}</h5>
+          <p class="text-muted mt-4 mb-1">Trámite</p>
+          <p class="fw-semibold">{{ $tramite['nombre'] ?? 'Sin nombre de trámite' }}</p>
 
-        <!-- Email -->
-        <div class="mb-3 w-100 px-5">
-          <label class="form-label text-muted">Numero</label>
-          <input type="text" class="form-control" disabled value="{{ $tramite['numero'] }}">
+          <p class="text-muted mt-4 mb-1">Fecha de recepción de solicitud</p>
+          <p class="small">{{ \Carbon\Carbon::parse($tramite['fecha_emision'])->format('d M Y') }}</p>
         </div>
-        <div class="mb-3 w-100 px-5">
-          <label class="form-label text-muted">Fecha de emision</label>
-          <input type="text" class="form-control" disabled value="{{ $tramite['fecha_emision'] }}">
-        </div>
-        <div class="mb-3 w-100 px-5">
-          <label class="form-label text-muted">Tipo</label>
-          <input type="text" class="form-control" disabled value="{{ $tramite['tipo'] }}">
-        </div>
-        <div class="mb-3 w-100 px-5">
-          <label class="form-label text-muted">Estatus</label>
-          <input type="text" class="form-control" disabled value="{{ $tramite['estatus'] }}">
-        </div>
-
-
       </div>
     </div>
 
-    <!-- Separador vertical -->
-    <div class="col-md-1 d-none d-md-flex justify-content-center">
-      <div class="vr" style="height: 100%; width: 1px; background-color: #dee2e6;"></div>
-    </div>
-
-    <!-- Columna derecha: Identidad digital -->
-    <div class="col-md-6">
-      <h6 class="fw-semibold">Identidad digital</h6>
-      <p><strong>Conectado a:</strong> Luján de Cuyo</p>
-      <p><strong>Wallet:</strong> {{ $tramite['etapa_actual'] ?? 'No conectada' }}</p>
-      <p><strong>Llave pública:</strong></p>
-      <textarea class="form-control mb-2" rows="2" disabled>{{ $tramite['etapas_totales'] ?? 'No disponible' }}</textarea>
-      <button class="btn btn-sm btn-link"><i class="bi bi-clipboard"></i> Copiar</button>
-      <button class="btn btn-dark w-100 mt-3"><i class="bi bi-arrow-up-circle me-2"></i> Subir de nivel</button>
+    {{-- Estatus del trámite --}}
+    <div class="col-12 col-md-7">
+      <div class="border rounded-4 p-4 h-100 bg-light">
+        <h6 class="fw-semibold text-secondary mb-3">
+          <i class="mdi mdi-information-outline text-primary me-2"></i> Estatus
+        </h6>
+        <p class="mb-1">
+          <strong>{{ $tramite['estatus'] }}</strong>
+        </p>
+        <p class="text-muted mb-0">
+          {{ $tramite['etapas'] ?? 'Etapa no disponible' }}
+        </p>
+      </div>
     </div>
 
   </div>
 </div>
+
 <div class="card shadow rounded-4 px-4 py-5 mb-4">
   <ul class="nav nav-tabs custom-tabs justify-content-center flex-wrap mb-4" id="interesTabs" role="tablist">
     <li class="nav-item" role="presentation">
@@ -84,6 +64,11 @@
   </ul>
   <div class="tab-content" id="interesTabsContent">
     <div class="tab-pane fade show active" id="inmueblesTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><i aria-hidden="true" class="v-icon notranslate white--text mr-2 mdi mdi-home theme--light"></i>
+          Inmueble
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -139,6 +124,11 @@
 
     </div>
     <div class="tab-pane fade" id="inicioTramiteTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><i aria-hidden="true" class="v-icon notranslate white--text mr-2 mdi mdi-home theme--light"></i>
+          Inicio del trámite
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -197,6 +187,11 @@
 
     </div>
     <div class="tab-pane fade" id="escribanoTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><!---->
+          Escribano
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -207,6 +202,11 @@
       </form>
     </div>
     <div class="tab-pane fade" id="transmitenteTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><!---->
+          Transmitente
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -234,6 +234,11 @@
 
     </div>
     <div class="tab-pane fade" id="adquirenteTab" role="tabpanel">
+      <div class="pa-3 col col-12">
+        <h4 class="h4-custom"><!---->
+          Adquirente
+        </h4>
+      </div>
       <form method="POST" action="">
         <div class="row">
           <div class="col-md-6 mb-3">

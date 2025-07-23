@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\InspeccionesController;
+use App\Http\Controllers\PagosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UsuariosController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::get('/usuarios', [UsuariosController::class, 'index']);
+Route::get('/usuarios/{id}', [UsuariosController::class, 'show']);
+Route::get('/pagos', [PagosController::class, 'index']);
+Route::get('/inspecciones/{id}', [InspeccionesController::class, 'show']);

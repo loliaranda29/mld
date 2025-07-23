@@ -1,9 +1,13 @@
 <?php
 
+use App\Http\Controllers\CitasController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FuncionarioController;
+use App\Http\Controllers\InspeccionesController;
+use App\Http\Controllers\PagosController;
+use App\Http\Controllers\tramitesController;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -22,17 +26,46 @@ use Illuminate\Http\Request;
 
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 Route::get('/login', [LoginController::class, 'index'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('forgot-password', function () {
+  return view('auth.forgot-password');
+})->name('password.request');
+
+Route::post('forgot-password', [LoginController::class, 'sendResetLinkEmail'])->name('password.email');
+
+Route::get('reset-password/{token}', function ($token) {
+  return view('auth.reset-password', ['token' => $token]);
+})->name('password.reset');
+
+Route::post('reset-password', [LoginController::class, 'reset'])->name('password.update');
+
+
+
+
 
 Route::prefix('profile')->name('profile.')->group(function () {
-  Route::get('/', [ProfileController::class, 'index'])->name('perfil'); // perfil por defecto
+  Route::get('/', [ProfileController::class, 'index'])->name('index'); // perfil por defecto
   Route::get('/documentos', [ProfileController::class, 'documentos'])->name('documentos');
-  Route::prefix('tramites')->name('tramites')->group(function () {
-    Route::get('/', [ProfileController::class, 'tramites'])->name('');
-    Route::get('/{id}', [ProfileController::class, 'tramitesShow'])->name('.detail');
+
+  // Pagos
+  Route::prefix('pagos')->name('pagos')->group(function () {
+    Route::get('/', [PagosController::class, 'index'])->name('');
+    Route::get('/{id}', [PagosController::class, 'show'])->name('.detail');
   });
-  Route::get('/pagos', [ProfileController::class, 'pagos'])->name('pagos');
-  Route::get('/inspecciones', [ProfileController::class, 'inspecciones'])->name('inspecciones');
-  Route::get('/citas', [ProfileController::class, 'citas'])->name('citas');
+  // Inspecciones
+  Route::prefix('inspecciones')->name('inspecciones')->group(function () {
+    Route::get('/', [InspeccionesController::class, 'index'])->name('');
+    Route::get('/{id}', [InspeccionesController::class, 'show'])->name('.detail');
+  });
+  // tramites
+  Route::prefix('tramites')->name('tramites')->group(function () {
+    Route::get('/', [tramitesController::class, 'index'])->name('');
+    Route::get('/{id}', [tramitesController::class, 'show'])->name('.detail');
+  });
+
+  Route::get('/citas', [CitasController::class, 'index'])->name('citas');
 });
 
 // 👔 Ruta para funcionario
@@ -56,4 +89,7 @@ Route::post('/logout', function (Request $request) {
     return redirect('/');
 })->name('logout');
 
+<<<<<<< HEAD
 Route::get('/ventanilla/procedures', [FuncionarioController::class, 'listadoTramites'])->name('ventanilla.procedures');
+=======
+>>>>>>> origin/dev

@@ -73,18 +73,19 @@ Route::get('/funcionario', [FuncionarioController::class, 'home'])->name('funcio
 
 // 🔁 Ruta para cambiar entre perfiles
 Route::post('/profile/switch', function () {
-  $actual = session('perfil_activo', 'ciudadano');
-  $nuevo = $actual === 'ciudadano' ? 'funcionario' : 'ciudadano';
-  session(['perfil_activo' => $nuevo]);
+    $actual = session('perfil_activo', 'ciudadano');
+    $nuevo = $actual === 'ciudadano' ? 'funcionario' : 'ciudadano';
+    session(['perfil_activo' => $nuevo]);
 
-  return redirect()->route($nuevo === 'ciudadano' ? 'perfil.index' : 'funcionario.home');
+    return redirect()->route($nuevo === 'ciudadano' ? 'perfil.index' : 'funcionario.home');
 })->name('profile.switch');
 
 Route::post('/logout', function (Request $request) {
-  Auth::logout();
+    Auth::logout();
 
-  $request->session()->invalidate();
-  $request->session()->regenerateToken();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
 
-  return redirect('/');
+    return redirect('/');
 })->name('logout');
+

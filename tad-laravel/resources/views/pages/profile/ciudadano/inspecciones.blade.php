@@ -10,7 +10,7 @@
 
     <form method="GET" action="" class="mb-4">
       <div class="input-group">
-        <input type="text" name="buscar" class="form-control" placeholder="Buscar por nombre" value="{{ request('buscar') }}">
+        <input type="text" name="search" class="form-control" placeholder="Buscar por nombre" value="{{ request('search') }}">
         <button class="btn btn-outline-secondary" type="submit">Buscar</button>
       </div>
     </form>
@@ -26,28 +26,29 @@
               <path id="Trazado_6763" data-name="Trazado 6763" d="M216.794,283.082l5.354-5.553c.093-.1.185-.2.283-.288a1.215,1.215,0,0,1,1.758.019,1.329,1.329,0,0,1,.07,1.845c-.236.275-.5.526-.749.787-1.889,1.958-3.794,3.9-5.659,5.883a1.341,1.341,0,0,1-2.1.008c-.793-.888-1.652-1.712-2.467-2.579a1.343,1.343,0,0,1,.64-2.25,1.215,1.215,0,0,1,1.216.407c.546.565,1.088,1.133,1.651,1.721" transform="translate(-200.539 -259.34)"></path>
             </g>
           </svg>
-          <h5 class="card-title mb-0">{{ $inspeccion['Trámite'] }}</h5>
+          <h5 class="card-title mb-0">{{ $inspeccion['folio_inspeccion'] }}</h5>
         </div>
 
         <div class="row">
           <div class="col-md-6 mb-2">
-            <p class="mb-1"><strong>Folio:</strong> {{ $inspeccion['Folio'] }}</p>
-            <p class="mb-1"><strong>Fecha de la inspección:</strong> {{$inspeccion['Fecha de la inspección']}}</p>
+            <p class="mb-1"><strong>Folio:</strong> {{ $inspeccion['folio_inspeccion'] }}</p>
+            <p class="mb-1"><strong>Inspector:</strong> {{$inspeccion['inspector']['nombre']}} {{$inspeccion['inspector']['apellido']}}</p>
+            <p class="mb-1"><strong>Fecha de la inspección:</strong> {{$inspeccion['fecha_inspeccion']}}</p>
           </div>
 
           <div class="col-md-6 mb-2 d-flex align-items-center">
-            <p class="mb-1 mb-md-0"><strong>Estatus:</strong>
-              @if(strtolower($inspeccion['Estatus']) === 'aprobado')
-              <span class="badge bg-success">{{ $inspeccion['Estatus'] }}</span>
-              @elseif(strtolower($inspeccion['Estatus']) === 'pendiente')
-              <span class="badge bg-warning text-dark">{{ $inspeccion['Estatus'] }}</span>
-              @elseif(strtolower($inspeccion['Estatus']) === 'rechazado')
-              <span class="badge bg-danger">{{ $inspeccion['Estatus'] }}</span>
+            <p class="mb-1 mb-md-0"><strong>Estado:</strong>
+              @if(strtolower($inspeccion['estado']) === 'aprobado')
+              <span class="badge bg-success">{{ $inspeccion['estado'] }}</span>
+              @elseif(strtolower($inspeccion['estado']) === 'pendiente')
+              <span class="badge bg-warning text-dark">{{ $inspeccion['estado'] }}</span>
+              @elseif(strtolower($inspeccion['estado']) === 'rechazado')
+              <span class="badge bg-danger">{{ $inspeccion['estado'] }}</span>
               @else
-              <span class="badge bg-secondary">{{ $inspeccion['Estatus'] }}</span>
+              <span class="badge bg-secondary">{{ $inspeccion['estado'] }}</span>
               @endif
             </p>
-            <a href="#" class="btn btn-sm btn-outline-primary ms-auto">Ver detalle</a>
+            <a href="{{ route('profile.inspecciones.detail', $inspeccion['id']) }}" class="btn btn-outline-custom ms-auto">Ver detalle</a>
           </div>
         </div>
 

@@ -19,12 +19,38 @@
           <span>Servicios digitales</span>
         </a>
       </div>
+
+      {{-- ✅ Mostrar login o usuario --}}
+      @guest
       <div>
-        <a href="{{route('login')}}" class="btn btn-link text-dark text-decoration-none d-flex align-items-center">
+        <a href="{{ route('login') }}" class="btn btn-link text-dark text-decoration-none d-flex align-items-center">
           <i class="mdi mdi-account-outline me-1"></i>
           <span>Iniciá sesión / Registrarse</span>
         </a>
       </div>
+      @else
+      {{-- Usuario logueado --}}
+      <div class="dropdown">
+        <a class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" href="#" role="button" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=298e8c&color=fff&rounded=true&size=40' }}"
+            alt="Avatar"
+            class="rounded-circle me-2"
+            style="width: 40px; height: 40px; object-fit: cover;">
+          <span>{{ Auth::user()->nombre }} {{ Auth::user()->apellido }}</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+          <li><a class="dropdown-item" href="{{ route('profile.index') }}"><i class="mdi mdi-account-circle-outline me-1"></i> Mi perfil</a></li>
+          <hr>
+          <li>
+            <form method="POST" action="{{ route('logout') }}">
+              @csrf
+              <button type="submit" class="dropdown-item"><i class="mdi mdi-logout me-1"></i> Cerrar sesión</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+      @endguest
+
     </div>
   </div>
 </nav>

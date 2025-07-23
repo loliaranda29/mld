@@ -258,6 +258,12 @@ a {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* sombra suave */
     border-radius: 12px; /* opcional para bordes más redondos */
 }
+.h4-custom {
+    background-color: #298e8c;
+    border-radius: 10px;
+    color: white;
+    padding: 5px;
+}
 
 .card-outline-custom:hover,
 .card-outline-custom:focus,
@@ -267,6 +273,34 @@ a {
     fill: #fff;
     color: #fff;
     border-color: #298e8c;
+}
+/* Comportamiento base en móviles */
+@media (max-width: 767.98px) {
+    .card-outline-custom {
+        min-width: 114px;
+        /* ancho fijo mínimo para scroll */
+        max-width: 114px;
+        height: 125px;
+        /* altura uniforme */
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .card-container {
+        flex-shrink: 0;
+    }
+
+    .overflow-auto {
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+    }
+    #menu-scroll {
+        scroll-behavior: smooth; /* animación suave */
+    }
 }
 /*--------------------------------------------------------------
 

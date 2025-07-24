@@ -98,12 +98,14 @@
     </a>
   </li>
 
-  <li class="nav-item mt-3">
+  <div class="mt-auto border-t px-4 py-4">
     <form method="POST" action="{{ route('logout') }}">
       @csrf
-      <button class="nav-link text-danger w-100 text-start" type="submit">
-        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+      <button type="submit" class="flex items-center gap-2 text-red-500 hover:text-red-700">
+        <i class="mdi mdi-logout-variant text-lg"></i>
+        <span class="text-sm">Cerrar sesión</span>
       </button>
     </form>
-  </li>
-</ul>
+  </div>
+  </nav>
+  </div>

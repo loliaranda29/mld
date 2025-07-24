@@ -7,74 +7,74 @@ use App\Models\Tramite;
 
 class Tramite_configController extends Controller
 {
-    // Mostrar listado de trámites
-    public function indexFuncionario()
-    {
-        $tramites = Tramite::orderBy('created_at', 'desc')->get();
-        return view('pages.profile.funcionario.tramite_config', compact('tramites'));
-    }
+  // Mostrar listado de trámites
+  public function indexFuncionario()
+  {
+    $tramites = Tramite::orderBy('created_at', 'desc')->get();
+    return view('pages.profile.funcionario.tramite_config', compact('tramites'));
+  }
 
-    // Mostrar formulario de creación
-    public function create()
-    {
-        return view('pages.profile.funcionario.tramite_create');
-    }
+  // Mostrar formulario de creación
+  public function create()
+  {
+    return view('pages.profile.funcionario.tramite_create');
+  }
 
-    // Guardar un nuevo trámite
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'publicado' => 'boolean',
-            'disponible' => 'boolean',
-            'mostrar_inicio' => 'boolean',
-            'tipo' => 'nullable|string|max:100',
-            'estatus' => 'nullable|string|max:100',
-            'etapas' => 'nullable|json',
-            'mensaje' => 'nullable|string',
-        ]);
+  // Guardar un nuevo trámite
+  public function store(Request $request)
+  {
+    $validated = $request->validate([
+      'nombre' => 'required|string|max:255',
+      'descripcion' => 'nullable|string',
+      'publicado' => 'boolean',
+      'disponible' => 'boolean',
+      'mostrar_inicio' => 'boolean',
+      'tipo' => 'nullable|string|max:100',
+      'estatus' => 'nullable|string|max:100',
+      'etapas' => 'nullable|json',
+      'mensaje' => 'nullable|string',
+    ]);
 
-        Tramite::create($validated);
+    Tramite::create($validated);
 
-        return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite creado con éxito.');
-    }
+    return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite creado con éxito.');
+  }
 
-    // Mostrar formulario de edición
-    public function edit($id)
-    {
-        $tramite = Tramite::findOrFail($id);
-        return view('pages.profile.funcionario.tramite_create', compact('tramite'));
-    }
+  // Mostrar formulario de edición
+  public function edit($id)
+  {
+    $tramite = Tramite::findOrFail($id);
+    return view('pages.profile.funcionario.tramite_create', compact('tramite'));
+  }
 
-    // Actualizar un trámite existente
-    public function update(Request $request, $id)
-    {
-        $tramite = Tramite::findOrFail($id);
+  // Actualizar un trámite existente
+  public function update(Request $request, $id)
+  {
+    $tramite = Tramite::findOrFail($id);
 
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'publicado' => 'boolean',
-            'disponible' => 'boolean',
-            'mostrar_inicio' => 'boolean',
-            'tipo' => 'nullable|string|max:100',
-            'estatus' => 'nullable|string|max:100',
-            'etapas' => 'nullable|json',
-            'mensaje' => 'nullable|string',
-        ]);
+    $validated = $request->validate([
+      'nombre' => 'required|string|max:255',
+      'descripcion' => 'nullable|string',
+      'publicado' => 'boolean',
+      'disponible' => 'boolean',
+      'mostrar_inicio' => 'boolean',
+      'tipo' => 'nullable|string|max:100',
+      'estatus' => 'nullable|string|max:100',
+      'etapas' => 'nullable|json',
+      'mensaje' => 'nullable|string',
+    ]);
 
-        $tramite->update($validated);
+    $tramite->update($validated);
 
-        return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite actualizado correctamente.');
-    }
+    return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite actualizado correctamente.');
+  }
 
-    // Eliminar un trámite
-    public function destroy($id)
-    {
-        $tramite = Tramite::findOrFail($id);
-        $tramite->delete();
+  // Eliminar un trámite
+  public function destroy($id)
+  {
+    $tramite = Tramite::findOrFail($id);
+    $tramite->delete();
 
-        return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite eliminado.');
-    }
+    return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite eliminado.');
+  }
 }

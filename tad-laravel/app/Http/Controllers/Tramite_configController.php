@@ -28,6 +28,20 @@ class Tramite_configController extends Controller
     {
         return view('pages.profile.funcionario.tramite_create');
     }
+    public function store(Request $request)
+{
+    // Validar campos
+    $validated = $request->validate([
+        'nombre' => 'required|string|max:255',
+        'descripcion' => 'nullable|string',
+        // Otros campos a validar
+    ]);
+
+    // Guardar en la base de datos
+    Trámite::create($validated); // O el modelo correspondiente
+
+    return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite creado con éxito');
+}
 
 
 }

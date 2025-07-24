@@ -7,7 +7,6 @@
     <h2 class="text-xl font-semibold">Listado de trámites</h2>
     <div class="space-x-2">
         <a href="{{ route('funcionario.tramite_config.create') }}" class="btn btn-primary">Nuevo</a>
-        <button class="btn btn-outline-primary">Subir trámites</button>
     </div>
 </div>
 

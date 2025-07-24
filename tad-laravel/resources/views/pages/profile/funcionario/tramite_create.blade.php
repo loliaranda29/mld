@@ -3,54 +3,40 @@
 @section('title', 'Nuevo trámite')
 
 @section('profile_content')
-<div class="max-w-4xl mx-auto bg-white shadow rounded p-6">
-    <h2 class="text-xl font-semibold mb-4">Crear nuevo trámite</h2>
+<nav class="text-sm text-black mt-4 mb-6">
+    <ol class="flex flex-wrap items-center space-x-1">
+            <a href="{{ url('/') }}" class="font-bold hover:underline flex items-center space-x-1">
+                <i class="bi bi-house"></i>
+                <span>Inicio</span>
+            </a>
+            <a>/</a>
+            <a href="#" class="font-bold hover:underline">Ventanilla Digital</a>
+            <a>/</a>
+            <a href="#" class="font-bold hover:underline">Trámites</a>
+            <a>/</a>
+            <span class="text-gray-600">Nueva ficha</span>
+        
+    </ol>
+</nav>
 
-    <form action="#" method="POST" enctype="multipart/form-data">
-        @csrf
-        <div class="mb-4">
-            <label class="block font-semibold">Nombre del trámite</label>
-            <input type="text" name="nombre" class="form-input w-full" required>
-        </div>
+    {{-- Cabecera --}}
+    <div class="flex items-center gap-2 px-3 py-2 bg-[#0c2d57] text-white rounded-md shadow">
+        @include('components.icons.tramite')
+        <span class="text-sm font-medium">Trámite sin publicar</span>
+    </div>
 
-        <div class="mb-4">
-            <label class="block font-semibold">Descripción</label>
-            <textarea name="descripcion" rows="4" class="form-textarea w-full" required></textarea>
-        </div>
+    {{-- Switch de publicación --}}
+    <div class="flex items-start gap-2">
+        <input type="checkbox" id="publicado" class="mt-1 accent-blue-600">
+        <label for="publicado" class="text-sm text-gray-800">
+            <span class="font-semibold">Disponible en línea</span><br>
+            <span class="text-xs text-gray-500">
+                El funcionario podrá establecer los requisitos necesarios para habilitar el trámite en línea.
+            </span>
+        </label>
+    </div>
 
-        <div class="mb-4">
-            <label class="block font-semibold">¿Disponible en línea?</label>
-            <select name="disponible" class="form-select w-full">
-                <option value="1">Sí</option>
-                <option value="0">No</option>
-            </select>
-        </div>
 
-        <div class="mb-4">
-            <label class="block font-semibold">¿Publicado?</label>
-            <select name="publicado" class="form-select w-full">
-                <option value="1">Sí</option>
-                <option value="0">No</option>
-            </select>
-        </div>
 
-        <div class="mb-4">
-            <label class="block font-semibold">¿Aceptar solicitudes?</label>
-            <select name="acepta_solicitudes" class="form-select w-full">
-                <option value="1">Sí</option>
-                <option value="0">No</option>
-            </select>
-        </div>
 
-        <div class="mb-4">
-            <label class="block font-semibold">Archivo adjunto (opcional)</label>
-            <input type="file" name="archivo" class="form-input w-full">
-        </div>
-
-        <div class="text-right">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="{{ route('funcionario.tramite_config') }}" class="btn btn-secondary">Cancelar</a>
-        </div>
-    </form>
-</div>
 @endsection

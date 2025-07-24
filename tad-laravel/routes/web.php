@@ -94,7 +94,7 @@ Route::post('/logout', function (Request $request) {
 // Ventanilla Digital
 Route::get('/tramite_config', [Tramite_configController::class, 'indexFuncionario'])->name('funcionario.tramite_config');
 Route::get('/tramite_config/nuevo', [Tramite_configController::class, 'create'])->name('funcionario.tramite_config.create');
-
+Route::post('/tramite_config', [Tramite_configController::class, 'store'])->name('tramites.store');
 Route::get('/bandeja', [BandejaController::class, 'index'])->name('funcionario.bandeja');
 
 // Inspectores

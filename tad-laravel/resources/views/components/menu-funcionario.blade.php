@@ -2,9 +2,9 @@
 <div class="d-flex align-items-center p-3 border-bottom">
   <div class="me-3">
     <img src="https://firebasestorage.googleapis.com/v0/b/os-arg-lujan-de-cuyo.appspot.com/o/users%2FEL7ME2E54uccdpCK6xnC7znfFBd2%2FprofilePicture.jpg?alt=media&token=94664911-a337-4c9f-bab7-f0e0c180bf40"
-         alt="Foto de perfil"
-         class="rounded-circle"
-         style="width: 40px; height: 40px; object-fit: cover;">
+      alt="Foto de perfil"
+      class="rounded-circle"
+      style="width: 40px; height: 40px; object-fit: cover;">
   </div>
   <div>
     <div class="fw-bold">Alicia Aranda</div>

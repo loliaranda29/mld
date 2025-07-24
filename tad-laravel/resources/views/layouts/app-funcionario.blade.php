@@ -1,60 +1,28 @@
-<!DOCTYPE html>
-<html lang="es">
+@extends('layouts.app')
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>@yield('title', 'Mi Luján Digital')</title>
-
-  {{-- Bootstrap --}}
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  {{-- Material Design Icons --}}
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
-
-  {{-- Tailwind y personalizados --}}
-  <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
-  <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
-
-  {{-- Livewire Styles --}}
-  @livewireStyles
-
-  <script src="https://unpkg.com/alpinejs" defer></script>
-</head>
-
-<body class="bg-gray-50">
-  <div x-data="menus" x-init="$watch('seccionActiva', value => console.log('Sección activa:', value))">
-    @include('components.header')
-
-    <div class="flex">
-      @include('components.menu-funcionario')
-
-      <main class="flex-1 p-6 ml-64">
-        <div x-show="seccionActiva === 'tramites'">
-          @livewire('tramites-listado')
-        </div>
-        <div x-show="seccionActiva !== 'tramites'">
-          @yield('content')
-        </div>
-      </main>
+@section('content')
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 col-lg-2 bg-light min-vh-100 py-4 border-end">
+      @include('components.menu-funcionario', ['active' => $active ?? ''])
     </div>
 
-    @include('components.footer')
+    <!-- Contenido principal -->
+    <div class="col-md-9 col-lg-10 py-4">
+      @if(session('perfil_activo') && in_array(session('perfil_activo'), ['ciudadano', 'funcionario']))
+        <div class="text-end pe-4 mb-3">
+          <form method="POST" action="{{ route('profile.switch') }}">
+            @csrf
+            <button class="btn btn-sm btn-outline-secondary">
+              Cambiar a perfil {{ session('perfil_activo') === 'ciudadano' ? 'Funcionario' : 'Ciudadano' }}
+            </button>
+          </form>
+        </div>
+      @endif
+
+      @yield('profile_content')
+    </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  {{-- Livewire Scripts --}}
-  @livewireScripts
-
-  <script>
-    document.addEventListener('alpine:init', () => {
-      Alpine.data('menus', () => ({
-        seccionActiva: 'inicio',
-        openMenu: null,
-        menus: @json(config('menus.funcionario'))
-      }));
-    });
-  </script>
-</body>
-
-</html>
+</div>
+@endsection

@@ -12,6 +12,8 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Tramite_configController;
+use App\Http\Controllers\BandejaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,5 +90,35 @@ Route::post('/logout', function (Request $request) {
 
     return redirect('/');
 })->name('logout');
+
+// Ventanilla Digital
+Route::get('/tramite_config', [Tramite_configController::class, 'indexFuncionario'])->name('funcionario.tramite_config');
+Route::get('/tramite_config/nuevo', [Tramite_configController::class, 'create'])->name('funcionario.tramite_config.create');
+
+Route::get('/bandeja', [BandejaController::class, 'index'])->name('funcionario.bandeja');
+
+// Inspectores
+Route::get('/inspectores', [InspectorController::class, 'index'])->name('inspectores.index');
+
+// Pagos
+Route::get('/pagos', [PagoController::class, 'index'])->name('pagos.index');
+
+// Citas
+Route::get('/citas', [CitaController::class, 'index'])->name('citas.index');
+
+// Usuarios
+Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+
+// Catálogos
+Route::get('/catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');
+
+// Filtros
+Route::get('/filtros', [FiltroController::class, 'index'])->name('filtros.index');
+
+// Estadísticas
+Route::get('/estadisticas', [EstadisticaController::class, 'index'])->name('estadisticas');
+
+// Registro de cambios
+Route::get('/registro-cambios', [RegistroController::class, 'index'])->name('registro.cambios');
 
 

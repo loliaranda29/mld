@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-funcionario')
 
 @section('title', 'Listado de trámites')
 

@@ -121,4 +121,10 @@ Route::get('/estadisticas', [EstadisticaController::class, 'index'])->name('esta
 // Registro de cambios
 Route::get('/registro-cambios', [RegistroController::class, 'index'])->name('registro.cambios');
 
+if (file_exists(__DIR__.'/superadmin_tramites.php')) {
+    require __DIR__.'/superadmin_tramites.php';
+}
+
+
+
 

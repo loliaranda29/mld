@@ -3,45 +3,78 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Tramite;
 
 class Tramite_configController extends Controller
 {
+    // Mostrar listado de trámites
     public function indexFuncionario()
     {
-        $tramites = [
-            [
-                'id' => 1,
-                'nombre' => 'Asistencia presencial para Licencias',
-                'descripcion' => 'Te ayudamos a cargar tu trámite online...',
-                'fecha' => '21/07/2025 08:40:05 hrs',
-                'disponible' => true,
-                'publicado' => true,
-                'acepta_solicitudes' => false,
-                'mostrar_inicio' => true,
-            ],
-            // ... más trámites simulados
-        ];
-
+        $tramites = Tramite::orderBy('created_at', 'desc')->get();
         return view('pages.profile.funcionario.tramite_config', compact('tramites'));
     }
+
+    // Mostrar formulario de creación
     public function create()
     {
         return view('pages.profile.funcionario.tramite_create');
     }
+
+    // Guardar un nuevo trámite
     public function store(Request $request)
-{
-    // Validar campos
-    $validated = $request->validate([
-        'nombre' => 'required|string|max:255',
-        'descripcion' => 'nullable|string',
-        // Otros campos a validar
-    ]);
+    {
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'publicado' => 'boolean',
+            'disponible' => 'boolean',
+            'mostrar_inicio' => 'boolean',
+            'tipo' => 'nullable|string|max:100',
+            'estatus' => 'nullable|string|max:100',
+            'etapas' => 'nullable|json',
+            'mensaje' => 'nullable|string',
+        ]);
 
-    // Guardar en la base de datos
-    Trámite::create($validated); // O el modelo correspondiente
+        Tramite::create($validated);
 
-    return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite creado con éxito');
-}
+        return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite creado con éxito.');
+    }
 
+    // Mostrar formulario de edición
+    public function edit($id)
+    {
+        $tramite = Tramite::findOrFail($id);
+        return view('pages.profile.funcionario.tramite_create', compact('tramite'));
+    }
 
+    // Actualizar un trámite existente
+    public function update(Request $request, $id)
+    {
+        $tramite = Tramite::findOrFail($id);
+
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'descripcion' => 'nullable|string',
+            'publicado' => 'boolean',
+            'disponible' => 'boolean',
+            'mostrar_inicio' => 'boolean',
+            'tipo' => 'nullable|string|max:100',
+            'estatus' => 'nullable|string|max:100',
+            'etapas' => 'nullable|json',
+            'mensaje' => 'nullable|string',
+        ]);
+
+        $tramite->update($validated);
+
+        return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite actualizado correctamente.');
+    }
+
+    // Eliminar un trámite
+    public function destroy($id)
+    {
+        $tramite = Tramite::findOrFail($id);
+        $tramite->delete();
+
+        return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite eliminado.');
+    }
 }

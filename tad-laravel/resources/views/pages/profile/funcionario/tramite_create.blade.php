@@ -1,50 +1,57 @@
 @extends('layouts.app-funcionario')
 
-@section('title', 'Nuevo trámite')
+@section('content')
+<div class="container">
+    <h2 class="mb-4">{{ isset($tramite) ? 'Editar Trámite' : 'Crear Nuevo Trámite' }}</h2>
 
-@section('profile_content')
-<nav class="text-sm text-black mt-4 mb-6">
-    <ol class="flex flex-wrap items-center space-x-1">
-            <a href="{{ url('/') }}" class="font-bold hover:underline flex items-center space-x-1">
-                <i class="bi bi-house"></i>
-                <span>Inicio</span>
-            </a>
-            <a>/</a>
-            <a href="#" class="font-bold hover:underline">Ventanilla Digital</a>
-            <a>/</a>
-            <a href="#" class="font-bold hover:underline">Trámites</a>
-            <a>/</a>
-            <span class="text-gray-600">Nueva ficha</span>
-        
-    </ol>
-</nav>
-<div class="w-full md:w-[300px] bg-white rounded-md shadow p-4 space-y-4">
-    {{-- Cabecera --}}
-    <div class="flex items-center gap-2 px-3 py-2 bg-[#0c2d57] text-white rounded-md shadow">
-        @include('components.icons.tramite')
-        <span class="text-sm font-medium">Trámite sin publicar</span>
-    </div>
+    <form method="POST" action="{{ isset($tramite) ? route('funcionario.tramite.update', $tramite->id) : route('funcionario.tramite.store') }}">
+        @csrf
+        @if(isset($tramite))
+            @method('PUT')
+        @endif
 
-    {{-- Switch de publicación --}}
-    <div class="flex items-start gap-2">
-        <input type="checkbox" id="publicado" class="mt-1 accent-blue-600">
-        <label for="publicado" class="text-sm text-gray-800">
-            <span class="font-semibold">Disponible en línea</span><br>
-            <span class="text-xs text-gray-500">
-                El funcionario podrá establecer los requisitos necesarios para habilitar el trámite en línea.
-            </span>
-        </label>
-    </div>
-
-    {{-- Ítem de menú lateral --}}
-    <div class="flex items-center justify-between px-3 py-2 border rounded-md hover:bg-gray-50 cursor-pointer">
-        <div class="flex items-center gap-2 text-gray-800">
-            @include('components.icons.settings')
-            <span class="text-sm">Configuración general</span>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" name="nombre" class="form-control" value="{{ old('nombre', $tramite->nombre ?? '') }}" required>
         </div>
-        <span class="text-red-600 text-xs">⨯</span>
-    </div>
+
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea name="descripcion" class="form-control" rows="3">{{ old('descripcion', $tramite->descripcion ?? '') }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="tipo" class="form-label">Tipo</label>
+            <input type="text" name="tipo" class="form-control" value="{{ old('tipo', $tramite->tipo ?? '') }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="estatus" class="form-label">Estado Inicial</label>
+            <input type="text" name="estatus" class="form-control" value="{{ old('estatus', $tramite->estatus ?? '') }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="mensaje" class="form-label">Mensaje</label>
+            <textarea name="mensaje" class="form-control" rows="2">{{ old('mensaje', $tramite->mensaje ?? '') }}</textarea>
+        </div>
+
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="publicado" value="1" {{ old('publicado', $tramite->publicado ?? false) ? 'checked' : '' }}>
+            <label class="form-check-label">Publicado</label>
+        </div>
+
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" name="disponible" value="1" {{ old('disponible', $tramite->disponible ?? false) ? 'checked' : '' }}>
+            <label class="form-check-label">Disponible</label>
+        </div>
+
+        <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" name="mostrar_inicio" value="1" {{ old('mostrar_inicio', $tramite->mostrar_inicio ?? false) ? 'checked' : '' }}>
+            <label class="form-check-label">Mostrar en Inicio</label>
+        </div>
+
+        <button type="submit" class="btn btn-success">{{ isset($tramite) ? 'Actualizar' : 'Guardar' }}</button>
+        <a href="{{ route('funcionario.tramite_config') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
 </div>
-
-
 @endsection

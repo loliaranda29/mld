@@ -26,3 +26,23 @@
   </div>
 </div>
 @endsection
+<!-- Scripts necesarios para funcionamiento de pestañas -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+
+<!-- Alpine.js -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const triggerTabList = [].slice.call(document.querySelectorAll('#tabsTramite button'));
+    triggerTabList.forEach(function (triggerEl) {
+      const tabTrigger = new bootstrap.Tab(triggerEl);
+      triggerEl.addEventListener('click', function (event) {
+        event.preventDefault();
+        tabTrigger.show();
+      });
+    });
+  });
+</script>
+

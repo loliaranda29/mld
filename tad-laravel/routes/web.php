@@ -97,6 +97,7 @@ Route::get('/tramites/crear', [Tramite_configController::class, 'create'])->name
 Route::post('/tramites', [Tramite_configController::class, 'store'])->name('funcionario.tramite.store');
 Route::get('/bandeja', [BandejaController::class, 'index'])->name('funcionario.bandeja');
 
+
 // Inspectores
 Route::get('/inspectores', [InspectorController::class, 'index'])->name('inspectores.index');
 

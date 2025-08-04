@@ -57,6 +57,7 @@
                                         </div>
                                     </div>
                                 </template>
+                                <div class="text-center text-muted mt-2" style="font-size: 0.85em;">Arrastrá aquí campos para agregarlos</div>
                             </div>
                         </template>
                     </div>
@@ -64,10 +65,12 @@
                 <template x-if="!form.sections.length">
                     <p class="text-muted">No hay campos aún. Agregá uno desde la izquierda.</p>
                 </template>
+
                 <div class="mt-3">
                     <label for="jsonOutput" class="form-label">Vista JSON del formulario</label>
                     <textarea id="jsonOutput" class="form-control" rows="10" readonly x-text="JSON.stringify(form, null, 2)"></textarea>
                 </div>
+
                 <div class="mt-3">
                     <label class="form-label">Vista flujo del formulario</label>
                     <div id="flowPreview" class="bg-light border rounded p-3">
@@ -80,8 +83,17 @@
                                             <template x-for="(field, fIndex) in section.fields" :key="fIndex">
                                                 <li>
                                                     - <span x-text="field.label"></span>
-                                                    <template x-if="field.condition">
-                                                        <span class="text-muted"> → <em x-text="field.condition"></em></span>
+                                                    <template x-if="field.options">
+                                                        <ul class="ms-3">
+                                                            <template x-for="(opt, i) in field.options" :key="i">
+                                                                <li>
+                                                                    <span x-text="opt"></span>
+                                                                    <template x-if="field.conditions && field.conditions[opt]">
+                                                                        <span class="text-muted"> → <em x-text="field.conditions[opt]"></em></span>
+                                                                    </template>
+                                                                </li>
+                                                            </template>
+                                                        </ul>
                                                     </template>
                                                 </li>
                                             </template>
@@ -122,19 +134,13 @@
                     <template x-if="['select', 'radio', 'checkbox'].includes(form.sections[selectedSection].fields[selectedField].type)">
                         <div class="mt-3">
                             <label class="form-label">Opciones</label>
-                            <template x-for="(opt, idx) in form.sections[selectedSection].fields[selectedField].options" :key="idx">
-                                <div class="input-group mb-2">
-                                    <input type="text" class="form-control" x-model="form.sections[selectedSection].fields[selectedField].options[idx].label">
-                                    <select class="form-select" x-model="form.sections[selectedSection].fields[selectedField].options[idx].redirect">
-                                        <option value="">-- Ir a sección --</option>
-                                        <template x-for="(section, i) in form.sections" :key="i">
-                                            <option :value="section.name" x-text="section.name"></option>
-                                        </template>
-                                    </select>
-                                    <button class="btn btn-outline-danger" @click="form.sections[selectedSection].fields[selectedField].options.splice(idx, 1)">×</button>
+                            <template x-for="(option, i) in form.sections[selectedSection].fields[selectedField].options" :key="i">
+                                <div class="d-flex mb-2 align-items-center">
+                                    <input class="form-control form-control-sm me-2" x-model="form.sections[selectedSection].fields[selectedField].options[i]">
+                                    <button class="btn btn-sm btn-outline-danger" @click="form.sections[selectedSection].fields[selectedField].options.splice(i, 1)">×</button>
                                 </div>
                             </template>
-                            <button class="btn btn-sm btn-outline-success" @click="form.sections[selectedSection].fields[selectedField].options.push({ label: '', redirect: '' })">+ Agregar opción</button>
+                            <button class="btn btn-sm btn-outline-success" @click="form.sections[selectedSection].fields[selectedField].options.push('')">+ Agregar opción</button>
                         </div>
                     </template>
 
@@ -142,17 +148,29 @@
                         <div class="mt-3">
                             <label class="form-label">Tamaño máximo (MB)</label>
                             <input type="number" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].maxSize">
+                            <label class="form-label">Tipos aceptados</label>
+                            <input type="text" class="form-control" placeholder="image/png, application/pdf..." x-model="form.sections[selectedSection].fields[selectedField].accept">
+                        </div>
+                    </template>
 
-                            <label class="form-label">Formatos permitidos</label>
-                            <select class="form-select" multiple x-model="form.sections[selectedSection].fields[selectedField].accept">
-                                <option value="image/png">Imagen (.png)</option>
-                                <option value="image/jpg">Imagen (.jpg)</option>
-                                <option value="image/jpeg">Imagen (.jpeg)</option>
-                                <option value="application/pdf">PDF (.pdf)</option>
-                                <option value="application/vnd.ms-excel">Excel (.xls)</option>
-                                <option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">Excel (.xlsx)</option>
-                                <option value="text/csv">CSV (.csv)</option>
+                    <template x-if="form.sections[selectedSection].fields[selectedField].type === 'api'">
+                        <div class="mt-3">
+                            <label class="form-label">Método</label>
+                            <select class="form-select mb-2" x-model="form.sections[selectedSection].fields[selectedField].apiMethod">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
                             </select>
+                            <label class="form-label">URL de la API</label>
+                            <input type="text" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].apiUrl">
+                            <label class="form-label">Credenciales / Headers (JSON)</label>
+                            <textarea class="form-control mb-2" rows="3" x-model="form.sections[selectedSection].fields[selectedField].apiHeaders"></textarea>
+                        </div>
+                    </template>
+
+                    <template x-if="form.sections[selectedSection].fields[selectedField].type === 'code'">
+                        <div class="mt-3">
+                            <label class="form-label">Código personalizado</label>
+                            <textarea class="form-control" rows="5" x-model="form.sections[selectedSection].fields[selectedField].code"></textarea>
                         </div>
                     </template>
 
@@ -226,6 +244,12 @@
                 if (item.type === 'file') {
                     field.maxSize = 5;
                     field.accept = ['image/png', 'image/jpg', 'application/pdf'];
+                }
+                if (item.type === 'api') {
+                    field.apiUrl = '';
+                    field.apiMethod = 'GET';
+                    field.apiHeaders = '{}';
+                    field.apiResultField = '';
                 }
                 if (["select", "radio", "checkbox"].includes(item.type)) {
                     field.options = [];

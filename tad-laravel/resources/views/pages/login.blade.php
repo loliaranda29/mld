@@ -43,7 +43,7 @@
             </div>
 
             <!-- Formulario -->
-            <form method="POST" action="" id="loginForm">
+            <form method="POST" action="{{ route('login.post') }}" id="loginForm">
               @csrf
 
               <div class="mb-3">
@@ -65,7 +65,7 @@
               </div>
 
               <div class="mb-3 text-end">
-                <a href="">¿Se te olvidó tu contraseña?</a>
+                <a href="{{ route('password.request') }}">¿Se te olvidó tu contraseña?</a>
               </div>
 
               <button type="submit" class="btn btn-outline-success w-100" id="loginBtn" disabled>Iniciar sesión</button>

@@ -25,11 +25,18 @@
     </div>
   </div>
 </div>
+<<<<<<< HEAD
 
 <!-- Scripts necesarios para funcionamiento de pestañas -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-QF1c+IAyT5Gyy+K3X5J82tFe0UeUYR5o4rwrXq8lLt1RbB2RCvC1q90ShxhEYMPn"
         crossorigin="anonymous"></script>
+=======
+@endsection
+<!-- Scripts necesarios para funcionamiento de pestañas -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+>>>>>>> loli
 
 <!-- Alpine.js -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -46,4 +53,8 @@
     });
   });
 </script>
+<<<<<<< HEAD
 @endsection
+=======
+
+>>>>>>> loli

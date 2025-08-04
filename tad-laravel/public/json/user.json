@@ -1,347 +1,2250 @@
-{
-    "userData": {
-        "id": 1,
-        "email": "juan.perez@example.com",
-        "cuil": "20-12345678-9",
-        "nombre": "Juan",
-        "apellido_paterno": "Pérez",
-        "fecha_nacimiento": "1985-06-15",
-        "telefono_celular": "+54 9 261 555-1234",
-        "telefono_fijo": "0261 444-5678",
-        "calle": "Patricias Mendocinas",
-        "numero_exterior": "256565566",
-        "departamento": "Lujan de cuyo",
-        "barrio": "Palmares",
-        "codigo_postal": "5501",
-        "referencias": "",
-        "direccion": "Av. San Martín 1234, Luján de Cuyo, Mendoza",
-        "wallet": "0xAbC1234567890DefABC1234567890defABC12345",
-        "llave_publica": "04bfcabf9e3a1c2d...f3a9c2d1e4b5c6d7e8f9",
-        "roles": ["ciudadano", "funcionario"],
-        "created_at": "2024-03-01T12:34:56Z",
-        "updated_at": "2025-07-10T09:00:00Z"
-    },
-    "tramites": [
-        {
-            "id": 1,
-            "titulo": "Solicitud de habilitación comercial",
-            "numero": "EXP-2025-00123456-LDC",
-            "fecha_emision": "2025-06-20",
-            "tipo": "Habilitación",
-            "estatus": "Observado",
-            "etapa_actual": 2,
-            "etapas_totales": 5,
-            "created_at": "2025-06-20T10:15:00Z",
-            "updated_at": "2025-07-09T14:30:00Z"
-        },
-        {
-            "id": 2,
-            "titulo": "Renovación de licencia de conducir",
-            "numero": "EXP-2025-00123457-LDC",
-            "fecha_emision": "2025-05-10",
-            "tipo": "Licencia",
-            "estatus": "En proceso",
-            "etapa_actual": 1,
-            "etapas_totales": 3,
-            "created_at": "2025-05-10T08:00:00Z",
-            "updated_at": "2025-06-01T11:45:00Z"
-        },
-        {
-            "id": 3,
-            "titulo": "Solicitud de exención impositiva",
-            "numero": "EXP-2025-00123458-LDC",
-            "fecha_emision": "2025-04-15",
-            "tipo": "Exención",
-            "estatus": "Aprobado",
-            "etapa_actual": 3,
-            "etapas_totales": 3,
-            "created_at": "2025-04-15T09:30:00Z",
-            "updated_at": "2025-05-20T13:00:00Z"
-        },
-        {
-            "id": 4,
-            "titulo": "Permiso de obra menor",
-            "numero": "EXP-2025-00123459-LDC",
-            "fecha_emision": "2025-03-22",
-            "tipo": "Obra",
-            "estatus": "Rechazado",
-            "etapa_actual": 1,
-            "etapas_totales": 4,
-            "created_at": "2025-03-22T14:10:00Z",
-            "updated_at": "2025-04-05T10:20:00Z"
-        },
-        {
-            "id": 5,
-            "titulo": "Inscripción en el registro de proveedores",
-            "numero": "EXP-2025-00123460-LDC",
-            "fecha_emision": "2025-02-28",
-            "tipo": "Registro",
-            "estatus": "Pendiente",
-            "etapa_actual": 0,
-            "etapas_totales": 2,
-            "created_at": "2025-02-28T16:45:00Z",
-            "updated_at": "2025-03-01T09:00:00Z"
-        },
-        {
-            "id": 6,
-            "titulo": "Solicitud de beca municipal",
-            "numero": "EXP-2025-00123461-LDC",
-            "fecha_emision": "2025-01-10",
-            "tipo": "Beca",
-            "estatus": "Finalizado",
-            "etapa_actual": 3,
-            "etapas_totales": 3,
-            "created_at": "2025-01-10T11:00:00Z",
-            "updated_at": "2025-02-15T12:00:00Z"
-        },
-        {
-            "id": 7,
-            "titulo": "Reclamo por alumbrado público",
-            "numero": "EXP-2025-00123462-LDC",
-            "fecha_emision": "2025-07-01",
-            "tipo": "Reclamo",
-            "estatus": "En revisión",
-            "etapa_actual": 1,
-            "etapas_totales": 2,
-            "created_at": "2025-07-01T08:30:00Z",
-            "updated_at": "2025-07-05T10:00:00Z"
-        },
-        {
-            "id": 8,
-            "titulo": "Solicitud de poda de árbol",
-            "numero": "EXP-2025-00123463-LDC",
-            "fecha_emision": "2025-06-05",
-            "tipo": "Servicios Urbanos",
-            "estatus": "Programado",
-            "etapa_actual": 2,
-            "etapas_totales": 3,
-            "created_at": "2025-06-05T07:45:00Z",
-            "updated_at": "2025-06-25T09:15:00Z"
-        }
-    ],
-    "documentos": [
-        {
-            "Nombre": "prueba10",
-            "Tipo": "jpg",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        },
-        {
-            "Nombre": "reporte_inspeccion",
-            "Tipo": "png",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        },
-        {
-            "Nombre": "firma_digital_2024",
-            "Tipo": "pdf",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        },
-        {
-            "Nombre": "comprobante_pago_ago",
-            "Tipo": "jpg",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        },
-        {
-            "Nombre": "certificado_catastral",
-            "Tipo": "pdf",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        },
-        {
-            "Nombre": "foto_predio",
-            "Tipo": "png",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        },
-        {
-            "Nombre": "doc_adjuntado",
-            "Tipo": "jpg",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        },
-        {
-            "Nombre": "declaracion_jurada",
-            "Tipo": "pdf",
-            "Fecha de creación": "2025-06-25T09:15:00Z"
-        }
-    ],
-
-    "pagos": [
-        {
-            "Número de folio": "azlp73MqCiuab1iYKqIj",
-            "Trámite": "Altas Padrones de Inmueble",
-            "Folio de trámite": "PRUEBA-4989927-004",
-            "Número de transacción": "TXN-20250712123601",
-            "Costo": "$ 0.00",
-            "Fecha": "12/05/2025 12:36:04",
-            "CUIT": "27291146967",
-            "Estado": "Pagado"
-        },
-        {
-            "Número de folio": "bxlm82NqTjuac3kZLpHo",
-            "Trámite": "Modificación de Datos Catastrales",
-            "Folio de trámite": "PRUEBA-4989930-002",
-            "Número de transacción": "TXN-20250712124522",
-            "Costo": "$ 150.00",
-            "Fecha": "12/05/2025 12:45:22",
-            "CUIT": "20345678901",
-            "Estado": "Pendiente"
-        },
-        {
-            "Número de folio": "cdnw94OrVjabs9vXMjTq",
-            "Trámite": "Baja de Propiedad",
-            "Folio de trámite": "PRUEBA-4989935-001",
-            "Número de transacción": "TXN-20250712130011",
-            "Costo": "$ 75.00",
-            "Fecha": "12/05/2025 13:00:11",
-            "CUIT": "27333344556",
-            "Estado": "Pagado"
-        },
-        {
-            "Número de folio": "depx85PqWkubd7sYLpJs",
-            "Trámite": "Consulta de Estado",
-            "Folio de trámite": "PRUEBA-4989940-005",
-            "Número de transacción": "TXN-20250712131545",
-            "Costo": "$ 0.00",
-            "Fecha": "12/05/2025 13:15:45",
-            "CUIT": "27222211333",
-            "Estado": "Pagado"
-        },
-        {
-            "Número de folio": "efqy92TqYludf6rZMnKu",
-            "Trámite": "Reinscripción de Propiedad",
-            "Folio de trámite": "PRUEBA-4989950-003",
-            "Número de transacción": "TXN-20250712133055",
-            "Costo": "$ 200.00",
-            "Fecha": "12/05/2025 13:30:55",
-            "CUIT": "20444556677",
-            "Estado": "Pendiente"
-        },
-        {
-            "Número de folio": "fgzr88UsZmvej4xXNoLp",
-            "Trámite": "Actualización de Titularidad",
-            "Folio de trámite": "PRUEBA-4989960-006",
-            "Número de transacción": "TXN-20250712134533",
-            "Costo": "$ 50.00",
-            "Fecha": "12/05/2025 13:45:33",
-            "CUIT": "27277788990",
-            "Estado": "Pagado"
-        },
-        {
-            "Número de folio": "ghas77VtXnkfc2yZLpKr",
-            "Trámite": "Solicitud de Certificado",
-            "Folio de trámite": "PRUEBA-4989970-007",
-            "Número de transacción": "TXN-20250712140000",
-            "Costo": "$ 100.00",
-            "Fecha": "12/05/2025 14:00:00",
-            "CUIT": "27123456789",
-            "Estado": "Pagado"
-        },
-        {
-            "Número de folio": "hijb69WrYoluq0wAMpLt",
-            "Trámite": "Inscripción Inicial",
-            "Folio de trámite": "PRUEBA-4989980-008",
-            "Número de transacción": "TXN-20250712141517",
-            "Costo": "$ 0.00",
-            "Fecha": "12/05/2025 14:15:17",
-            "CUIT": "27345678901",
-            "Estado": "Pendiente"
-        }
-    ],
-    "inspecciones": [
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989950 / 4989916-010",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Aprobado"
-        },
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989951 / 4989916-011",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Pendiente"
-        },
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989952 / 4989916-012",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Rechazado"
-        },
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989953 / 4989916-013",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Aprobado"
-        },
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989954 / 4989916-014",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Pendiente"
-        },
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989955 / 4989916-015",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Aprobado"
-        },
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989956 / 4989916-016",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Rechazado"
-        },
-        {
-            "Trámite": "Permisos Eléctricos",
-            "Folio": "PRUEBA-4989957 / 4989916-017",
-            "Fecha de la inspección": "2025-02-28",
-            "Estatus": "Pendiente"
-        }
-    ],
-    "citas": [
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-005",
-            "Día de la cita": "05/05/2025 10:00",
-            "Estatus": "Programada"
-        },
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-006",
-            "Día de la cita": "06/05/2025 09:30",
-            "Estatus": "Reprogramada"
-        },
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-007",
-            "Día de la cita": "08/05/2025 13:45",
-            "Estatus": "Atendida"
-        },
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-008",
-            "Día de la cita": "10/05/2025 11:15",
-            "Estatus": "Cancelada"
-        },
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-009",
-            "Día de la cita": "12/05/2025 14:00",
-            "Estatus": "Pendiente"
-        },
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-010",
-            "Día de la cita": "15/05/2025 08:30",
-            "Estatus": "Atendida"
-        },
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-011",
-            "Día de la cita": "16/05/2025 16:00",
-            "Estatus": "Programada"
-        },
-        {
-            "Trámite": "Denuncias de Protección al Consumidor",
-            "Folio": "PRUEBA-4989943-012",
-            "Día de la cita": "18/05/2025 10:45",
-            "Estatus": "Requiere Reprogramación"
-        }
+16
+[[399,["noop"]]]103
+[[400,[{
+  "targetChange": {
+    "targetChangeType": "ADD",
+    "targetIds": [
+      24
     ]
+  }
 }
+]]]5883
+[[401,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/27233872402",
+      "fields": {
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "birthday": {
+          "stringValue": "1973-10-04"
+        },
+        "cp": {
+          "stringValue": "5507"
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "direccion": {
+          "stringValue": ""
+        },
+        "created": {
+          "timestampValue": "2024-11-09T01:54:20.286Z"
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "colonia": {
+          "stringValue": "21 de Julio"
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "sub": {
+                "stringValue": "d617baf2-b36e-4126-8a36-441758a5846c"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "given_name": {
+                "stringValue": "Marta Laura"
+              },
+              "preferred_username": {
+                "stringValue": "27233872402"
+              },
+              "cuit": {
+                "stringValue": "27233872402"
+              },
+              "family_name": {
+                "stringValue": "PEDEMONTE"
+              }
+            }
+          }
+        },
+        "last_name": {
+          "stringValue": "PEDEMONTE"
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "public_address": {
+          "stringValue": ""
+        },
+        "levelCidi": {
+          "stringValue": "1"
+        },
+        "dni": {
+          "stringValue": "27233872402"
+        },
+        "updatedAt": {
+          "timestampValue": "2025-07-28T01:56:33.510Z"
+        },
+        "email": {
+          "stringValue": "lau.pedemonte@yahoo.com.ar"
+        },
+        "celphone": {
+          "stringValue": "261 570 8427"
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/licencias/answers"
+                    },
+                    "name": {
+                      "stringValue": "Renovación licencia de conducir"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/consultaYPagosDeMultas/answers"
+                    },
+                    "name": {
+                      "stringValue": "Libre deuda de Infracciones viales"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "type": {
+          "nullValue": null
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "proofAddress": {
+          "nullValue": null
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "token": {
+          "nullValue": null
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "sex": {
+          "stringValue": ""
+        },
+        "ubicationDescription": {
+          "stringValue": ""
+        },
+        "invitationID": {
+          "stringValue": "6c2a8c8d-01aa-4c1b-b0ef-6eabfbef7450"
+        },
+        "typeHumanSettlement": {
+          "nullValue": null
+        },
+        "calle": {
+          "stringValue": "Tierra del Fuego "
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "1"
+        },
+        "first_name": {
+          "stringValue": "Marta Laura"
+        },
+        "num_ext": {
+          "stringValue": "6859"
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "uid": {
+          "stringValue": "27233872402"
+        },
+        "typeRoad": {
+          "nullValue": null
+        },
+        "officialId": {
+          "nullValue": null
+        },
+        "identify": {
+          "stringValue": "27233872402"
+        }
+      },
+      "createTime": "2024-11-09T01:55:59.541369Z",
+      "updateTime": "2025-07-28T01:56:34.319231Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]4968
+[[402,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20206536552",
+      "fields": {
+        "cp": {
+          "stringValue": ""
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/licencias/answers"
+                    },
+                    "name": {
+                      "stringValue": "Renovación licencia de conducir"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "token": {
+          "nullValue": null
+        },
+        "birthday": {
+          "stringValue": "1969-02-14"
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "email": {
+          "stringValue": "edvicentedaniel@gmail.com"
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "1"
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "identify": {
+          "stringValue": "20206536552"
+        },
+        "invitationID": {
+          "stringValue": "6b76305c-86d7-486c-a6ee-641fa1900755"
+        },
+        "first_name": {
+          "stringValue": "Eduardo Daniel"
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "dni": {
+          "stringValue": "20206536552"
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:00:48.627Z"
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "uid": {
+          "stringValue": "20206536552"
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "public_address": {
+          "stringValue": ""
+        },
+        "last_name": {
+          "stringValue": "VICENTE"
+        },
+        "created": {
+          "timestampValue": "2024-11-09T02:25:02.301Z"
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "preferred_username": {
+                "stringValue": "20206536552"
+              },
+              "cuit": {
+                "stringValue": "20206536552"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "sub": {
+                "stringValue": "38064585-d549-4bb4-b8ca-865bc2ca1e0e"
+              },
+              "family_name": {
+                "stringValue": "VICENTE"
+              },
+              "given_name": {
+                "stringValue": "Eduardo Daniel"
+              }
+            }
+          }
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "type": {
+          "nullValue": null
+        }
+      },
+      "createTime": "2024-11-09T02:28:15.067953Z",
+      "updateTime": "2025-05-30T21:00:48.886367Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]5031
+[[403,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20318117218",
+      "fields": {
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:01:07.624Z"
+        },
+        "email": {
+          "stringValue": "fernandezpabloruben@yahoo.com.ar"
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "preferred_username": {
+                "stringValue": "20318117218"
+              },
+              "given_name": {
+                "stringValue": "Pablo Ruben"
+              },
+              "family_name": {
+                "stringValue": "FERNANDEZ"
+              },
+              "sub": {
+                "stringValue": "d33d6c55-05e7-42fa-ae8b-44c722cadabb"
+              },
+              "cuit": {
+                "stringValue": "20318117218"
+              }
+            }
+          }
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "public_address": {
+          "stringValue": "did:quarkid:EiCS-Q7MW7j_JQNPSsSETGTh1SoIep3VRQi8Q_WVodE7Jw"
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "token": {
+          "nullValue": null
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/licencias/answers"
+                    },
+                    "name": {
+                      "stringValue": "Renovación licencia de conducir"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "created": {
+          "timestampValue": "2024-11-09T02:44:01.541Z"
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "invitationID": {
+          "stringValue": "044cbded-536a-4048-b509-0c4a933856b7"
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "type": {
+          "nullValue": null
+        },
+        "last_name": {
+          "stringValue": "FERNANDEZ"
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "birthday": {
+          "stringValue": "1985-09-26"
+        },
+        "dni": {
+          "stringValue": "20318117218"
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "first_name": {
+          "stringValue": "Pablo Ruben"
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "identify": {
+          "stringValue": "20318117218"
+        },
+        "uid": {
+          "stringValue": "20318117218"
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "cp": {
+          "stringValue": ""
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "1"
+        }
+      },
+      "createTime": "2024-11-09T02:45:40.329594Z",
+      "updateTime": "2025-05-30T21:01:07.827807Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]5541
+[[404,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20402191830",
+      "fields": {
+        "uid": {
+          "stringValue": "20402191830"
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "type": {
+          "nullValue": null
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "created": {
+          "timestampValue": "2024-11-09T04:16:25.532Z"
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "cuit": {
+                "stringValue": "20402191830"
+              },
+              "preferred_username": {
+                "stringValue": "20402191830"
+              },
+              "sub": {
+                "stringValue": "3b3238b6-3a92-498a-9430-6faef1c72243"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "family_name": {
+                "stringValue": "MARISCAL MARTIN"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "given_name": {
+                "stringValue": "Jesus Gabriel"
+              }
+            }
+          }
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "birthday": {
+          "stringValue": "1997-03-23"
+        },
+        "dni": {
+          "stringValue": "20402191830"
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "identify": {
+          "stringValue": "20402191830"
+        },
+        "useOnlyProcedurePost": {
+          "booleanValue": false
+        },
+        "cp": {
+          "stringValue": ""
+        },
+        "invitationID": {
+          "stringValue": "dbb56ca7-94dc-44e6-bab1-a69286948bb1"
+        },
+        "usersEmpowered": {
+          "arrayValue": {}
+        },
+        "email": {
+          "stringValue": "mariscaljesus971@gmail.com"
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "last_name": {
+          "stringValue": "MARISCAL MARTIN"
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "token": {
+          "nullValue": null
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "public_address": {
+          "stringValue": ""
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "first_name": {
+          "stringValue": "Jesus Gabriel"
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/renovacionLicenciaProfesional/answers"
+                    },
+                    "name": {
+                      "stringValue": "Renovación Licencia Profesional"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/originalLicenciaProfesionalConCapacitacionPresencial/answers"
+                    },
+                    "name": {
+                      "stringValue": "Original licencia profesional con capacitación presencial"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:01:19.349Z"
+        }
+      },
+      "createTime": "2024-11-09T04:17:23.516514Z",
+      "updateTime": "2025-05-30T21:01:19.593343Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]4885
+[[405,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20209091713",
+      "fields": {
+        "role": {
+          "stringValue": "user"
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "identify": {
+          "stringValue": "20209091713"
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "created": {
+          "timestampValue": "2024-11-09T10:57:31.079Z"
+        },
+        "email": {
+          "stringValue": "diegoezquerro13@gmail.com"
+        },
+        "type": {
+          "nullValue": null
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "uid": {
+          "stringValue": "20209091713"
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "first_name": {
+          "stringValue": "Diego Nestor"
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/renovacionLicenciaProfesional/answers"
+                    },
+                    "name": {
+                      "stringValue": "Renovación Licencia Profesional"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "cuit": {
+                "stringValue": "20209091713"
+              },
+              "sub": {
+                "stringValue": "38fa6e02-dc1b-46df-a672-bd12524e40ce"
+              },
+              "given_name": {
+                "stringValue": "Diego Nestor"
+              },
+              "family_name": {
+                "stringValue": "EZQUERRO"
+              },
+              "preferred_username": {
+                "stringValue": "20209091713"
+              }
+            }
+          }
+        },
+        "dni": {
+          "stringValue": "20209091713"
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "1"
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "token": {
+          "nullValue": null
+        },
+        "cp": {
+          "stringValue": ""
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:00:48.636Z"
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "last_name": {
+          "stringValue": "EZQUERRO"
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "birthday": {
+          "stringValue": "1969-11-13"
+        },
+        "public_address": {
+          "stringValue": ""
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        }
+      },
+      "createTime": "2024-11-09T10:59:34.807780Z",
+      "updateTime": "2025-05-30T21:00:48.892815Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]5004
+[[406,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20320329850",
+      "fields": {
+        "cp": {
+          "stringValue": ""
+        },
+        "invitationID": {
+          "stringValue": "e06f0354-de56-47b8-953a-cb60f8c4e406"
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "dni": {
+          "stringValue": "20320329850"
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "0"
+        },
+        "public_address": {
+          "stringValue": ""
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "preferred_username": {
+                "stringValue": "20320329850"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "family_name": {
+                "stringValue": "CONDORI"
+              },
+              "given_name": {
+                "stringValue": "Jose Luis"
+              },
+              "cuit": {
+                "stringValue": "20320329850"
+              },
+              "sub": {
+                "stringValue": "4bcbd6b9-3cb3-466f-a66e-870e770d005f"
+              }
+            }
+          }
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "identify": {
+          "stringValue": "20320329850"
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:01:07.636Z"
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "uid": {
+          "stringValue": "20320329850"
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "first_name": {
+          "stringValue": "Jose Luis"
+        },
+        "token": {
+          "nullValue": null
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "name": {
+                      "stringValue": "Ampliación licencia particular con capacitación presencial"
+                    },
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/ampliacionDeLicenciaParticular/answers"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "created": {
+          "timestampValue": "2024-11-09T13:11:34.852Z"
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "email": {
+          "stringValue": "condorijl2014@gmail.com"
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "last_name": {
+          "stringValue": "CONDORI"
+        },
+        "type": {
+          "nullValue": null
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "birthday": {
+          "stringValue": "1986-04-27"
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "localidad": {
+          "stringValue": ""
+        }
+      },
+      "createTime": "2024-11-09T13:13:40.895043Z",
+      "updateTime": "2025-05-30T21:01:07.830271Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]5033
+[[407,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20399529337",
+      "fields": {
+        "email": {
+          "stringValue": "francocostantini29@gmail.com"
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "name": {
+                      "stringValue": "Renovación licencia de conducir"
+                    },
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/licencias/answers"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "birthday": {
+          "stringValue": "1996-10-22"
+        },
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "type": {
+          "nullValue": null
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "identify": {
+          "stringValue": "20399529337"
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "last_name": {
+          "stringValue": "COSTANTINI"
+        },
+        "first_name": {
+          "stringValue": "Franco Hernan"
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "dni": {
+          "stringValue": "20399529337"
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "cp": {
+          "stringValue": ""
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "token": {
+          "nullValue": null
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "family_name": {
+                "stringValue": "COSTANTINI"
+              },
+              "preferred_username": {
+                "stringValue": "20399529337"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "cuit": {
+                "stringValue": "20399529337"
+              },
+              "sub": {
+                "stringValue": "5351243a-2f26-4516-9502-4f974cc81013"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "given_name": {
+                "stringValue": "Franco Hernan"
+              }
+            }
+          }
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:01:18.745Z"
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "1"
+        },
+        "created": {
+          "timestampValue": "2024-11-09T13:17:47.056Z"
+        },
+        "public_address": {
+          "stringValue": "did:quarkid:EiBv3tjvIhBzun64UtdqLuhZ-7PaykMtdfEWYJVXWA3u3Q"
+        },
+        "invitationID": {
+          "stringValue": "9ff11765-b507-4f20-bf8a-43436263cc4b"
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "uid": {
+          "stringValue": "20399529337"
+        }
+      },
+      "createTime": "2024-11-09T13:18:24.526046Z",
+      "updateTime": "2025-05-30T21:01:19.006671Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]4866
+[[408,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20326275272",
+      "fields": {
+        "dependency": {
+          "stringValue": ""
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "cp": {
+          "stringValue": ""
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "public_address": {
+          "stringValue": ""
+        },
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "last_name": {
+          "stringValue": "AGUINAGA BARO"
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "created": {
+          "timestampValue": "2024-11-09T13:23:31.971Z"
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "token": {
+          "nullValue": null
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "1"
+        },
+        "email": {
+          "stringValue": "aleaguinaga2@gmail.com"
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "cuit": {
+                "stringValue": "20326275272"
+              },
+              "given_name": {
+                "stringValue": "Alejandro"
+              },
+              "sub": {
+                "stringValue": "7cbd5873-a196-4eb0-a860-3ad5bcbb6a88"
+              },
+              "preferred_username": {
+                "stringValue": "20326275272"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "family_name": {
+                "stringValue": "AGUINAGA BARO"
+              }
+            }
+          }
+        },
+        "dni": {
+          "stringValue": "20326275272"
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "identify": {
+          "stringValue": "20326275272"
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "type": {
+          "nullValue": null
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "uid": {
+          "stringValue": "20326275272"
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "first_name": {
+          "stringValue": "Alejandro"
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/licencias/answers"
+                    },
+                    "name": {
+                      "stringValue": "Renovación licencia de conducir"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:01:08.653Z"
+        },
+        "birthday": {
+          "stringValue": "1986-09-30"
+        },
+        "estado": {
+          "stringValue": ""
+        }
+      },
+      "createTime": "2024-11-09T13:24:34.237806Z",
+      "updateTime": "2025-05-30T21:01:08.900159Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]6167
+[[409,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/20237692390",
+      "fields": {
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "0"
+        },
+        "usersEmpowered": {
+          "arrayValue": {}
+        },
+        "sex": {
+          "stringValue": ""
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "token": {
+          "nullValue": null
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "ubicationDescription": {
+          "stringValue": ""
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "given_name": {
+                "stringValue": "Gustavo César"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              },
+              "sub": {
+                "stringValue": "eba9b5fb-656d-4cb3-99cd-35d2147aef60"
+              },
+              "cuit": {
+                "stringValue": "20237692390"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "preferred_username": {
+                "stringValue": "20237692390"
+              },
+              "family_name": {
+                "stringValue": "MENDEZ"
+              }
+            }
+          }
+        },
+        "created": {
+          "timestampValue": "2024-11-09T14:47:41.439Z"
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "dni": {
+          "stringValue": "20237692390"
+        },
+        "typeRoad": {
+          "nullValue": null
+        },
+        "useOnlyProcedurePost": {
+          "booleanValue": false
+        },
+        "num_ext": {
+          "stringValue": "23"
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "levelCidi": {
+          "stringValue": "1"
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:00:53.360Z"
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "first_name": {
+          "stringValue": "Gustavo César"
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "calle": {
+          "stringValue": "Barrio viñas de Malbec manzana c casa"
+        },
+        "last_name": {
+          "stringValue": "MENDEZ"
+        },
+        "typeHumanSettlement": {
+          "nullValue": null
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "email": {
+          "stringValue": "gmendez@mendoza-conicet.gov.ar"
+        },
+        "type": {
+          "nullValue": null
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "localidad": {
+          "stringValue": ""
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "invitationID": {
+          "stringValue": "20c0b196-a1c2-407d-b50a-6ada0ebbbbf5"
+        },
+        "proofAddress": {
+          "nullValue": null
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/ampliacionDeLicenciaParticular/answers"
+                    },
+                    "name": {
+                      "stringValue": "Ampliación licencia particular con capacitación presencial"
+                    }
+                  }
+                }
+              },
+              {
+                "mapValue": {
+                  "fields": {
+                    "name": {
+                      "stringValue": "Original licencia particular con capacitación presencial"
+                    },
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/licenciaOriginalParticular/answers"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "celphone": {
+          "stringValue": "261 501 0498"
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "uid": {
+          "stringValue": "20237692390"
+        },
+        "birthday": {
+          "stringValue": "1974-06-24"
+        },
+        "public_address": {
+          "stringValue": "did:quarkid:EiC5X34A4fn-zg6rCY8WCYNVklordaw4uSW2JBbTI3MsKg"
+        },
+        "officialId": {
+          "nullValue": null
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "identify": {
+          "stringValue": "20237692390"
+        },
+        "direccion": {
+          "stringValue": ""
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "cp": {
+          "stringValue": "5509"
+        }
+      },
+      "createTime": "2024-11-09T14:49:02.657990Z",
+      "updateTime": "2025-05-30T21:00:53.837807Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]4964
+[[410,[{
+  "documentChange": {
+    "document": {
+      "name": "projects/os-arg-lujan-de-cuyo/databases/(default)/documents/users/23396789264",
+      "fields": {
+        "localidad": {
+          "stringValue": ""
+        },
+        "name": {
+          "stringValue": ""
+        },
+        "dni": {
+          "stringValue": "23396789264"
+        },
+        "tipoPersona": {
+          "stringValue": "f"
+        },
+        "fotografia": {
+          "stringValue": ""
+        },
+        "sexo": {
+          "stringValue": ""
+        },
+        "email": {
+          "stringValue": "castrorenzo94@gmail.com"
+        },
+        "last_name2": {
+          "stringValue": ""
+        },
+        "referencias": {
+          "stringValue": ""
+        },
+        "taxProfile": {
+          "stringValue": ""
+        },
+        "autenticated": {
+          "stringValue": "renaper"
+        },
+        "torre": {
+          "stringValue": ""
+        },
+        "involvedModules": {
+          "arrayValue": {}
+        },
+        "calle": {
+          "stringValue": ""
+        },
+        "num_ext": {
+          "stringValue": ""
+        },
+        "created": {
+          "timestampValue": "2024-11-09T14:47:42.159Z"
+        },
+        "totalDocumentsFinals": {
+          "integerValue": "1"
+        },
+        "autenticarRes": {
+          "mapValue": {
+            "fields": {
+              "cuit": {
+                "stringValue": "23396789264"
+              },
+              "tipo_persona": {
+                "stringValue": "F"
+              },
+              "family_name": {
+                "stringValue": "HERRERA"
+              },
+              "preferred_username": {
+                "stringValue": "23396789264"
+              },
+              "given_name": {
+                "stringValue": "Aldana Yasmin"
+              },
+              "sub": {
+                "stringValue": "1e5624f9-c84f-42d5-8f74-cb52a17f37c8"
+              },
+              "proveedor": {
+                "stringValue": "renaper"
+              }
+            }
+          }
+        },
+        "first_name": {
+          "stringValue": "Aldana Yasmin"
+        },
+        "invitationID": {
+          "stringValue": "56c87f0e-b573-406e-b639-acc5a11da2a0"
+        },
+        "token": {
+          "nullValue": null
+        },
+        "celphone": {
+          "stringValue": ""
+        },
+        "public_address": {
+          "stringValue": ""
+        },
+        "dirección": {
+          "stringValue": ""
+        },
+        "colonia": {
+          "stringValue": ""
+        },
+        "identify": {
+          "stringValue": "23396789264"
+        },
+        "telphone": {
+          "stringValue": ""
+        },
+        "updatedAt": {
+          "timestampValue": "2025-05-30T21:01:42.355Z"
+        },
+        "type": {
+          "nullValue": null
+        },
+        "deptounidad": {
+          "stringValue": ""
+        },
+        "certificatesListPath": {
+          "arrayValue": {
+            "values": [
+              {
+                "mapValue": {
+                  "fields": {
+                    "path": {
+                      "stringValue": "modules/ventanillaDigital/procedures/licencias/answers"
+                    },
+                    "name": {
+                      "stringValue": "Renovación licencia de conducir"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "levelCidi": {
+          "integerValue": "1"
+        },
+        "role": {
+          "stringValue": "user"
+        },
+        "alreadyRegister": {
+          "booleanValue": false
+        },
+        "companiesIHavePermissions": {
+          "arrayValue": {}
+        },
+        "piso": {
+          "stringValue": ""
+        },
+        "activated": {
+          "booleanValue": true
+        },
+        "uid": {
+          "stringValue": "23396789264"
+        },
+        "auxRole": {
+          "stringValue": "citizen"
+        },
+        "municipio": {
+          "stringValue": ""
+        },
+        "levelUpdated": {
+          "booleanValue": false
+        },
+        "curp": {
+          "stringValue": ""
+        },
+        "birthday": {
+          "stringValue": "1996-05-17"
+        },
+        "biografia": {
+          "stringValue": ""
+        },
+        "rfc": {
+          "stringValue": ""
+        },
+        "dependency": {
+          "stringValue": ""
+        },
+        "usersIHavePermissions": {
+          "arrayValue": {}
+        },
+        "num_int": {
+          "stringValue": ""
+        },
+        "availableModules": {
+          "nullValue": null
+        },
+        "estado": {
+          "stringValue": ""
+        },
+        "cp": {
+          "stringValue": ""
+        },
+        "genero": {
+          "stringValue": ""
+        },
+        "last_name": {
+          "stringValue": "HERRERA"
+        }
+      },
+      "createTime": "2024-11-09T14:51:45.056033Z",
+      "updateTime": "2025-05-30T21:01:42.596223Z"
+    },
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]193
+
+[[411,[{
+  "targetChange": {
+    "targetChangeType": "CURRENT",
+    "targetIds": [
+      24
+    ],
+    "resumeToken": "CgkIgLWSpobqjgM=",
+    "readTime": "2025-08-01T16:38:54.292608Z"
+  }
+}
+]]]123
+[[412,[{
+  "targetChange": {
+    "resumeToken": "CgkIgLWSpobqjgM=",
+    "readTime": "2025-08-01T16:38:54.292608Z"
+  }
+}
+]]]106
+[[413,[{
+  "targetChange": {
+    "targetChangeType": "REMOVE",
+    "targetIds": [
+      24
+    ]
+  }
+}
+]]]

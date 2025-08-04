@@ -1,8 +1,11 @@
 <?php
 
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CitasController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FuncionarioController;
 use App\Http\Controllers\InspeccionesController;
@@ -21,32 +24,27 @@ use App\Http\Controllers\BandejaController;
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
 |
 */
 
-Route::get('/', [HomeController::class, 'index'])->name('home.index');
-Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/', function () {
+  return Inertia::render('Welcome', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+    'laravelVersion' => Application::VERSION,
+    'phpVersion' => PHP_VERSION,
+  ]);
+});
 
-Route::get('forgot-password', function () {
-  return view('auth.forgot-password');
-})->name('password.request');
+Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
+  return Inertia::render('Dashboard');
+})->name('dashboard');
 
-Route::post('forgot-password', [LoginController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::middleware(['auth:sanctum', 'verified'])->resource('/users', UserController::class);
 
-Route::get('reset-password/{token}', function ($token) {
-  return view('auth.reset-password', ['token' => $token]);
-})->name('password.reset');
-
-Route::post('reset-password', [LoginController::class, 'reset'])->name('password.update');
-
-
-
-
-
+Route::get('/home', [HomeController::class, 'index'])->name('home.index');
 Route::prefix('profile')->name('profile.')->group(function () {
   Route::get('/', [ProfileController::class, 'index'])->name('index'); // perfil por defecto
   Route::get('/documentos', [ProfileController::class, 'documentos'])->name('documentos');

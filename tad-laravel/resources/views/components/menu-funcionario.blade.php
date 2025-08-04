@@ -1,156 +1,109 @@
-<script src="https://unpkg.com/alpinejs" defer></script>
-
-<aside class="fixed left-0 top-0 w-64 h-screen bg-white shadow-md flex flex-col overflow-y-auto">
-  <!-- Perfil Usuario -->
-   <div class="v-navigation-drawer__content">
-    <div class="flex flex-col items-center px-4 py-6 border-b">
-      <div class="v-avatar overflow-hidden rounded-full border border-gray-300" style="height: 50px; width: 50px;">
-        <img class="object-cover w-full h-full rounded-full" src="https://firebasestorage.googleapis.com/v0/b/os-arg-lujan-de-cuyo.appspot.com/o/users%2FEL7ME2E54uccdpCK6xnC7znfFBd2%2FprofilePicture.jpg?alt=media&amp;token=94664911-a337-4c9f-bab7-f0e0c180bf40" alt="Foto de perfil">
-      </div>
-      <p class="mt-3 text-sm font-semibold text-gray-800">Alicia Aranda</p>
-      <p class="text-xs text-gray-500">Nivel 1 | Funcionario</p>
-    </div>
-
-
-  <nav class="flex-1 py-2" x-data="{ openMenu: null }">
-    @php
-    $menus = [
-      [
-        'title' => 'Ventanilla Digital',
-        'iconSvg' => '<i class="mdi mdi-calendar"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Constructor de ficha'],
-          ['url' => '#', 'label' => 'Listado de trámites'],
-          ['url' => '#', 'label' => 'Bandeja de entrada'],
-          ['url' => '#', 'label' => 'Configuración'],
-        ],
-      ],
-      [
-        'title' => 'Inspectores',
-        'iconSvg' => '<i class="mdi mdi-account"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Bandeja de entrada'],
-          ['url' => '#', 'label' => 'Bandeja de asignación'],
-          ['url' => '#', 'label' => 'Configuración'],
-        ],
-      ],
-      [
-        'title' => 'Pagos',
-        'iconSvg' => '<i class="mdi mdi-cash"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Lista de pagos'],
-          ['url' => '#', 'label' => 'Configuración'],
-        ],
-      ],
-      [
-        'title' => 'Citas',
-        'iconSvg' => '<i class="mdi mdi-calendar-check"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Bandeja de entrada'],
-          ['url' => '#', 'label' => 'Bandeja de asignación'],
-          ['url' => '#', 'label' => 'Configuración'],
-        ],
-      ],
-      [
-        'title' => 'Usuarios',
-        'iconSvg' => '<i class="mdi mdi-account-group"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Ciudadanos'],
-          ['url' => '#', 'label' => 'Institucionales'],
-          ['url' => '#', 'label' => 'Funcionarios'],
-          ['url' => '#', 'label' => 'Visualizadores'],
-          ['url' => '#', 'label' => 'Roles'],
-          ['url' => '#', 'label' => 'Configuración'],
-        ],
-      ],
-      [
-        'title' => 'Catálogos',
-        'iconSvg' => '<i class="mdi mdi-book"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Catálogos'],
-        ],
-      ],
-      [
-        'title' => 'Filtros',
-        'iconSvg' => '<i class="mdi mdi-filter"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Filtros'],
-        ],
-      ],
-      [
-        'title' => 'Configuración',
-        'iconSvg' => '<i class="mdi mdi-cog"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Configuración'],
-        ],
-      ],
-      [
-        'title' => 'Estadísticas',
-        'iconSvg' => '<i class="mdi mdi-chart-bar"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Estadísticas'],
-        ],
-      ],
-      [
-        'title' => 'Registro de cambios',
-        'iconSvg' => '<i class="mdi mdi-timer-refresh-outline"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Registro de cambios'],
-        ],
-      ],
-      [
-        'title' => 'Centro de ayuda +',
-        'iconSvg' => '<i class="mdi mdi-help-circle"></i>',
-        'items' => [
-          ['url' => '#', 'label' => 'Centro de ayuda +', 'external' => true],
-        ],
-      ],
-    ];
-    @endphp
-
-    <nav class="flex-1 py-2" x-data="{ openMenu: null }">
-      @foreach($menus as $index => $menu)
-        <div>
-          <div
-            class="w-full flex justify-between items-center px-4 py-2 cursor-pointer hover:bg-gray-100 transition-colors"
-            @click="openMenu === {{ $index }} ? openMenu = null : openMenu = {{ $index }}"
-          >
-            <div class="flex items-center gap-3">
-              <span class="text-gray-500">{!! $menu['iconSvg'] !!}</span>
-              <span class="text-gray-700 font-medium">{{ $menu['title'] }}</span>
-            </div>
-            <i :class="openMenu === {{ $index }} ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'" class="text-gray-400"></i>
-          </div>
-
-          <ul x-show="openMenu === {{ $index }}" x-collapse class="py-1 pl-10">
-            @foreach($menu['items'] as $item)
-              <li>
-                <a
-                  href="{{ $item['url'] }}"
-                  class="block py-1 text-gray-600 hover:text-primary-600 transition-colors text-sm"
-                  @if(isset($item['external']) && $item['external']) target="_blank" @endif
-                >
-                  • {{ $item['label'] }}
-                </a>
-              </li>
-            @endforeach
-          </ul>
-        </div>
-      @endforeach
-
-      <div class="mt-auto border-t px-4 py-4">
-        <form method="POST" action="{{ route('logout') }}">
-          @csrf
-          <button type="submit" class="flex items-center gap-2 text-red-500 hover:text-red-700">
-            <i class="mdi mdi-logout-variant text-lg"></i>
-            <span class="text-sm">Cerrar sesión</span>
-          </button>
-        </form>
-      </div>
-    </nav>
+<!-- Perfil del funcionario (mock) -->
+<div class="d-flex align-items-center p-3 border-bottom">
+  <div class="me-3">
+    <img src="https://firebasestorage.googleapis.com/v0/b/os-arg-lujan-de-cuyo.appspot.com/o/users%2FEL7ME2E54uccdpCK6xnC7znfFBd2%2FprofilePicture.jpg?alt=media&token=94664911-a337-4c9f-bab7-f0e0c180bf40"
+         alt="Foto de perfil"
+         class="rounded-circle"
+         style="width: 40px; height: 40px; object-fit: cover;">
   </div>
-</aside>
-
-<div class="ml-64">
-  @yield('content')
+  <div>
+    <div class="fw-bold">Alicia Aranda</div>
+    <div class="text-muted small">
+      Nivel 1<br>
+      Funcionario
+    </div>
+  </div>
 </div>
+
+<!-- Menú lateral del funcionario -->
+<ul class="nav flex-column nav-pills gap-1">
+
+  <!-- Sección: Ventanilla Digital -->
+  <li class="nav-item">
+    <div class="fw-bold text-uppercase small px-3 pt-3">Ventanilla Digital</div>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link {{ $active === 'tramite_config' ? 'active' : '' }}" href="{{ route('funcionario.tramite_config') }}">
+      <i class="bi bi-list-task me-2"></i> Listado de trámites
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link {{ $active === 'bandeja' ? 'active' : '' }}" href="{{ route('funcionario.bandeja') }}">
+      <i class="bi bi-inbox me-2"></i> Bandeja de entrada
+    </a>
+  </li>
+
+  <!-- Sección: Inspectores -->
+  <li class="nav-item">
+    <div class="fw-bold text-uppercase small px-3 pt-4">Inspectores</div>
+    <a class="nav-link {{ $active === 'inspectores' ? 'active' : '' }}" href="{{ route('inspectores.index') }}">
+      <i class="bi bi-person-badge me-2"></i> Gestión de Inspectores
+    </a>
+  </li>
+
+  <!-- Sección: Pagos -->
+  <li class="nav-item">
+    <div class="fw-bold text-uppercase small px-3 pt-4">Pagos</div>
+    <a class="nav-link {{ $active === 'pagos' ? 'active' : '' }}" href="{{ route('pagos.index') }}">
+      <i class="bi bi-cash-coin me-2"></i> Administración de pagos
+    </a>
+  </li>
+
+  <!-- Sección: Citas -->
+  <li class="nav-item">
+    <div class="fw-bold text-uppercase small px-3 pt-4">Citas</div>
+    <a class="nav-link {{ $active === 'citas' ? 'active' : '' }}" href="{{ route('citas.index') }}">
+      <i class="bi bi-calendar-check me-2"></i> Gestión de citas
+    </a>
+  </li>
+
+  <hr>
+
+  <!-- Otros enlaces -->
+  <li class="nav-item">
+    <a class="nav-link {{ $active === 'usuarios' ? 'active' : '' }}" href="{{ route('usuarios.index') }}">
+      <i class="bi bi-people me-2"></i> Usuarios
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link {{ $active === 'catalogos' ? 'active' : '' }}" href="{{ route('catalogos.index') }}">
+      <i class="bi bi-collection me-2"></i> Catálogos
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link {{ $active === 'filtros' ? 'active' : '' }}" href="{{ route('filtros.index') }}">
+      <i class="bi bi-filter me-2"></i> Filtros
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link {{ $active === 'estadisticas' ? 'active' : '' }}" href="{{ route('estadisticas') }}">
+      <i class="bi bi-bar-chart-line me-2"></i> Estadísticas
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link {{ $active === 'registro' ? 'active' : '' }}" href="{{ route('registro.cambios') }}">
+      <i class="bi bi-clock-history me-2"></i> Registro de cambios
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="https://www.os.city" target="_blank">
+      <i class="bi bi-box-arrow-up-right me-2"></i> Centro de ayuda +
+    </a>
+  </li>
+
+  <li class="nav-item mt-3">
+    <form method="POST" action="{{ route('logout') }}">
+      @csrf
+      <button class="nav-link text-danger w-100 text-start" type="submit">
+        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+      </button>
+    </form>
+  </li>
+</ul>

@@ -22,4 +22,10 @@ class Tramite extends Model
         'etapas',
         'mensaje',
     ];
+
+    public function etapas()
+{
+    return $this->hasMany(Etapa::class)->orderBy('orden');
+}
+
 }

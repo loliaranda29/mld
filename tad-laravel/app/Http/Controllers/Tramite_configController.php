@@ -15,10 +15,14 @@ class Tramite_configController extends Controller
     }
 
     // Mostrar formulario de creación
-    public function create()
-    {
-        return view('pages.profile.funcionario.tramite_create');
-    }
+   public function create()
+{
+    $tramite = null;
+    $etapas = [];
+
+    return view('pages.profile.funcionario.tramite_create', compact('tramite', 'etapas'));
+}
+
 
     // Guardar un nuevo trámite
     public function store(Request $request)
@@ -41,11 +45,15 @@ class Tramite_configController extends Controller
     }
 
     // Mostrar formulario de edición
-    public function edit($id)
-    {
-        $tramite = Tramite::findOrFail($id);
-        return view('pages.profile.funcionario.tramite_create', compact('tramite'));
-    }
+   public function edit($id)
+{
+    $tramite = Tramite::with('etapas')->findOrFail($id);
+    $etapas = $tramite->etapas;
+
+    return view('pages.profile.funcionario.tramite_create', compact('tramite', 'etapas'));
+}
+
+
 
     // Actualizar un trámite existente
     public function update(Request $request, $id)
@@ -77,4 +85,9 @@ class Tramite_configController extends Controller
 
         return redirect()->route('funcionario.tramite_config')->with('success', 'Trámite eliminado.');
     }
+    public function etapas()
+{
+    return $this->hasMany(Etapa::class)->orderBy('orden');
+}
+
 }

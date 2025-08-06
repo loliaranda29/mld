@@ -34,7 +34,8 @@
         </div>
 
         <div class="tab-pane fade" id="tab-etapas" role="tabpanel" aria-labelledby="etapas-tab">
-            @includeIf('pages.profile.funcionario.tramites.partials.etapas')
+            @include('pages.profile.funcionario.tramites.partials.etapas', ['tramite' => $tramite, 'etapas' => $etapas ?? []])
+
         </div>
 
         <div class="tab-pane fade" id="tab-documento" role="tabpanel" aria-labelledby="documento-tab">

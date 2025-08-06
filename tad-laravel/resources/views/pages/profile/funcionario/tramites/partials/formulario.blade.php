@@ -1,3 +1,4 @@
+<!-- formulario.blade.php -->
 <div x-data="formBuilder()" x-init="init()" class="row">
     <!-- Panel izquierdo -->
     <div class="col-md-4">
@@ -46,6 +47,10 @@
                             <div class="mb-3 border rounded p-2" @dragover.prevent @drop="handleDrop($event, sIndex)">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <input class="form-control form-control-sm me-2" x-model="section.name" />
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input" type="checkbox" :id="'repeatable_' + sIndex" x-model="section.repeatable">
+                                        <label class="form-check-label" :for="'repeatable_' + sIndex">Repetible</label>
+                                    </div>
                                     <button class="btn btn-sm btn-outline-danger" @click="removeSection(sIndex)">Eliminar sección</button>
                                 </div>
                                 <template x-for="(field, index) in section.fields" :key="index">
@@ -108,173 +113,222 @@
         </div>
     </div>
 
-    <!-- Modal de edición -->
     <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true" x-ref="modal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" x-show="selectedField !== null" x-transition>
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Campo</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="selectedField = null"></button>
-                </div>
-                <div class="modal-body" x-show="selectedField !== null">
-                    <label class="form-label">Etiqueta</label>
-                    <input type="text" class="form-control" x-model="form.sections[selectedSection].fields[selectedField].label">
-
-                    <label class="form-label mt-3">Nombre Interno</label>
-                    <input type="text" class="form-control" x-model="form.sections[selectedSection].fields[selectedField].name">
-
-                    <label class="form-label mt-3">Validación</label>
-                    <select class="form-select" x-model="form.sections[selectedSection].fields[selectedField].validation">
-                        <option value="none">Sin validación</option>
-                        <option value="required">Obligatorio</option>
-                        <option value="email">Email</option>
-                        <option value="number">Número</option>
-                    </select>
-
-                    <template x-if="['select', 'radio', 'checkbox'].includes(form.sections[selectedSection].fields[selectedField].type)">
-                        <div class="mt-3">
-                            <label class="form-label">Opciones</label>
-                            <template x-for="(option, i) in form.sections[selectedSection].fields[selectedField].options" :key="i">
-                                <div class="d-flex mb-2 align-items-center">
-                                    <input class="form-control form-control-sm me-2" x-model="form.sections[selectedSection].fields[selectedField].options[i]">
-                                    <button class="btn btn-sm btn-outline-danger" @click="form.sections[selectedSection].fields[selectedField].options.splice(i, 1)">×</button>
-                                </div>
-                            </template>
-                            <button class="btn btn-sm btn-outline-success" @click="form.sections[selectedSection].fields[selectedField].options.push('')">+ Agregar opción</button>
-                        </div>
-                    </template>
-
-                    <template x-if="form.sections[selectedSection].fields[selectedField].type === 'file'">
-                        <div class="mt-3">
-                            <label class="form-label">Tamaño máximo (MB)</label>
-                            <input type="number" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].maxSize">
-                            <label class="form-label">Tipos aceptados</label>
-                            <input type="text" class="form-control" placeholder="image/png, application/pdf..." x-model="form.sections[selectedSection].fields[selectedField].accept">
-                        </div>
-                    </template>
-
-                    <template x-if="form.sections[selectedSection].fields[selectedField].type === 'api'">
-                        <div class="mt-3">
-                            <label class="form-label">Método</label>
-                            <select class="form-select mb-2" x-model="form.sections[selectedSection].fields[selectedField].apiMethod">
-                                <option value="GET">GET</option>
-                                <option value="POST">POST</option>
-                            </select>
-                            <label class="form-label">URL de la API</label>
-                            <input type="text" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].apiUrl">
-                            <label class="form-label">Credenciales / Headers (JSON)</label>
-                            <textarea class="form-control mb-2" rows="3" x-model="form.sections[selectedSection].fields[selectedField].apiHeaders"></textarea>
-                        </div>
-                    </template>
-
-                    <template x-if="form.sections[selectedSection].fields[selectedField].type === 'code'">
-                        <div class="mt-3">
-                            <label class="form-label">Código personalizado</label>
-                            <textarea class="form-control" rows="5" x-model="form.sections[selectedSection].fields[selectedField].code"></textarea>
-                        </div>
-                    </template>
-
-                    <label class="form-label mt-3">Pista (texto)</label>
-                    <input type="text" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].help">
-
-                    <label class="form-label">Pista (imagen o video)</label>
-                    <input type="text" class="form-control" placeholder="URL de imagen o video" x-model="form.sections[selectedSection].fields[selectedField].media">
-
-                    <label class="form-label mt-3">Condición / Deriva a sección</label>
-                    <select class="form-select" x-model="form.sections[selectedSection].fields[selectedField].condition">
-                        <option value="">-- Ninguna --</option>
-                        <template x-for="(section, index) in form.sections" :key="index">
-                            <option :value="section.name" x-text="section.name"></option>
-                        </template>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button class="btn btn-primary" @click="selectedField = null" data-bs-dismiss="modal">Guardar</button>
-                </div>
-            </div>
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" x-show="selectedField !== null" x-transition>
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Campo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="selectedField = null"></button>
         </div>
+        <div class="modal-body" x-show="selectedField !== null">
+          <label class="form-label">Etiqueta</label>
+          <input type="text" class="form-control" x-model="form.sections[selectedSection].fields[selectedField].label">
+
+          <label class="form-label mt-3">Nombre Interno</label>
+          <input type="text" class="form-control" x-model="form.sections[selectedSection].fields[selectedField].name">
+
+          <label class="form-label mt-3">Validación</label>
+          <select class="form-select" x-model="form.sections[selectedSection].fields[selectedField].validation">
+            <option value="none">Sin validación</option>
+            <option value="required">Obligatorio</option>
+            <option value="email">Email</option>
+            <option value="number">Número</option>
+          </select>
+
+          <template x-if="form.sections[selectedSection].fields[selectedField].type === 'richtext'">
+            <div class="mt-3">
+              <label class="form-label">Contenido enriquecido</label>
+              <div id="editorjs-container">
+                <div id="editorjs" class="border rounded p-2" style="min-height: 200px;"></div>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="['select', 'radio', 'checkbox'].includes(form.sections[selectedSection].fields[selectedField].type)">
+            <div class="mt-3">
+              <label class="form-label">Opciones</label>
+              <template x-for="(option, i) in form.sections[selectedSection].fields[selectedField].options" :key="i">
+                <div class="d-flex mb-2 align-items-center">
+                  <input class="form-control form-control-sm me-2" x-model="form.sections[selectedSection].fields[selectedField].options[i]">
+                  <button class="btn btn-sm btn-outline-danger" @click="form.sections[selectedSection].fields[selectedField].options.splice(i, 1)">×</button>
+                </div>
+              </template>
+              <button class="btn btn-sm btn-outline-success" @click="form.sections[selectedSection].fields[selectedField].options.push('')">+ Agregar opción</button>
+            </div>
+          </template>
+
+          <template x-if="form.sections[selectedSection].fields[selectedField].type === 'file'">
+            <div class="mt-3">
+              <label class="form-label">Tamaño máximo (MB)</label>
+              <input type="number" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].maxSize">
+              <label class="form-label">Tipos aceptados (separados por coma)</label>
+              <input type="text" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].accept">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" x-model="form.sections[selectedSection].fields[selectedField].multiple">
+                <label class="form-check-label">Permitir subir múltiples archivos</label>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="form.sections[selectedSection].fields[selectedField].type === 'api'">
+            <div class="mt-3">
+              <label class="form-label">Método</label>
+              <select class="form-select mb-2" x-model="form.sections[selectedSection].fields[selectedField].apiMethod">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+              </select>
+              <label class="form-label">URL de la API</label>
+              <input type="text" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].apiUrl">
+              <label class="form-label">Credenciales / Headers (JSON)</label>
+              <textarea class="form-control mb-2" rows="3" x-model="form.sections[selectedSection].fields[selectedField].apiHeaders"></textarea>
+            </div>
+          </template>
+
+          <template x-if="form.sections[selectedSection].fields[selectedField].type === 'code'">
+            <div class="mt-3">
+              <label class="form-label">Código personalizado</label>
+              <textarea class="form-control" rows="5" x-model="form.sections[selectedSection].fields[selectedField].code"></textarea>
+            </div>
+          </template>
+
+          <label class="form-label mt-3">Pista (texto)</label>
+          <input type="text" class="form-control mb-2" x-model="form.sections[selectedSection].fields[selectedField].help">
+
+          <label class="form-label">Pista (imagen o video)</label>
+          <input type="text" class="form-control" placeholder="URL de imagen o video" x-model="form.sections[selectedSection].fields[selectedField].media">
+
+          <label class="form-label mt-3">Condición / Deriva a sección</label>
+          <select class="form-select" x-model="form.sections[selectedSection].fields[selectedField].condition">
+            <option value="">-- Ninguna --</option>
+            <template x-for="(section, index) in form.sections" :key="index">
+              <option :value="section.name" x-text="section.name"></option>
+            </template>
+          </select>
+        </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button class="btn btn-primary" @click="selectedField = null" data-bs-dismiss="modal">Guardar</button>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
+<!-- Carga del editor Trix -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/trix/2.0.0/trix.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/trix/2.0.0/trix.umd.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.27.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.6.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@1.9.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@2.5.3"></script>
 
 <script>
-    function formBuilder() {
-        return {
-            useSections: true,
-            useSteps: true,
-            selectedField: null,
-            selectedSection: 0,
-            form: {
-                sections: [
-                    {
-                        name: 'Inicio del trámite',
-                        fields: []
-                    }
-                ]
-            },
-            components: [
-                { type: 'text', label: 'Respuesta breve', name: 'respuesta_breve' },
-                { type: 'textarea', label: 'Párrafo', name: 'parrafo' },
-                { type: 'select', label: 'Lista desplegable', name: 'lista' },
-                { type: 'file', label: 'Archivo', name: 'archivo' },
-                { type: 'date', label: 'Fecha', name: 'fecha' },
-                { type: 'api', label: 'Campo API', name: 'api_field' },
-                { type: 'code', label: 'Código personalizado', name: 'codigo' },
-                { type: 'radio', label: 'Opción múltiple', name: 'radio' },
-                { type: 'checkbox', label: 'Casillas de verificación', name: 'checkbox' },
-                { type: 'search', label: 'Campo de búsqueda', name: 'busqueda' },
-                { type: 'richtext', label: 'Texto enriquecido', name: 'richtext' }
-            ],
-            addSection() {
-                this.form.sections.push({ name: 'Nueva sección', fields: [] });
-            },
-            removeSection(index) {
-                this.form.sections.splice(index, 1);
-            },
-            addFieldToSection(item, sIndex) {
-                const field = {
-                    ...item,
-                    required: false,
-                    certificado: false,
-                    help: '',
-                    media: '',
-                    condition: '',
-                    validation: 'none'
-                };
-                if (item.type === 'file') {
-                    field.maxSize = 5;
-                    field.accept = ['image/png', 'image/jpg', 'application/pdf'];
-                }
-                if (item.type === 'api') {
-                    field.apiUrl = '';
-                    field.apiMethod = 'GET';
-                    field.apiHeaders = '{}';
-                    field.apiResultField = '';
-                }
-                if (["select", "radio", "checkbox"].includes(item.type)) {
-                    field.options = [];
-                }
-                this.form.sections[sIndex].fields.push(field);
-            },
-            removeField(sectionIndex, index) {
-                this.form.sections[sectionIndex].fields.splice(index, 1);
-            },
-            editField(sectionIndex, index) {
-                this.selectedSection = sectionIndex;
-                this.selectedField = index;
-                new bootstrap.Modal(this.$refs.modal).show();
-            },
-            handleDragStart(event, item) {
-                event.dataTransfer.setData('application/json', JSON.stringify(item));
-            },
-            handleDrop(event, sIndex) {
-                const item = JSON.parse(event.dataTransfer.getData('application/json'));
-                this.addFieldToSection(item, sIndex);
-            },
-            init() {
-                // Inicialización si es necesario
-            }
+  function formBuilder() {
+    return {
+      useSections: true,
+      useSteps: true,
+      selectedField: null,
+      selectedSection: 0,
+      editor: null,
+      form: {
+        sections: [ { name: 'Inicio del trámite', fields: [] } ]
+      },
+      components: [
+        { type: 'text', label: 'Respuesta breve', name: 'respuesta_breve' },
+        { type: 'textarea', label: 'Párrafo', name: 'parrafo' },
+        { type: 'select', label: 'Lista desplegable', name: 'lista' },
+        { type: 'file', label: 'Archivo', name: 'archivo' },
+        { type: 'date', label: 'Fecha', name: 'fecha' },
+        { type: 'api', label: 'Campo API', name: 'api_field' },
+        { type: 'code', label: 'Código personalizado', name: 'codigo' },
+        { type: 'radio', label: 'Opción múltiple', name: 'radio' },
+        { type: 'checkbox', label: 'Casillas de verificación', name: 'checkbox' },
+        { type: 'search', label: 'Campo de búsqueda', name: 'busqueda' },
+        { type: 'richtext', label: 'Texto enriquecido', name: 'richtext' }
+      ],
+      addSection() {
+        this.form.sections.push({ name: 'Nueva sección', fields: [] });
+      },
+      removeSection(index) {
+        this.form.sections.splice(index, 1);
+      },
+      addFieldToSection(item, sIndex) {
+        const field = {
+          ...item,
+          required: false,
+          certificado: false,
+          help: '',
+          media: '',
+          content: '',
+          condition: '',
+          validation: 'none'
+        };
+        if (item.type === 'file') {
+          field.maxSize = 5;
+          field.accept = 'image/png, image/jpg, application/pdf';
+          field.multiple = false;
         }
+        if (item.type === 'api') {
+          field.apiUrl = '';
+          field.apiMethod = 'GET';
+          field.apiHeaders = '{}';
+        }
+        if (["select", "radio", "checkbox"].includes(item.type)) {
+          field.options = [];
+        }
+        this.form.sections[sIndex].fields.push(field);
+      },
+      removeField(sectionIndex, index) {
+        this.form.sections[sectionIndex].fields.splice(index, 1);
+      },
+      editField(sectionIndex, index) {
+        this.selectedSection = sectionIndex;
+        this.selectedField = index;
+        this.$nextTick(() => {
+          const field = this.form.sections[sectionIndex].fields[index];
+          if (field.type === 'richtext') {
+            const holder = document.getElementById('editorjs');
+            if (holder) holder.innerHTML = '';
+            if (this.editor) this.editor.destroy();
+            this.editor = new EditorJS({
+              holder: 'editorjs',
+              autofocus: true,
+              tools: {
+                header: Header,
+                list: List,
+                embed: Embed,
+                image: {
+                  class: ImageTool,
+                  config: {
+                    endpoints: {
+                      byFile: '/uploadFile',
+                      byUrl: '/fetchUrl'
+                    }
+                  }
+                }
+              },
+              data: field.content ? JSON.parse(field.content) : {},
+              onChange: async () => {
+                const output = await this.editor.save();
+                this.form.sections[this.selectedSection].fields[this.selectedField].content = JSON.stringify(output);
+              }
+            });
+          }
+        });
+        new bootstrap.Modal(this.$refs.modal).show();
+      },
+      handleDragStart(event, item) {
+        event.dataTransfer.setData('application/json', JSON.stringify(item));
+      },
+      handleDrop(event, sIndex) {
+        const item = JSON.parse(event.dataTransfer.getData('application/json'));
+        this.addFieldToSection(item, sIndex);
+      },
+      init() {}
     }
+  }
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>

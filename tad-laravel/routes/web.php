@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Tramite_configController;
 use App\Http\Controllers\BandejaController;
+use App\Http\Controllers\UsuariosController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -105,7 +107,14 @@ Route::get('/pagos', [PagoController::class, 'index'])->name('pagos.index');
 Route::get('/citas', [CitaController::class, 'index'])->name('citas.index');
 
 // Usuarios
-Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+Route::get('/usuarios/ciudadanos', [UsuariosController::class, 'ciudadanos'])->name('funcionario.usuarios.ciudadanos');
+Route::prefix('usuarios')->group(function () {
+    Route::get('/', [UsuariosController::class, 'index'])->name('usuarios.index'); 
+    Route::get('/permisos', [UsuariosController::class, 'permisos'])->name('usuarios.permisos');
+    Route::get('/configuracion', [UsuariosController::class, 'config'])->name('usuarios.config');
+});
+
+
 
 // Catálogos
 Route::get('/catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');

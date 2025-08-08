@@ -47,4 +47,52 @@ class UsuariosController extends Controller
       'data' => $usuarioTransformado,
     ]);
   }
+  public function ciudadanos()
+{
+    // Simulación de datos estáticos por ahora
+    $ciudadanos = [
+        [
+            'nombre' => 'Pam Martínez',
+            'correo' => 'fernando~1@os.city',
+            'fecha' => '16/11/2023 21:04:35'
+        ],
+        [
+            'nombre' => 'Suleyma Mota',
+            'correo' => 'suley301194@gmail.com',
+            'fecha' => '13/03/2024 13:42:57'
+        ],
+        [
+            'nombre' => 'Evaristo Miguel FAJARDO',
+            'correo' => 'evo.familia6@gmail.com',
+            'fecha' => '06/11/2024 21:03:09'
+        ],
+        [
+            'nombre' => 'Pascual Mario GOMEZ',
+            'correo' => 'mariogom1957@gmail.com',
+            'fecha' => '08/11/2024 19:51:50'
+        ],
+        [
+            'nombre' => 'Lucas Agustín Castillo',
+            'correo' => 'agustincastillo086@gmail.com',
+            'fecha' => '08/11/2024 19:52:35'
+        ],
+    ];
+
+    return view('pages.profile.funcionario.usuarios.ciudadanos', [
+        'ciudadanos' => $ciudadanos,
+        'totalCiudadanos' => count($ciudadanos),
+        'active' => 'usuarios'
+    ]);
+    }
+    public function permisos()
+    {
+        return view('pages.profile.funcionario.usuarios.permisos');
+    }
+
+    public function config()
+    {
+        return view('pages.profile.funcionario.usuarios.config');
+    }
+
+
 }

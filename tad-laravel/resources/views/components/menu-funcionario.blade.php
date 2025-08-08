@@ -87,17 +87,32 @@
         </div>
 
         <div class="accordion-item border-0">
-            <h6 class="accordion-header">
-                <button class="accordion-button collapsed px-0 py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUsuarios">
-                    <i class="bi bi-people me-2"></i> Usuarios
-                </button>
-            </h6>
-            <div id="collapseUsuarios" class="accordion-collapse collapse {{ isOpen('usuarios', $active) }}">
-                <ul class="nav flex-column ps-3">
-                    <li class="nav-item"><a href="{{ route('usuarios.index') }}" class="nav-link">Usuarios</a></li>
-                </ul>
-            </div>
-        </div>
+    <h6 class="accordion-header">
+        <button class="accordion-button collapsed px-0 py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUsuarios">
+            <i class="bi bi-people me-2"></i> Usuarios
+        </button>
+    </h6>
+    <div id="collapseUsuarios" class="accordion-collapse collapse {{ isOpen('usuarios', $active) }}">
+        <ul class="nav flex-column ps-3">
+            <li class="nav-item">
+                <a href="{{ route('usuarios.index') }}" class="nav-link {{ isActive('ciudadanos', $active) }}">
+                    <i class="bi bi-person me-2"></i> Ciudadanos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('usuarios.permisos') }}" class="nav-link {{ isActive('permisos', $active) }}">
+                    <i class="bi bi-shield-lock me-2"></i> Permisos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('usuarios.config') }}" class="nav-link {{ isActive('configUsuarios', $active) }}">
+                    <i class="bi bi-gear me-2"></i> Configuración
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
 
     </div>
 

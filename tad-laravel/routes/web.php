@@ -43,10 +43,6 @@ Route::get('reset-password/{token}', function ($token) {
 
 Route::post('reset-password', [LoginController::class, 'reset'])->name('password.update');
 
-
-
-
-
 Route::prefix('profile')->name('profile.')->group(function () {
   Route::get('/', [ProfileController::class, 'index'])->name('index'); // perfil por defecto
   Route::get('/documentos', [ProfileController::class, 'documentos'])->name('documentos');
@@ -96,6 +92,7 @@ Route::get('/tramite_config', [Tramite_configController::class, 'indexFuncionari
 Route::get('/tramites/crear', [Tramite_configController::class, 'create'])->name('funcionario.tramite.create');
 Route::post('/tramites', [Tramite_configController::class, 'store'])->name('funcionario.tramite.store');
 Route::get('/bandeja', [BandejaController::class, 'index'])->name('funcionario.bandeja');
+Route::get('/bandeja/{id}', [BandejaController::class, 'show'])->name('funcionario.bandeja.show');
 
 
 // Inspectores

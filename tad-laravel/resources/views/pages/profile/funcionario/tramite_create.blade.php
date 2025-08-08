@@ -1,6 +1,6 @@
 @extends('layouts.app-funcionario')
 
-@section('content')
+@section('profile_content')
 <div class="container">
     <h1>Crear Nuevo Trámite</h1>
 

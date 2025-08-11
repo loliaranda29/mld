@@ -95,7 +95,7 @@
     <div id="collapseUsuarios" class="accordion-collapse collapse {{ isOpen('usuarios', $active) }}">
         <ul class="nav flex-column ps-3">
             <li class="nav-item">
-                <a href="{{ route('usuarios.index') }}" class="nav-link {{ isActive('ciudadanos', $active) }}">
+                <a href="{{ route('usuarios.ciudadanos') }}" class="nav-link {{ isActive('ciudadanos', $active) }}">
                     <i class="bi bi-person me-2"></i> Ciudadanos
                 </a>
             </li>

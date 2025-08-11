@@ -15,6 +15,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Tramite_configController;
 use App\Http\Controllers\BandejaController;
 use App\Http\Controllers\UsuariosController;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Http\RedirectResponse;
+
 
 
 /*
@@ -107,12 +111,32 @@ Route::get('/pagos', [PagoController::class, 'index'])->name('pagos.index');
 Route::get('/citas', [CitaController::class, 'index'])->name('citas.index');
 
 // Usuarios
-Route::get('/usuarios/ciudadanos', [UsuariosController::class, 'ciudadanos'])->name('funcionario.usuarios.ciudadanos');
-Route::prefix('usuarios')->group(function () {
-    Route::get('/', [UsuariosController::class, 'index'])->name('usuarios.index'); 
-    Route::get('/permisos', [UsuariosController::class, 'permisos'])->name('usuarios.permisos');
-    Route::get('/configuracion', [UsuariosController::class, 'config'])->name('usuarios.config');
+Route::prefix('usuarios')->name('usuarios.')->group(function () {
+    // Listado (ciudadanos)
+    Route::get('/ciudadanos', [UsuariosController::class, 'ciudadanos'])->name('ciudadanos');
+
+    // Permisos
+    Route::get('/permisos', [UsuariosController::class, 'permisos'])->name('permisos');
+
+    // Configuración
+    Route::get('/configuracion', [UsuariosController::class, 'config'])->name('config');
+
+    // Detalle (mostrar ficha del ciudadano) — si querés que sea /usuarios/{id}
+    Route::get('/{id}', [UsuariosController::class, 'show'])->name('show');
 });
+
+Route::prefix('usuarios')->name('usuarios.')->group(function () {
+    Route::post('{id}/deactivate', [UsuariosController::class, 'deactivate'])->name('deactivate');
+    Route::post('{id}/password',   [UsuariosController::class, 'updatePassword'])->name('password');
+    Route::post('{id}/email',      [UsuariosController::class, 'updateEmail'])->name('email');
+});
+
+// Ciudadanos -> Detalle
+Route::get(
+    '/usuarios/ciudadanos/{id}',
+    [UsuariosController::class, 'ciudadanoShow']
+)->name('funcionario.usuarios.ciudadanos.show');
+
 
 
 

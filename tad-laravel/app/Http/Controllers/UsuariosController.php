@@ -93,6 +93,79 @@ class UsuariosController extends Controller
     {
         return view('pages.profile.funcionario.usuarios.config');
     }
+    public function ciudadanoShow($id)
+{
+    // Datos de ejemplo (reemplazá por la consulta real)
+    $ciudadano = [
+        'id' => $id,
+        'cuil' => '7654321',
+        'nombre' => 'Pam',
+        'apellido' => 'Martínez',
+        'fecha_nac' => '1992-05-06',
+        'email' => 'fernando~1@os.city',
+        'telefono_fijo' => '',
+        'telefono_celular' => '',
+        'direccion' => [
+            'cp' => '',
+            'barrio' => '',
+            'calle' => '',
+            'numero' => '',
+            'depto' => '',
+            'referencias' => '',
+        ],
+        // Solo para avatar iniciales
+        'iniciales' => 'PM',
+    ];
 
+    return view('pages.profile.funcionario.usuarios.show', [
+        'c'      => $ciudadano,
+        'active' => 'usuarios',
+    ]);
+    }
+    public function deactivate($id): RedirectResponse
+      {
+          $u = Usuario::findOrFail($id);
+          // Si tu tabla es `users`, asegurate de que el modelo `Usuario` apunte a esa tabla.
+          // Ej: protected $table = 'users';
+
+          // Suponemos que hay un boolean `active` (o `activo`). Cambiá el nombre si hace falta.
+          $flag = $u->active ?? $u->activo ?? 1;
+          if (property_exists($u, 'active')) {
+              $u->active = !$flag;
+          } else {
+              $u->activo = !$flag;
+          }
+          $u->save();
+
+          return back()->with('ok', 'Usuario ' . ($flag ? 'desactivado' : 'activado') . ' correctamente.');
+      }
+
+      public function updatePassword(Request $request, $id): RedirectResponse
+      {
+          $request->validate([
+              'password' => ['required', 'min:8', 'confirmed'],
+          ]);
+
+          $u = Usuario::findOrFail($id);
+          $u->password = Hash::make($request->password);
+          $u->save();
+
+          return back()->with('ok', 'Contraseña actualizada.');
+      }
+
+      public function updateEmail(Request $request, $id): RedirectResponse
+      {
+          // Si tu tabla real es `users`, usá 'users' en la regla unique
+          $request->validate([
+              'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($id)],
+          ]);
+
+          $u = Usuario::findOrFail($id);
+          $u->email = $request->email;
+          $u->save();
+
+          return back()->with('ok', 'Correo electrónico actualizado.');
+      }
+        
 
 }

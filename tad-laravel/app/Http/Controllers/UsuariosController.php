@@ -84,10 +84,6 @@ class UsuariosController extends Controller
         'active' => 'usuarios'
     ]);
     }
-    public function permisos()
-    {
-        return view('pages.profile.funcionario.usuarios.permisos');
-    }
 
     public function config()
     {
@@ -166,6 +162,34 @@ class UsuariosController extends Controller
 
           return back()->with('ok', 'Correo electrónico actualizado.');
       }
+       public function permisos()
+        {
+            // Demo: datos estáticos para clonar la UI
+            $roles = [
+                ['id' => 1, 'nombre' => 'Seguimiento',   'modulo' => 'Trámites', 'rol_base' => 'Operador'],
+                ['id' => 2, 'nombre' => 'Director',      'modulo' => 'Trámites', 'rol_base' => 'Administrador'],
+                ['id' => 3, 'nombre' => 'Auditor',       'modulo' => 'Trámites', 'rol_base' => 'Administrador'],
+                ['id' => 4, 'nombre' => 'control',       'modulo' => 'Trámites', 'rol_base' => 'Operador'],
+                ['id' => 5, 'nombre' => 'Visualizador',  'modulo' => 'Trámites', 'rol_base' => 'Editor'],
+            ];
+
+            return view('pages.profile.funcionario.usuarios.permisos', [
+                'roles'  => $roles,
+                'active' => 'permisos',
+            ]);
+        }
+
+        public function crearRol()
+        {
+            // Más adelante podés renderizar un form real.
+            return back()->with('status', 'Abrir modal/forma de "Nuevo rol" (placeholder).');
+        }
+
+        public function editarRol($id)
+        {
+            // Placeholder; en real traerías el rol por $id y mostrarías el form de edición
+            return back()->with('status', "Editar rol ID {$id} (placeholder).");
+        }
         
 
 }

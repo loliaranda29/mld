@@ -18,7 +18,8 @@ use App\Http\Controllers\UsuariosController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
-
+use App\Http\Controllers\PagosAdminController;
+use App\Http\Controllers\CatalogosAdminController;
 
 
 /*
@@ -137,11 +138,37 @@ Route::get(
     [UsuariosController::class, 'ciudadanoShow']
 )->name('funcionario.usuarios.ciudadanos.show');
 
+// --- Permisos / Roles ---
+Route::get('/usuarios/permisos', [UsuariosController::class, 'permisos'])->name('usuarios.permisos');
+Route::get('/usuarios/permisos/crear', [UsuariosController::class, 'crearRol'])->name('usuarios.permisos.create');
+Route::get('/usuarios/permisos/{id}/editar', [UsuariosController::class, 'editarRol'])->name('usuarios.permisos.edit');
 
+// Pagos (funcionario/admin)
+Route::prefix('funcionario/pagos')->name('pagos.')->group(function () {
+    Route::get('/', [PagosAdminController::class, 'index'])->name('index');           // Config general (lado izq + card principal)
+    Route::get('/conceptos', [PagosAdminController::class, 'conceptos'])->name('conceptos'); // Catálogo de conceptos
+    Route::get('/configuracion', [PagosAdminController::class, 'config'])->name('config');    // Pantalla de “Valor de la UT”
+
+    // <<< NUEVO: CRUD del valor de la UT >>>
+    Route::post('/ut',                 [PagosAdminController::class, 'utStore'])->name('ut.store');
+    Route::put('/ut/{id}',             [PagosAdminController::class, 'utUpdate'])->name('ut.update');
+    Route::delete('/ut/{id}',          [PagosAdminController::class, 'utDestroy'])->name('ut.destroy');
+});
 
 
 // Catálogos
-Route::get('/catalogos', [CatalogoController::class, 'index'])->name('catalogos.index');
+Route::prefix('funcionario/catalogos')->name('catalogos.')->group(function () {
+    Route::get('/',        [CatalogosAdminController::class, 'index'])->name('index');
+    Route::get('/crear',   [CatalogosAdminController::class, 'create'])->name('create'); // ⬅️ NUEVO
+    Route::post('/',       [CatalogosAdminController::class, 'store'])->name('store');
+    Route::delete('{id}',  [CatalogosAdminController::class, 'destroy'])->name('destroy');
+    Route::get('{id}',     [CatalogosAdminController::class, 'show'])->name('show');
+
+    // 👉 Nuevo: listado de subcatálogos
+    Route::get('{id}/subcatalogos', [CatalogosAdminController::class, 'subcatalogos'])
+        ->name('subcatalogos');
+});
+
 
 // Filtros
 Route::get('/filtros', [FiltroController::class, 'index'])->name('filtros.index');

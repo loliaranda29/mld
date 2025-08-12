@@ -63,15 +63,17 @@
         <div class="accordion-item border-0">
             <h6 class="accordion-header">
                 <button class="accordion-button collapsed px-0 py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePagos">
-                    <i class="bi bi-credit-card me-2"></i> Pagos
+                <i class="bi bi-credit-card me-2"></i> Pagos
                 </button>
             </h6>
             <div id="collapsePagos" class="accordion-collapse collapse {{ isOpen('pagos', $active) }}">
                 <ul class="nav flex-column ps-3">
-                    <li class="nav-item"><a href="{{ route('pagos.index') }}" class="nav-link">Administración de pagos</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('pagos.index') }}" class="nav-link">Administración de pagos</a>
+                    </li>
                 </ul>
             </div>
-        </div>
+            </div>
 
         <div class="accordion-item border-0">
             <h6 class="accordion-header">
@@ -100,10 +102,12 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('usuarios.permisos') }}" class="nav-link {{ isActive('permisos', $active) }}">
+                <a href="{{ route('usuarios.permisos') }}"
+                    class="nav-link {{ isActive('permisos', $active ?? '') }}">
                     <i class="bi bi-shield-lock me-2"></i> Permisos
                 </a>
             </li>
+
             <li class="nav-item">
                 <a href="{{ route('usuarios.config') }}" class="nav-link {{ isActive('configUsuarios', $active) }}">
                     <i class="bi bi-gear me-2"></i> Configuración
@@ -119,10 +123,11 @@
     <!-- Otros enlaces sueltos -->
     <ul class="nav flex-column">
     <li class="nav-item">
-        <a href="{{ route('catalogos.index') }}" class="nav-link d-flex align-items-center {{ isActive('catalogos', $active) }}">
-            <i class="bi bi-folder2-open me-2"></i> Catálogos
+    <a href="{{ route('catalogos.index') }}" class="nav-link {{ isActive('catalogos', $active) }}">
+        <i class="bi bi-folder2-open me-2"></i> Catálogos
         </a>
     </li>
+
     <li class="nav-item">
         <a href="{{ route('filtros.index') }}" class="nav-link d-flex align-items-center {{ isActive('filtros', $active) }}">
             <i class="bi bi-funnel me-2"></i> Filtros

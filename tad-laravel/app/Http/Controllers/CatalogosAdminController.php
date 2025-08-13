@@ -26,6 +26,7 @@ class CatalogosAdminController extends Controller
         ]);
     }
 
+
     public function index(Request $request)
     {
         // Paginar manualmente la colección para clonar la UI
@@ -116,6 +117,84 @@ public function subcatalogos(Request $request, $id)
         'perPage'      => $perPage,
         'total'        => $total,
     ]);
+}
+// ---- Mock de opciones / subcatálogos ----
+protected function seedOptions($catalogoId)
+{
+    // Podés personalizar por catálogo si querés;
+    // por ahora devolvemos el set de la maqueta
+    return collect([
+        ['id'=>'1SmNbPMRvt3hE8hSJ6A3','nombre'=>'CONEXIÓN ÚNICA','slug'=>'conexionUnica','icono'=>'mdi-account'],
+        ['id'=>'fqsLvhiDF4xLTwULRvy3','nombre'=>'CASA Nº','slug'=>'casaN','icono'=>'mdi-home'],
+        ['id'=>'3gCKU82zScKomPPSlZ7q','nombre'=>'DPTO Nº','slug'=>'dptoN','icono'=>'mdi-office-building'],
+        ['id'=>'Fq37I7I8Il2WqhkOTSJj','nombre'=>'LOCAL Nº','slug'=>'localN','icono'=>'mdi-storefront'],
+        ['id'=>'H5IFGXMdl9YrwREOnaqf','nombre'=>'ESP.COM. Nº','slug'=>'espComN','icono'=>'mdi-domain'],
+        ['id'=>'3wnjKoyTc8yyKT4CDvKM','nombre'=>'DEPÓSITO Nº','slug'=>'depositoN','icono'=>'mdi-warehouse'],
+        ['id'=>'W4Vqawsw88S8AuxAyfDp','nombre'=>'GALPÓN Nº','slug'=>'galponN','icono'=>'mdi-warehouse'],
+        ['id'=>'Oh9MQijQm2jE5IGwTXIM','nombre'=>'OFICINA Nº','slug'=>'oficinaN','icono'=>'mdi-domain'],
+        ['id'=>'DgnKSbyiKHP2wH7dxIDV','nombre'=>'PORTAL ING. Nº','slug'=>'portalIngN','icono'=>'mdi-gate'],
+    ]);
+}
+
+public function subIndex($catalogoId, Request $request)
+{
+    $perPage = (int)$request->get('per_page', 10);
+    $page    = (int)$request->get('page', 1);
+
+    $all   = $this->seedOptions($catalogoId)->values();
+    $total = $all->count();
+    $slice = $all->slice(($page-1)*$perPage, $perPage)->values();
+
+    return view('pages.profile.funcionario.catalogos.sub.index', [
+        'active'      => 'catalogos',
+        'catalogoId'  => $catalogoId,
+        'items'       => $slice,
+        'page'        => $page,
+        'perPage'     => $perPage,
+        'total'       => $total,
+    ]);
+}
+
+public function subShow($catalogoId, $optId)
+{
+    $opt = $this->seedOptions($catalogoId)->firstWhere('id', $optId);
+    abort_unless($opt, 404);
+
+    return view('pages.profile.funcionario.catalogos.sub.show', [
+        'active'     => 'catalogos',
+        'catalogoId' => $catalogoId,
+        'opt'        => $opt,
+    ]);
+}
+public function subUpload(Request $request, $catalogoId, $optId)
+{
+    // Si el formulario viene con 'mode=csv', tratamos archivo
+    if ($request->input('mode') === 'csv') {
+        $request->validate([
+            'csv' => ['required','file','mimes:csv,txt'],
+        ]);
+        // Aquí parsearías el CSV y guardarías los términos en BD…
+        return back()->with('ok', 'Archivo CSV recibido (demo).');
+    }
+
+    // Si no, es "Agregar un término"
+    $request->validate([
+        'nombre' => ['required','string','max:255'],
+        'slug'   => ['required','string','max:255'],
+        'icon'   => ['nullable','string','max:255'],
+    ]);
+
+    // Aquí crearías el término en BD…
+    return back()->with('ok', 'Término agregado (demo).');
+}
+public function subDestroy($catalogoId, $optId)
+{
+    // En demo validamos que exista; en producción eliminá en BD
+    //$exists = $this->seedOptions($catalogoId)->firstWhere('id', $optId);
+    //abort_unless($exists, 404);
+
+    // Aquí iría: CatalogoOpcion::where('catalogo_id', $catalogoId)->where('id', $optId)->delete();
+    return back()->with('ok', 'Término eliminado correctamente.');
 }
 
 

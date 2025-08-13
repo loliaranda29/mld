@@ -17,11 +17,9 @@
       <button type="button" class="btn btn-dark">
         Sincronizar <i class="bi bi-arrow-repeat ms-1"></i>
       </button>
-      <a href="{{ route('catalogos.subcatalogos', $catalogo['id']) }}"
-        class="btn btn-dark">
+      <a href="{{ route('catalogos.subcatalogos', $catalogo['id']) }}" class="btn btn-dark">
         Ver Listado
-        </a>
-
+      </a>
     </div>
   </div>
 

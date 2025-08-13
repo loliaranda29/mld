@@ -134,7 +134,7 @@
         </a>
     </li>
     <li class="nav-item">
-        <a href="#" class="nav-link d-flex align-items-center {{ isActive('configuracion', $active) }}">
+        <a href="{{ route('configuracion.index') }}" class="nav-link d-flex align-items-center {{ isActive('filtros', $active) }}">
             <i class="bi bi-gear me-2"></i> Configuración
         </a>
     </li>

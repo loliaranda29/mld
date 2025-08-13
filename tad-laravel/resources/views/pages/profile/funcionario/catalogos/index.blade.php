@@ -23,8 +23,7 @@
 
       <a href="{{ route('catalogos.create') }}" class="btn btn-primary">
         Agregar nuevo registro
-        </a>
-
+      </a>
     </div>
 
     <div class="table-responsive">

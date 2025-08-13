@@ -26,23 +26,25 @@
   </div>
 </div>
 @endsection
-<!-- Scripts necesarios para funcionamiento de pestañas -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
+@push('scripts')
+  {{-- Alpine (una sola vez) --}}
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-<!-- Alpine.js -->
-<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  {{-- Bootstrap JS (bundle incluye Popper) – NECESARIO para modales y tabs --}}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const triggerTabList = [].slice.call(document.querySelectorAll('#tabsTramite button'));
-    triggerTabList.forEach(function (triggerEl) {
-      const tabTrigger = new bootstrap.Tab(triggerEl);
-      triggerEl.addEventListener('click', function (event) {
-        event.preventDefault();
-        tabTrigger.show();
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Soporte para tabs (si existen en la página)
+      const triggerTabList = [].slice.call(document.querySelectorAll('#tabsTramite button'));
+      triggerTabList.forEach(function (triggerEl) {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+        triggerEl.addEventListener('click', function (event) {
+          event.preventDefault();
+          tabTrigger.show();
+        });
       });
     });
-  });
-</script>
-
+  </script>
+@endpush

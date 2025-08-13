@@ -20,6 +20,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Controllers\PagosAdminController;
 use App\Http\Controllers\CatalogosAdminController;
+use App\Http\Controllers\FiltrosAdminController;
+use App\Http\Controllers\ConfiguracionAdminController;
 
 
 /*
@@ -165,19 +167,34 @@ Route::prefix('funcionario/catalogos')->name('catalogos.')->group(function () {
     Route::get('{id}',     [CatalogosAdminController::class, 'show'])->name('show');
 
     // 👉 Nuevo: listado de subcatálogos
-    Route::get('{id}/subcatalogos', [CatalogosAdminController::class, 'subcatalogos'])
-        ->name('subcatalogos');
+    Route::get('{id}/subcatalogos', [CatalogosAdminController::class, 'subcatalogos'])->name('subcatalogos');
+    Route::get('{id}/subcatalogos/{optId}', [CatalogosAdminController::class, 'subShow'])->name('sub.show');
+
+    Route::post('{id}/subcatalogos/{optId}/upload', [CatalogosAdminController::class, 'subUpload'])->name('sub.upload');
+     Route::delete('{id}/subcatalogos/{optId}', [CatalogosAdminController::class, 'subDestroy'])->name('sub.destroy');
 });
 
 
 // Filtros
-Route::get('/filtros', [FiltroController::class, 'index'])->name('filtros.index');
+Route::prefix('funcionario/filtros')->name('filtros.')->group(function () {
+    Route::get('/', [FiltrosAdminController::class, 'index'])->name('index');
+    Route::post('/toggle', [FiltrosAdminController::class, 'toggle'])->name('toggle');
+    Route::post('/store', [FiltrosAdminController::class, 'store'])->name('store'); 
+    Route::delete('/{id}', [FiltrosAdminController::class, 'destroy'])->name('destroy');
+});
 
 // Estadísticas
 Route::get('/estadisticas', [EstadisticaController::class, 'index'])->name('estadisticas');
 
 // Registro de cambios
 Route::get('/registro-cambios', [RegistroController::class, 'index'])->name('registro.cambios');
+
+Route::prefix('funcionario/configuracion')->name('configuracion.')->group(function () {
+    Route::get('/', [ConfiguracionAdminController::class, 'index'])->name('index');
+    Route::post('/guardar', [ConfiguracionAdminController::class, 'guardar'])->name('guardar');
+    Route::post('/inhabiles', [ConfiguracionAdminController::class, 'agregarInhabil'])->name('inhabiles.add');
+    Route::delete('/inhabiles/{dia}', [ConfiguracionAdminController::class, 'eliminarInhabil'])->name('inhabiles.del');
+});
 
 if (file_exists(__DIR__.'/superadmin_tramites.php')) {
     require __DIR__.'/superadmin_tramites.php';

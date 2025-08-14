@@ -36,22 +36,6 @@ class ConfiguracionAdminController extends Controller
             'correo' => 'Correo electrónico',
             'cuit' => 'CUIT',
             'cuil' => 'CUIL',
-            'fecha_nac' => 'Fecha de nacimiento',
-            'telefono_celular' => 'Teléfono celular',
-            'telefono_fijo' => 'Teléfono fijo',
-            'localidad' => 'Localidad',
-            'provincia' => 'Provincia',
-            'barrio' => 'Barrio',
-            'calle' => 'Calle',
-            'numero_int' => 'Número interior',
-            'numero_ext' => 'Número exterior',
-            'direccion_publica' => 'Dirección pública',
-            'nro_acta' => 'Número de acta constitutiva',
-            'fecha_venc' => 'Fecha de vencimiento',
-            'inicio_op' => 'Fecha inicio de operaciones',
-            'razon_social' => 'Nombre, denominación o razón social',
-            'genero' => 'Género',
-            'referencias' => 'Referencias',
         ];
     }
 
@@ -138,4 +122,180 @@ class ConfiguracionAdminController extends Controller
 
         return back()->with('ok', 'Día inhábil eliminado.');
     }
+
+    
+
+protected function aparienciaDefaults(): array
+{
+    // Valores por defecto (tomados de tus capturas)
+    return [
+        // Colores base
+        'primary'   => '#298E8CFF',
+        'secondary' => '#298E8CFF',
+        'accent'    => '#24B889FF',
+        'error'     => '#FF5252FF',
+        'info'      => '#2196F3FF',
+        'success'   => '#4CAF50FF',
+        'warning'   => '#FFBC00FF',
+
+        // Textos
+        'text_title'     => '#0B0B0BFF',
+        'text_subtitle'  => '#0B0B0BFF',
+        'text_body'      => '#0B0B0BEO', // si querés exacto usa #0B0B0BFF
+
+        // Botones
+        'btn_primary'   => '#298E8CFF',
+        'btn_secondary' => '#298E8CFF',
+        'chips'         => '#80CBC4FF',
+
+        // Home
+        'home_card_title' => '#298E8CFF',
+        'home_tabs'       => '#298E8CFF',
+        'home_lists'      => '#298E8CFF',
+
+        // Ficha de trámite
+        'doc_icons'       => '#298E8CFF',
+        'doc_cards_border'=> '#298E8CFF',
+        'doc_section'     => '#298E8CFF',
+
+        // Cards/Modales
+        'card_title_bg'   => '#298E8CFF',
+        'modal_toolbar'   => '#298E8CFF',
+
+        // Tabs
+        'tabs_border'     => '#298E8CFF',
+        'tabs_text'       => '#0B0B0BFF',
+        'tabs_card_bg'    => '#298E8CFF',
+        'tabs_active'     => '#FFFFFFFF',
+        'tabs_disabled'   => '#686868FF',
+
+        // Íconos generales
+        'icons'           => '#298E8CFF',
+    ];
+}
+
+public function aparienciaIndex(\Illuminate\Http\Request $request)
+{
+    $paleta = $request->session()->get('config_apariencia', $this->aparienciaDefaults());
+
+    return view('pages.profile.funcionario.configuracion.apariencia', [
+        'active' => 'configuracion',
+        'paleta' => $paleta,
+    ]);
+}
+
+public function aparienciaGuardar(\Illuminate\Http\Request $request)
+{
+    // Lista blanca de claves permitidas (para evitar extraños)
+    $keys = array_keys($this->aparienciaDefaults());
+
+    $data = $request->validate([
+        // todos como string; validación soft para permitir #RRGGBB o #RRGGBBAA
+    ] + collect($keys)->mapWithKeys(fn($k)=>[$k=>['nullable','string','max:12']])->all());
+
+    // Normalizamos: si falta alguno, usamos el existente/defecto
+    $actual = $request->session()->get('config_apariencia', $this->aparienciaDefaults());
+    foreach ($keys as $k) {
+        $val = $data[$k] ?? $actual[$k] ?? null;
+        // Limpieza simple: uppercase y quitar espacios
+        if (is_string($val)) {
+            $val = strtoupper(trim($val));
+        }
+        $actual[$k] = $val ?: $actual[$k];
+    }
+
+    $request->session()->put('config_apariencia', $actual);
+
+    return back()->with('ok', 'Apariencia guardada.');
+}
+
+// app/Http/Controllers/ConfiguracionAdminController.php
+
+protected function seoDefaults(): array
+{
+    return [
+        'title'       => 'Mi Luján',
+        'description' => 'Mi Luján Digital',
+        'favicon'     => null, // path público (storage) o null
+    ];
+}
+
+public function seoIndex(\Illuminate\Http\Request $request)
+{
+    $seo = $request->session()->get('config_seo', $this->seoDefaults());
+
+    return view('pages.profile.funcionario.configuracion.seo', [
+        'active'   => 'configuracion.seo',
+        'seo'      => $seo,
+        'faviconUrl' => $seo['favicon'] ? asset('storage/'.$seo['favicon']) : null,
+    ]);
+}
+
+public function seoGuardar(\Illuminate\Http\Request $request)
+{
+    $data = $request->validate([
+        'title'       => ['required','string','max:120'],
+        'description' => ['required','string','max:255'],
+        'favicon'     => ['nullable','file','mimes:ico,png,svg','max:512'], // 512KB
+    ]);
+
+    $seo = $request->session()->get('config_seo', $this->seoDefaults());
+    $seo['title']       = $data['title'];
+    $seo['description'] = $data['description'];
+
+    if ($request->hasFile('favicon')) {
+        // Asegúrate de tener el symlink: php artisan storage:link
+        $ext  = $request->file('favicon')->getClientOriginalExtension();
+        $name = 'favicon.'.strtolower($ext);
+        $path = $request->file('favicon')->storeAs('seo', $name, 'public'); // storage/app/public/seo/favicon.*
+        $seo['favicon'] = $path;
+    }
+
+    $request->session()->put('config_seo', $seo);
+
+    return back()->with('ok', 'SEO guardado.');
+}
+// app/Http/Controllers/ConfiguracionAdminController.php
+
+protected function mapaDefaults(): array
+{
+    return [
+        'title' => 'Ubicación del mapa',
+        // Centro por defecto: Luján de Cuyo (aprox)
+        'lat'   => -33.0160,
+        'lng'   => -68.8750,
+        'zoom'  => 11,
+    ];
+}
+
+public function mapaIndex(\Illuminate\Http\Request $request)
+{
+    $mapa = $request->session()->get('config_mapa', $this->mapaDefaults());
+
+    return view('pages.profile.funcionario.configuracion.mapa', [
+        'active' => 'configuracion.mapa',
+        'mapa'   => $mapa,
+        'gmaps_key' => config('services.google.maps_key'), // ver paso 4
+    ]);
+}
+
+public function mapaGuardar(\Illuminate\Http\Request $request)
+{
+    $data = $request->validate([
+        'title' => ['required','string','max:150'],
+        'lat'   => ['required','numeric','between:-90,90'],
+        'lng'   => ['required','numeric','between:-180,180'],
+        'zoom'  => ['required','integer','min:3','max:20'],
+    ]);
+
+    $config = $request->session()->get('config_mapa', $this->mapaDefaults());
+    $config = array_merge($config, $data);
+
+    $request->session()->put('config_mapa', $config);
+
+    return back()->with('ok', 'Ubicación guardada.');
+}
+
+
+
 }

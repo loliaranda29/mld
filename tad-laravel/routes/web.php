@@ -22,6 +22,8 @@ use App\Http\Controllers\PagosAdminController;
 use App\Http\Controllers\CatalogosAdminController;
 use App\Http\Controllers\FiltrosAdminController;
 use App\Http\Controllers\ConfiguracionAdminController;
+use App\Http\Controllers\EstadisticasAdminController;
+use App\Http\Controllers\ChangeLogAdminController;
 
 
 /*
@@ -184,7 +186,10 @@ Route::prefix('funcionario/filtros')->name('filtros.')->group(function () {
 });
 
 // Estadísticas
-Route::get('/estadisticas', [EstadisticaController::class, 'index'])->name('estadisticas');
+Route::prefix('funcionario')->group(function () {
+    Route::get('/estadisticas', [EstadisticasAdminController::class, 'index'])
+        ->name('estadisticas');
+}); 
 
 // Registro de cambios
 Route::get('/registro-cambios', [RegistroController::class, 'index'])->name('registro.cambios');
@@ -194,6 +199,20 @@ Route::prefix('funcionario/configuracion')->name('configuracion.')->group(functi
     Route::post('/guardar', [ConfiguracionAdminController::class, 'guardar'])->name('guardar');
     Route::post('/inhabiles', [ConfiguracionAdminController::class, 'agregarInhabil'])->name('inhabiles.add');
     Route::delete('/inhabiles/{dia}', [ConfiguracionAdminController::class, 'eliminarInhabil'])->name('inhabiles.del');
+    Route::get('/apariencia', [ConfiguracionAdminController::class, 'aparienciaIndex'])->name('apariencia.index');
+    Route::post('/apariencia/guardar', [ConfiguracionAdminController::class, 'aparienciaGuardar'])->name('apariencia.guardar');
+    Route::get('/seo', [ConfiguracionAdminController::class, 'seoIndex'])->name('seo.index');
+    Route::post('/seo/guardar', [ConfiguracionAdminController::class, 'seoGuardar'])->name('seo.guardar');
+    Route::get('/mapa', [ConfiguracionAdminController::class, 'mapaIndex'])->name('mapa.index');
+    Route::post('/mapa/guardar', [ConfiguracionAdminController::class, 'mapaGuardar'])->name('mapa.guardar');
+});
+
+
+Route::prefix('funcionario')->group(function () {
+    Route::get('/registro-cambios', [ChangeLogAdminController::class, 'index'])
+        ->name('registro.cambios');
+    Route::get('/registro-cambios/export', [ChangeLogAdminController::class, 'export'])
+        ->name('registro.cambios.export');
 });
 
 if (file_exists(__DIR__.'/superadmin_tramites.php')) {

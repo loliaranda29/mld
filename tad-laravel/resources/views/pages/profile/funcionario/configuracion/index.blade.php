@@ -13,16 +13,6 @@
   </nav>
 
   <div class="row">
-    {{-- Panel izquierdo: acordeón de secciones (solo visual) --}}
-    <div class="col-lg-3 mb-3">
-      <div class="list-group">
-        <a class="list-group-item list-group-item-action active">Configuración</a>
-        <a class="list-group-item list-group-item-action">General</a>
-        <a class="list-group-item list-group-item-action">Apariencia</a>
-        <a class="list-group-item list-group-item-action">SEO</a>
-        <a class="list-group-item list-group-item-action">Ubicación del mapa</a>
-      </div>
-    </div>
 
     {{-- Contenido --}}
     <div class="col-lg-9">

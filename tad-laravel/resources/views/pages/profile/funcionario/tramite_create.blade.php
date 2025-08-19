@@ -2,7 +2,7 @@
 
 @section('profile_content')
 <div class="container">
-    <h1>Crear Nuevo Trámite</h1>
+    <h1 class="h3 mb-3">Crear Nuevo Trámite</h1>
 
     <!-- Nav Tabs -->
     <ul class="nav nav-tabs" id="tabsTramite" role="tablist">

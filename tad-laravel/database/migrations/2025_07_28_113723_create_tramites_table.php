@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('tramites', function (Blueprint $table) {
                 $table->id();
-                $table->string('titulo'); // mejor que 'nombre', más claro en la UI
+                $table->string('nombre'); // mejor que 'nombre', más claro en la UI
                 $table->text('descripcion')->nullable();
 
                 // switches generales

@@ -28,22 +28,17 @@
 @endsection
 
 @push('scripts')
-  {{-- Alpine (una sola vez) --}}
+  {{-- Alpine (necesario para el builder) --}}
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  {{-- Bootstrap JS (bundle incluye Popper) – NECESARIO para modales y tabs --}}
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
+    // Soporte para tabs Bootstrap en el módulo de trámites
     document.addEventListener('DOMContentLoaded', function () {
-      // Soporte para tabs (si existen en la página)
-      const triggerTabList = [].slice.call(document.querySelectorAll('#tabsTramite button'));
-      triggerTabList.forEach(function (triggerEl) {
-        const tabTrigger = new bootstrap.Tab(triggerEl);
-        triggerEl.addEventListener('click', function (event) {
-          event.preventDefault();
-          tabTrigger.show();
-        });
+      if (!window.bootstrap) return;
+      const triggers = document.querySelectorAll('#tabsTramite button[data-bs-toggle="tab"], #tabsTramite button');
+      triggers.forEach((el) => {
+        const tab = new bootstrap.Tab(el);
+        el.addEventListener('click', (e) => { e.preventDefault(); tab.show(); });
       });
     });
   </script>

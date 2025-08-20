@@ -124,6 +124,7 @@ Route::prefix('funcionario')->group(function () {
   Route::get('/tramite/{tramite}/editar', [Tramite_configController::class, 'edit'])->name('funcionario.tramite.edit');
   Route::put('/tramite/{tramite}',        [Tramite_configController::class, 'update'])->name('funcionario.tramite.update');
   Route::get('/tramite/{tramite}',        [Tramite_configController::class, 'show'])->name('funcionario.tramite.show');
+  Route::delete('/tramites/{id}', [Tramite_configController::class, 'destroy'])->name('funcionario.tramites.destroy');
 });
 
 // Legacy: tu listado anterior

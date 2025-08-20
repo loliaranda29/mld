@@ -28,9 +28,6 @@
 @endsection
 
 @push('scripts')
-  {{-- Alpine (necesario para el builder) --}}
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
   <script>
     // Soporte para tabs Bootstrap en el módulo de trámites
     document.addEventListener('DOMContentLoaded', function () {

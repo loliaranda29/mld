@@ -15,6 +15,30 @@
   {{-- Estilos adicionales --}}
   <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
+
+  {{-- Alpine: principal por jsDelivr, con fallback a unpkg si falla --}}
+  <script defer
+          src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+          onerror="
+            var s=document.createElement('script');
+            s.defer=true;
+            s.src='https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js';
+            document.head.appendChild(s);
+          ">
+  </script>
+  <script>
+    // Aviso en consola si Alpine no cargó (ayuda a diagnosticar si un firewall bloquea ambos CDNs)
+    window.addEventListener('DOMContentLoaded', function () {
+      setTimeout(function () {
+        if (!window.Alpine) {
+          console.error('Alpine.js no se cargó. Verificá que el CDN no esté bloqueado por la red.');
+        }
+      }, 0);
+    });
+  </script>
+
+  {{-- (opcional) estilos empujados desde vistas hijas --}}
+  @stack('styles')
 </head>
 <body>
 
@@ -29,7 +53,7 @@
   {{-- JS base (Bootstrap bundle) --}}
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  {{-- Aquí se inyectan los scripts pusheados desde sublayouts/páginas --}}
+  {{-- Aquí se inyectan los scripts pusheados desde sublayouts/páginas (EditorJS, etc.) --}}
   @stack('scripts')
 </body>
 </html>

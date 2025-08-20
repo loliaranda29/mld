@@ -1,113 +1,104 @@
 @extends('layouts.app-funcionario')
 
 @section('profile_content')
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Listado de trámites</h4>
-        <div class="d-flex gap-2">
-            <a href="{{ route('funcionario.tramite.create') }}" class="btn btn-primary">Nuevo</a>
-            <button class="btn btn-outline-secondary">Subir trámites</button>
-        </div>
-    </div>
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Gestión de Trámites</h1>
+    <a href="{{ route('funcionario.tramites.create') }}" class="btn btn-primary">
+      + Nuevo trámite
+    </a>
+  </div>
 
-    <div class="card">
-        <div class="card-body p-3">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="form-group mb-0">
-                    <select class="form-select">
-                        <option>Todos</option>
-                        <option>Activos</option>
-                        <option>Inactivos</option>
-                    </select>
-                </div>
-                <div class="form-check mb-0">
-                    <input type="checkbox" class="form-check-input" id="soloInicio">
-                    <label class="form-check-label" for="soloInicio">¿Ver solo los publicados en el inicio?</label>
-                </div>
-                <div class="form-group mb-0 flex-grow-1 mx-3">
-                    <input type="text" class="form-control" placeholder="Buscar...">
-                </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary"><i class="bi bi-download"></i></button>
-                    <button class="btn btn-outline-secondary"><i class="bi bi-upload"></i></button>
-                </div>
-            </div>
+  @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+  @endif
 
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center">
-                                <input type="checkbox">
-                                <br>
-                                <small>Mostrar<br>en inicio</small>
-                            </th>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Fecha de creación</th>
-                            <th>Disponible en línea</th>
-                            <th>Trámite publicado</th>
-                            <th>Aceptar solicitudes</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-    @forelse ($tramites as $tramite)
-        <tr>
-            <td class="text-center">
-                <input type="checkbox" {{ $tramite->mostrar_inicio ? 'checked' : '' }}>
-            </td>
-            <td>
-                {{ $tramite->nombre }}
-                @if($tramite->tiene_adjuntos)
-                    <i class="bi bi-paperclip text-secondary ms-1" title="Tiene adjuntos"></i>
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Padre</th>
+              <th>Subtrámites</th>
+              <th>Vínculos</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          @forelse($tramites as $t)
+            <tr>
+              <td>
+                <strong>{{ $t->nombre }}</strong>
+                @if($t->descripcion)
+                  <div class="text-muted small">{{ Str::limit($t->descripcion, 80) }}</div>
                 @endif
-            </td>
-            <td style="max-width: 300px;" class="text-truncate" title="{{ $tramite->descripcion }}">
-                {{ $tramite->descripcion }}
-            </td>
-            <td>{{ $tramite->created_at->format('d/m/Y H:i:s') }} hrs</td>
-            <td><span class="badge bg-success">Activo</span></td>
-            <td><span class="badge bg-success">Activo</span></td>
-            <td><span class="badge bg-secondary">Inactivo</span></td>
-            <td class="text-center">
-                <a href="{{ route('funcionario.tramite.edit', $tramite->id) }}" class="text-primary me-2" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                </a>
-                <a href="#" class="text-danger" title="Eliminar" onclick="confirm('¿Estás seguro que querés eliminar este trámite?')">
-                    <i class="bi bi-trash"></i>
-                </a>
-            </td>
+              </td>
+              <td class="text-muted">
+                {{ $t->parent?->nombre ?? '—' }}
+              </td>
+              <td>
+                {{-- mostramos count rápido; si querés listado, podés expandir --}}
+                {{ $t->hijos()->count() }}
+              </td>
+              <td>
+                {{-- vínculos como origen --}}
+                {{ $t->relacionados()->count() }}
+              </td>
+              <td>
+                @if($t->publicado)
+                  <span class="badge bg-success">Publicado</span>
+                @else
+                  <span class="badge bg-secondary">Borrador</span>
+                @endif
+              </td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{{ route('funcionario.tramites.edit', $t->id) }}">Editar</a>
 
-        </tr>
-    @empty
-        <tr>
-            <td class="text-center"><input type="checkbox" checked></td>
-            <td>
-                Asistencia presencial para el trámite de Licencias de Conducir
-                <i class="bi bi-paperclip text-secondary ms-1" title="Tiene adjuntos"></i>
-            </td>
-            <td>
-                🚗 ¿Tuviste problemas para cargar tu trámite de Licencia de Conducir online? ¡Te ayudamos!
-            </td>
-            <td>21/07/2025 08:40:05 hrs</td>
-            <td><span class="badge bg-success">Activo</span></td>
-            <td><span class="badge bg-success">Activo</span></td>
-            <td><span class="badge bg-secondary">Inactivo</span></td>
-            <td class="text-center">
-                <i class="bi bi-pencil-square text-secondary mx-1" title="Editar (deshabilitado)"></i>
-                <i class="bi bi-trash-fill text-secondary mx-1" title="Eliminar (deshabilitado)"></i>
-            </td>
-        </tr>
-    @endforelse
-</tbody>
+                <form action="{{ route('funcionario.tramites.destroy', $t->id) }}" method="POST" class="d-inline"
+                      onsubmit="return confirm('¿Eliminar definitivamente este trámite?');">
+                  @csrf @method('DELETE')
+                  <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                </form>
+              </td>
+            </tr>
 
-                </table>
-                <div class="text-center mt-3">
-                    <button class="btn btn-outline-primary">Mostrar más</button>
-                </div>
-            </div>
-        </div>
+            {{-- Si querés mostrar subtrámites en línea (nivel 1) --}}
+            @foreach($t->hijos as $h)
+              <tr class="table-sm">
+                <td>
+                  <span class="text-muted">↳</span> {{ $h->nombre }}
+                </td>
+                <td class="text-muted">{{ $h->parent?->nombre ?? '—' }}</td>
+                <td>{{ $h->hijos()->count() }}</td>
+                <td>{{ $h->relacionados()->count() }}</td>
+                <td>
+                  @if($h->publicado)
+                    <span class="badge bg-success">Publicado</span>
+                  @else
+                    <span class="badge bg-secondary">Borrador</span>
+                  @endif
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" href="{{ route('funcionario.tramites.edit', $h->id) }}">Editar</a>
+                  <form action="{{ route('funcionario.tramites.destroy', $h->id) }}" method="POST" class="d-inline"
+                        onsubmit="return confirm('¿Eliminar este subtrámite?');">
+                    @csrf @method('DELETE')
+                    <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+            @endforeach
+
+          @empty
+            <tr><td colspan="6" class="text-center text-muted py-4">No hay trámites aún.</td></tr>
+          @endforelse
+          </tbody>
+        </table>
+      </div>
     </div>
+  </div>
 </div>
 @endsection

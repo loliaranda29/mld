@@ -61,51 +61,35 @@ class Tramite_configController extends Controller
     }
 
     // Actualizar
-     use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-
-// ...
 
     public function update(Request $request, $id)
-    {
-        $tramite = Tramite::findOrFail($id);
+{
+    $tramite = Tramite::findOrFail($id);
 
-        $data = $this->validateData($request);
+    $data = $request->validate([
+        'nombre'           => 'required|string|max:255',
+        'descripcion'      => 'nullable|string',
+        // … el resto de tus campos simples …
+        'formulario_json'  => 'nullable|string', // llega del hidden
+        'etapas_json'      => 'nullable|string',
+        'documento_json'   => 'nullable|string',
+        'config_json'      => 'nullable|string',
+        // …
+    ]);
 
-        // padre (evitar que se seleccione a sí mismo)
-        $parentId = $request->input('parent_id');
-        $data['parent_id'] = ($parentId && (int)$parentId !== (int)$tramite->id) ? (int)$parentId : null;
+    // No inventes estructuras nuevas acá: si el hidden existe, usarlo tal cual.
+    // (Opcional) Blindaje básico para booleanos/toggles:
+    $data['publicado']      = (bool) ($data['publicado']      ?? $tramite->publicado);
+    $data['disponible']     = (bool) ($data['disponible']     ?? $tramite->disponible);
+    $data['mostrar_inicio'] = (bool) ($data['mostrar_inicio'] ?? $tramite->mostrar_inicio);
 
-        // Actualiza campos simples del trámite (tu lógica original)
-        $tramite->update($data);
+    $tramite->update($data);
 
-        // --------- VÍNCULOS (many-to-many) -----------
-        $relIds = collect($request->input('relacionados_ids', []))
-            ->filter(fn($i) => $i && (int)$i !== (int)$tramite->id)
-            ->unique()->values()->all();
-        $tramite->relacionados()->sync($relIds);
+    return redirect()
+        ->route('funcionario.tramite_config')
+        ->with('success', 'Trámite actualizado correctamente.');
+}
 
-        // --------- HIJOS (asignar/limpiar parent_id en terceros) -----------
-        $hijosIds = collect($request->input('hijos_ids', []))
-            ->filter(fn($i) => $i && (int)$i !== (int)$tramite->id)
-            ->unique()->values()->all();
-
-        Tramite::where('parent_id', $tramite->id)
-            ->whereNotIn('id', $hijosIds)
-            ->update(['parent_id' => null]);
-
-        if (!empty($hijosIds)) {
-            Tramite::whereIn('id', $hijosIds)->update(['parent_id' => $tramite->id]);
-        }
-
-        // --- si tenías guardado de los JSON por pestañas, dejalo como estaba ---
-        // $this->maybeSetJson($tramite, 'general_json', $request->input('general_json') ?? null);
-        // ...
-
-        return redirect()
-            ->route('funcionario.tramite_config')
-            ->with('success','Trámite actualizado correctamente.');
-    }
 
     // Eliminar
     // App\Http\Controllers\Tramite_configController.php

@@ -1,20 +1,28 @@
-{{-- resources/views/pages/profile/funcionario/tramites/partials/formulario.blade.php --}}
 @php
-  // Normalizamos lo que venga de BD (array o string JSON) a array
-  $formInitRaw = $tramite->formulario_json ?? ['sections' => [ ['name' => 'Inicio del trámite', 'fields' => []] ]];
-  $formInit = is_string($formInitRaw) ? json_decode($formInitRaw, true) : $formInitRaw;
-  if (!is_array($formInit) || !isset($formInit['sections'])) {
-      $formInit = ['sections' => [ ['name' => 'Inicio del trámite', 'fields' => []] ]];
-  }
+    // Traer lo que venga (array por cast, o string JSON) y normalizar
+    $raw = $tramite->formulario_json ?? null;
+
+    if (is_string($raw)) {
+        $formInit = json_decode($raw, true);
+    } elseif (is_array($raw)) {
+        $formInit = $raw;
+    } else {
+        $formInit = null;
+    }
+
+    // Fallback limpio si no hay datos válidos
+    if (!is_array($formInit) || !isset($formInit['sections']) || !is_array($formInit['sections'])) {
+        $formInit = ['sections' => [ ['name' => 'Inicio del trámite', 'fields' => []] ]];
+    }
 @endphp
 
-{{-- Pasamos el JSON inicial como string seguro en data-initial y lo parseamos en el constructor --}}
 <div
-  x-data="formBuilder($el.dataset.initial)"
+  x-data="formBuilder($el.dataset.initial || '{}')"
   x-init="init()"
-  data-initial='@json($formInit, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT)'
+  data-initial='@json($formInit, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'
   class="row"
 >
+
 
   <!-- Panel izquierdo -->
   <div class="col-md-4">

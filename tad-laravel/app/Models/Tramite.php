@@ -48,4 +48,13 @@ class Tramite extends Model
             'tramite_id'
         )->withPivot('tipo')->withTimestamps();
     }
+    protected $casts = [
+    'general_json'    => 'array',
+    'formulario_json' => 'array',
+    'etapas_json'     => 'array',
+    'documento_json'  => 'array',
+    'config_json'     => 'array',
+];
+
+
 }

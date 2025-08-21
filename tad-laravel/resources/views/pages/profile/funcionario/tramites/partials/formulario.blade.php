@@ -68,13 +68,22 @@
           <div id="fieldContainer">
             <template x-for="(section, sIndex) in state.sections" :key="sIndex">
               <div class="mb-3 border rounded p-2" @dragover.prevent @drop="handleDrop($event, sIndex)">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <input class="form-control form-control-sm me-2" x-model="section.name" @input="updateHidden()" />
-                  <div class="form-check me-2">
-                    <input class="form-check-input" type="checkbox" :id="'repeatable_' + sIndex" x-model="section.repeatable" @change="updateHidden()">
-                    <label class="form-check-label" :for="'repeatable_' + sIndex">Repetible</label>
+                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                  <input class="form-control form-control-sm me-2" style="min-width:220px" x-model="section.name" @input="updateHidden()" />
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="form-check me-2">
+                      <input class="form-check-input" type="checkbox" :id="'repeatable_' + sIndex" x-model="section.repeatable" @change="updateHidden()">
+                      <label class="form-check-label" :for="'repeatable_' + sIndex">Repetible</label>
+                    </div>
+
+                    <!-- NUEVO: marcar sección como activable durante el trámite -->
+                    <div class="form-check me-2">
+                      <input class="form-check-input" type="checkbox" :id="'activable_' + sIndex" x-model="section.activable" @change="updateHidden()">
+                      <label class="form-check-label" :for="'activable_' + sIndex">Activable durante el trámite</label>
+                    </div>
+
+                    <button class="btn btn-sm btn-outline-danger" type="button" @click="removeSection(sIndex)">Eliminar sección</button>
                   </div>
-                  <button class="btn btn-sm btn-outline-danger" type="button" @click="removeSection(sIndex)">Eliminar sección</button>
                 </div>
 
                 <template x-for="(field, index) in section.fields" :key="index">
@@ -102,39 +111,36 @@
           <textarea id="jsonOutput" class="form-control" rows="10" readonly x-text="JSON.stringify(state, null, 2)"></textarea>
         </div>
 
+        <!-- ====== NUEVO: Flujograma tipo “diagrama” (no elimina lo anterior) ====== -->
         <div class="mt-3">
-          <label class="form-label">Vista flujo del formulario</label>
-          <div id="flowPreview" class="bg-light border rounded p-3">
-            <template x-if="$data.state && $data.state.sections && $data.state.sections.length">
-              <div class="d-flex flex-wrap gap-4">
-                <template x-for="(section, sIndex) in state.sections" :key="sIndex">
-                  <div class="border border-primary rounded p-2" style="min-width: 200px;">
-                    <strong x-text="section.name"></strong>
-                    <ul class="list-unstyled mt-2">
-                      <template x-for="(field, fIndex) in section.fields" :key="fIndex">
-                        <li>
-                          - <span x-text="field.label"></span>
-                          <template x-if="field.options">
-                            <ul class="ms-3">
-                              <template x-for="(opt, i) in field.options" :key="i">
-                                <li>
-                                  <span x-text="opt"></span>
-                                  <template x-if="field.conditions && field.conditions[opt]">
-                                    <span class="text-muted"> → <em x-text="field.conditions[opt]"></em></span>
-                                  </template>
-                                </li>
-                              </template>
-                            </ul>
-                          </template>
-                        </li>
-                      </template>
-                    </ul>
-                  </div>
-                </template>
-              </div>
-            </template>
-          </div>
+          <label class="form-label">Vista flujo del formulario (diagrama)</label>
+          <div id="flowCanvas"
+               class="bg-light border rounded"
+               style="height: 420px; min-height: 420px;"
+               x-init="renderFlow()"></div>
+          <small class="text-muted d-block mt-2">
+            Zoom con la rueda, arrastrar para mover. Flechas continuas = orden. Flechas punteadas = derivaciones.
+          </small>
         </div>
+        <!-- ====== /NUEVO ====== -->
+
+        <!-- ====== NUEVO: listado de secciones activables ====== -->
+        <div class="mt-4">
+          <label class="form-label">Secciones activables (plantillas para requerimientos)</label>
+          <ul class="list-group">
+            <template x-for="(s, idx) in (state.sections || []).filter(x => x.activable)" :key="'act-'+idx">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-plug me-1"></i> <span x-text="s.name"></span></span>
+                <span class="badge bg-secondary">Plantilla activable</span>
+              </li>
+            </template>
+            <template x-if="!(state.sections || []).some(x => x.activable)">
+              <li class="list-group-item text-muted">No hay secciones activables definidas.</li>
+            </template>
+          </ul>
+          <small class="text-muted d-block mt-1">Estas secciones no se muestran en el diagrama inicial y podrán habilitarse durante el trámite para pedir info/documentación adicional.</small>
+        </div>
+        <!-- ====== /NUEVO ====== -->
       </div>
     </div>
   </div>
@@ -338,6 +344,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@2.5.3"></script>
 
+<!-- NUEVO: librería para el diagrama -->
+<script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+
+<!-- Layout Dagre (opcional pero recomendado) -->
+<script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
+<script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+
+
 <script>
   function formBuilder(initialRaw) {
     try {
@@ -363,6 +377,10 @@
         // Estado principal
         state: base,
 
+        // === NUEVO: props para el diagrama ===
+        cy: null,
+        _flowTimer: null,
+
         // Paleta de componentes
         components: [
           { type: 'text',     label: 'Respuesta breve',          name: 'respuesta_breve' },
@@ -379,17 +397,42 @@
         ],
 
         init() {
-          this.updateHidden();
-        },
+        this.updateHidden();
+        this.renderFlow();
+
+        // Cuando se muestra el tab “Formulario”, reencuadrar
+        const tabBtn = document.getElementById('formulario-tab');
+        if (tabBtn) {
+          tabBtn.addEventListener('shown.bs.tab', () => this._refit());
+        }
+
+        // Reencuadrar en resize
+        window.addEventListener('resize', () => this._refit());
+
+        // Al entrar en el viewport por primera vez, reencuadrar
+        const container = document.getElementById('flowCanvas');
+        if (container && 'IntersectionObserver' in window) {
+          const io = new IntersectionObserver((entries, obs) => {
+            if (entries[0]?.isIntersecting) {
+              this._refit();
+              obs.disconnect();
+            }
+          });
+          io.observe(container);
+        }
+      },
+
 
         updateHidden() {
           if (this.$refs && this.$refs.formularioJson) {
             this.$refs.formularioJson.value = JSON.stringify(this.state);
           }
+          this.scheduleFlow(); // <- NUEVO
         },
 
         addSection() {
-          (this.state.sections ??= []).push({ name: 'Nueva sección', fields: [], repeatable: false });
+          // NUEVO: activable por defecto en false
+          (this.state.sections ??= []).push({ name: 'Nueva sección', fields: [], repeatable: false, activable: false });
           this.updateHidden();
         },
 
@@ -498,7 +541,310 @@
           const item = JSON.parse(event.dataTransfer.getData('application/json'));
           this.addFieldToSection(item, sIndex);
           this.updateHidden();
+        },
+
+        // ===== NUEVO: Diagrama =====
+        scheduleFlow() {
+          clearTimeout(this._flowTimer);
+          this._flowTimer = setTimeout(() => this.renderFlow(), 200);
+        },
+
+        renderFlow() {
+          const container = document.getElementById('flowCanvas');
+          if (!container) return;
+
+          // NUEVO: construir elementos filtrando secciones activables
+          const elements = this._buildFlowElementsForDiagram();
+
+          if (!this.cy) {
+            this.cy = cytoscape({
+              container,
+              elements,
+              wheelSensitivity: 0.2,
+              boxSelectionEnabled: false,
+              autoungrabify: true,
+              style: [
+                  // Secciones
+                  {
+                    selector: 'node.section',
+                    style: {
+                      'shape': 'round-rectangle',
+                      'background-color': '#cfd8dc',
+                      'border-width': 1,
+                      'border-color': '#90a4ae',
+                      'label': 'data(label)',
+                      'font-size': 12,
+                      'text-valign': 'center',
+                      'text-halign': 'center',
+                      // ← texto SIEMPRE oscuro
+                      'color': '#0f172a',
+                      'text-outline-width': 0,
+                      'width': 'label',
+                      'height': 'label',
+                      'padding': '8px 12px'
+                    }
+                  },
+                  // Entradas
+                  {
+                    selector: 'node.input',
+                    style: {
+                      'shape': 'round-rectangle',
+                      'background-color': '#60a5fa',
+                      'border-width': 0,
+                      'label': 'data(label)',
+                      // ← texto oscuro (antes estaba en blanco)
+                      'color': '#0f172a',
+                      'text-outline-width': 0,
+                      'font-weight': 600,
+                      'text-wrap': 'wrap',
+                      'text-max-width': 180,
+                      'width': 'label',
+                      'height': 'label',
+                      'padding': '8px 12px'
+                    }
+                  },
+                  // Elección
+                  {
+                    selector: 'node.choice',
+                    style: {
+                      'shape': 'round-rectangle',
+                      'background-color': '#22c55e',
+                      'label': 'data(label)',
+                      // ← texto oscuro (antes estaba en blanco)
+                      'color': '#0f172a',
+                      'text-outline-width': 0,
+                      'font-weight': 600,
+                      'text-wrap': 'wrap',
+                      'text-max-width': 180,
+                      'width': 'label',
+                      'height': 'label',
+                      'padding': '8px 12px'
+                    }
+                  },
+                  // Especiales
+                  {
+                    selector: 'node.special',
+                    style: {
+                      'shape': 'round-rectangle',
+                      'background-color': '#f59e0b',
+                      'label': 'data(label)',
+                      // ya era oscuro, dejo el mismo tono
+                      'color': '#0f172a',
+                      'text-outline-width': 0,
+                      'font-weight': 700,
+                      'text-wrap': 'wrap',
+                      'text-max-width': 220,
+                      'width': 'label',
+                      'height': 'label',
+                      'padding': '8px 12px'
+                    }
+                  },
+                  // Flujo normal
+                  {
+                    selector: 'edge.flow',
+                    style: {
+                      'width': 2,
+                      'line-color': '#94a3b8',
+                      'target-arrow-color': '#94a3b8',
+                      'target-arrow-shape': 'triangle',
+                      'curve-style': 'bezier'
+                    }
+                  },
+                  // Condiciones/derivaciones
+                  {
+                    selector: 'edge.cond',
+                    style: {
+                      'width': 2,
+                      'line-color': '#ef4444',
+                      'target-arrow-color': '#ef4444',
+                      'target-arrow-shape': 'triangle',
+                      'line-style': 'dashed',
+                      'curve-style': 'bezier',
+                      'label': 'data(label)',
+                      'font-size': 10,
+                      'color': '#0f172a',                 // ← también texto oscuro en las etiquetas de aristas
+                      'text-background-color': '#fff',
+                      'text-background-opacity': 0.7,
+                      'text-background-padding': 2
+                    }
+                  }
+                ]
+
+            });
+          } else {
+            this.cy.json({ elements });
+          }
+
+          const layout = this.cy.layout({
+          name: 'breadthfirst',
+          directed: true,
+          nodeDimensionsIncludeLabels: true,
+          padding: 16,           // padding más chico
+          spacingFactor: 0.6,    // líneas ~a la mitad
+          animate: false,
+          roots: this.cy.collection('node.section')
+        });
+        layout.run();
+
+        // Muy importante: encuadrar y centrar tras posicionar
+        this._refit();
+        },
+
+        _refit() {
+        try {
+          if (!this.cy) return;
+          // recalcular tamaño por si el contenedor cambió
+          this.cy.resize();
+          // ajustar zoom para que entre todo, con un padding cómodo
+          this.cy.fit(this.cy.elements(), 48);  // padding en px
+          // centrar por si quedó con pan residual
+          this.cy.center();
+        } catch (e) {
+          console.warn('refit falló', e);
         }
+      },
+
+        // ====== ORIGINAL (sin filtro) ======
+        _buildFlowElements() {
+          const els = [];
+          const sections = (this.state && Array.isArray(this.state.sections)) ? this.state.sections : [];
+
+          const sectionIndexByName = new Map();
+          sections.forEach((s, i) => sectionIndexByName.set((s.name || '').trim(), i));
+
+          sections.forEach((s, sIdx) => {
+            els.push({
+              data: { id: `sec-${sIdx}`, label: s.name || `Sección ${sIdx+1}` },
+              classes: 'section'
+            });
+
+            const fields = Array.isArray(s.fields) ? s.fields : [];
+            let prevId = `sec-${sIdx}`;
+
+            fields.forEach((f, fIdx) => {
+              const id = `f-${sIdx}-${fIdx}`;
+              const label = f.label || f.name || `Campo ${fIdx+1}`;
+              const type = (f.type || '').toLowerCase();
+
+              let klass = 'input';
+              if (['select','radio','checkbox','date'].includes(type)) klass = 'choice';
+              if (['file','api','code','richtext'].includes(type))   klass = 'special';
+
+              els.push({ data: { id, label }, classes: klass });
+              els.push({ data: { id: `e-${prevId}-${id}`, source: prevId, target: id }, classes: 'flow' });
+              prevId = id;
+
+              // Condición general (derivar siempre)
+              if (f.condition) {
+                const toIdx = sectionIndexByName.get((f.condition || '').trim());
+                if (typeof toIdx === 'number') {
+                  els.push({
+                    data: {
+                      id: `cg-${id}-sec-${toIdx}`,
+                      source: id,
+                      target: `sec-${toIdx}`,
+                      label: ''
+                    },
+                    classes: 'cond'
+                  });
+                }
+              }
+
+              // Condiciones por opción
+              if (f.conditions && typeof f.conditions === 'object') {
+                for (const [opt, secName] of Object.entries(f.conditions)) {
+                  const toIdx = sectionIndexByName.get((secName || '').trim());
+                  if (typeof toIdx === 'number') {
+                    els.push({
+                      data: {
+                        id: `c-${id}-sec-${toIdx}-${opt}`,
+                        source: id,
+                        target: `sec-${toIdx}`,
+                        label: String(opt)
+                      },
+                      classes: 'cond'
+                    });
+                  }
+                }
+              }
+            });
+          });
+
+          return els;
+        },
+
+        // ====== NUEVO: versión para el diagrama (excluye activables) ======
+        _buildFlowElementsForDiagram() {
+          const els = [];
+          const all = (this.state && Array.isArray(this.state.sections)) ? this.state.sections : [];
+
+          // solo las NO activables
+          const sections = all.filter(s => !s.activable);
+
+          const sectionIndexByName = new Map();
+          sections.forEach((s, i) => sectionIndexByName.set((s.name || '').trim(), i));
+
+          sections.forEach((s, sIdx) => {
+            els.push({
+              data: { id: `sec-${sIdx}`, label: s.name || `Sección ${sIdx+1}` },
+              classes: 'section'
+            });
+
+            const fields = Array.isArray(s.fields) ? s.fields : [];
+            let prevId = `sec-${sIdx}`;
+
+            fields.forEach((f, fIdx) => {
+              const id = `f-${sIdx}-${fIdx}`;
+              const label = f.label || f.name || `Campo ${fIdx+1}`;
+              const type = (f.type || '').toLowerCase();
+
+              let klass = 'input';
+              if (['select','radio','checkbox','date'].includes(type)) klass = 'choice';
+              if (['file','api','code','richtext'].includes(type))   klass = 'special';
+
+              els.push({ data: { id, label }, classes: klass });
+              els.push({ data: { id: `e-${prevId}-${id}`, source: prevId, target: id }, classes: 'flow' });
+              prevId = id;
+
+              // Condición general (derivar siempre)
+              if (f.condition) {
+                const toIdx = sectionIndexByName.get((f.condition || '').trim());
+                if (typeof toIdx === 'number') {
+                  els.push({
+                    data: {
+                      id: `cg-${id}-sec-${toIdx}`,
+                      source: id,
+                      target: `sec-${toIdx}`,
+                      label: ''
+                    },
+                    classes: 'cond'
+                  });
+                }
+              }
+
+              // Condiciones por opción
+              if (f.conditions && typeof f.conditions === 'object') {
+                for (const [opt, secName] of Object.entries(f.conditions)) {
+                  const toIdx = sectionIndexByName.get((secName || '').trim());
+                  if (typeof toIdx === 'number') {
+                    els.push({
+                      data: {
+                        id: `c-${id}-sec-${toIdx}-${opt}`,
+                        source: id,
+                        target: `sec-${toIdx}`,
+                        label: String(opt)
+                      },
+                      classes: 'cond'
+                    });
+                  }
+                }
+              }
+            });
+          });
+
+          return els;
+        }
+        // ===== /NUEVO =====
       };
 
     } catch (e) {

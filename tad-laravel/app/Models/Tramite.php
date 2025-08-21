@@ -55,6 +55,14 @@ class Tramite extends Model
     'documento_json'  => 'array',
     'config_json'     => 'array',
 ];
+public function seccionesActivables(): array
+{
+    $json = $this->formulario_json;
+    if (is_string($json)) $json = json_decode($json, true);
+
+    $sections = is_array($json['sections'] ?? null) ? $json['sections'] : [];
+    return array_values(array_filter($sections, fn($s) => !empty($s['activable'])));
+}
 
 
 }

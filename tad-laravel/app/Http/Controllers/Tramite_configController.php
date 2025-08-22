@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Tramite;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+
+\App\Models\Catalogo::where('slug','dependencias')->first()?->items()->where('activo',1)->orderBy('orden')->orderBy('nombre')->get();
+
 
 
 class Tramite_configController extends Controller
@@ -66,22 +70,9 @@ class Tramite_configController extends Controller
 {
     $tramite = Tramite::findOrFail($id);
 
-    $data = $request->validate([
-        'nombre'           => 'required|string|max:255',
-        'descripcion'      => 'nullable|string',
-        // … el resto de tus campos simples …
-        'formulario_json'  => 'nullable|string', // llega del hidden
-        'etapas_json'      => 'nullable|string',
-        'documento_json'   => 'nullable|string',
-        'config_json'      => 'nullable|string',
-        // …
-    ]);
-
-    // No inventes estructuras nuevas acá: si el hidden existe, usarlo tal cual.
-    // (Opcional) Blindaje básico para booleanos/toggles:
-    $data['publicado']      = (bool) ($data['publicado']      ?? $tramite->publicado);
-    $data['disponible']     = (bool) ($data['disponible']     ?? $tramite->disponible);
-    $data['mostrar_inicio'] = (bool) ($data['mostrar_inicio'] ?? $tramite->mostrar_inicio);
+    $data = $this->validateData($request);       // ✅ usa el mismo helper
+    $data = $this->normalizeBooleans($request, $data);
+    $data = $this->stripMissingColumns($data);
 
     $tramite->update($data);
 
@@ -89,6 +80,7 @@ class Tramite_configController extends Controller
         ->route('funcionario.tramite_config')
         ->with('success', 'Trámite actualizado correctamente.');
 }
+
 
 
     // Eliminar
@@ -143,6 +135,28 @@ public function destroy($id)
             'acepta_pruebas'      => 'nullable',
             'modulo_citas'        => 'nullable',
             'modulo_inspectores'  => 'nullable',
+
+            // campos generales enriquecidos
+            'tutorial_html'      => ['nullable','string'],
+            'modalidad'          => ['nullable','in:Presencial,Online,Presencial/Online'],
+            'implica_costo'      => ['nullable','in:Con costo,Sin costo'],
+            'detalle_costo_html' => ['nullable','string'],
+            'telefono_oficina'   => ['nullable','string','max:60'],
+            'horario_atencion'   => ['nullable','string','max:120'],
+
+            'dependencia_id'     => ['nullable','integer'],
+            'dependencia_nombre' => ['nullable','string','max:160'],
+            'categoria_id'       => ['nullable','integer'],
+            'categoria_nombre'   => ['nullable','string','max:120'],
+            'oficina_id'         => ['nullable','integer'],
+            'oficina_nombre'     => ['nullable','string','max:160'],
+            'ubicacion_id'       => ['nullable','integer'],
+            'ubicacion_nombre'   => ['nullable','string','max:200'],
+
+            'descripcion_html'   => ['nullable','string'],
+            'requisitos_html'    => ['nullable','string'],
+            'pasos_html'         => ['nullable','string'],
+
         ]);
     }
 
@@ -177,6 +191,16 @@ public function destroy($id)
             }
             return $data;
         }
+        public function mediaUpload(Request $request)
+        {
+            $request->validate([
+                'file' => ['required','file','mimes:jpg,jpeg,png,gif,webp,mp4,webm,ogg','max:20480'] // 20MB
+            ]);
 
+            $path = $request->file('file')->store('tramites', 'public'); // storage/app/public/tramites
+            $url  = Storage::disk('public')->url($path);
+
+            return response()->json(['url' => $url], 201);
+        }
 
 }

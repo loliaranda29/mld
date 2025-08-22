@@ -3,200 +3,226 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Models\Catalogo;
+use App\Models\CatalogoItem;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class CatalogosAdminController extends Controller
 {
-    // Para clonar la UI usamos datos en memoria
-    protected function seed()
-    {
-        // ⚠️ En producción: reemplazar por modelo Catalogo::query()->latest()->get()
-        return collect([
-            ['id'=>1,'nombre'=>'DestinoPermiso',             'created_at'=>'2025-03-20 09:37:54'],
-            ['id'=>2,'nombre'=>'Corresponde',                'created_at'=>'2025-03-20 09:33:26'],
-            ['id'=>3,'nombre'=>'Construcción Destino',       'created_at'=>'2025-03-20 09:24:55'],
-            ['id'=>4,'nombre'=>'Catalogo de prueba',         'created_at'=>'2024-07-01 10:57:37'],
-            ['id'=>5,'nombre'=>'Categorías Particulares',    'created_at'=>'2024-07-01 09:06:54'],
-            ['id'=>6,'nombre'=>'Barrios',                    'created_at'=>'2023-12-19 11:44:53'],
-            ['id'=>7,'nombre'=>'Área',                       'created_at'=>'2023-12-18 11:54:20'],
-            ['id'=>8,'nombre'=>'Material Techo',             'created_at'=>'2023-06-02 10:02:29'],
-            ['id'=>9,'nombre'=>'Tipo de DNI',                'created_at'=>'2023-05-22 11:25:22'],
-            ['id'=>10,'nombre'=>'Estado Civil',              'created_at'=>'2023-05-22 11:24:26'],
-        ]);
-    }
-
+    /* ───────────── Catálogos (padre) ───────────── */
 
     public function index(Request $request)
     {
-        // Paginar manualmente la colección para clonar la UI
-        $perPage   = (int)($request->get('per_page', 10));
-        $page      = (int)($request->get('page', 1));
-        $all       = $this->seed()->sortByDesc('created_at')->values();
-        $total     = $all->count();
-        $slice     = $all->slice(($page-1)*$perPage, $perPage)->values();
+        $perPage   = (int) $request->get('per_page', 10);
+
+        $catalogos = Catalogo::query()
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('pages.profile.funcionario.catalogos.index', [
-            'active'      => 'catalogos',
-            'catalogos'   => $slice,
-            'page'        => $page,
-            'perPage'     => $perPage,
-            'total'       => $total,
+            'active'    => 'catalogos',
+            'catalogos' => $catalogos,            // ← ahora es LengthAwarePaginator
+            'page'      => $catalogos->currentPage(),
+            'perPage'   => $catalogos->perPage(),
+            'total'     => $catalogos->total(),
+        ]);
+    }
+
+    public function create()
+    {
+        return view('pages.profile.funcionario.catalogos.create', [
+            'active' => 'catalogos',
         ]);
     }
 
     public function store(Request $request)
     {
-        // En la demo no persistimos; validamos y “simulamos éxito”
-        $request->validate([
-            'nombre' => ['required','string','max:200'],
+        $data = $request->validate([
+            'nombre'      => ['required','string','max:200'],
+            'slug'        => ['nullable','string','max:200', 'unique:catalogos,slug'],
+            'descripcion' => ['nullable','string','max:255'],
+            'icono'       => ['nullable','string','max:255'],
+            'orden'       => ['nullable','integer'],
+            'activo'      => ['nullable','boolean'],
         ]);
 
-        // Aquí guardarías el registro en BD (Catalogo::create([...]))
-        return back()->with('ok', 'Catálogo agregado correctamente.');
+        // si no mandan slug, lo generamos
+        $data['slug'] = $data['slug'] ?? Str::slug($data['nombre']);
+        $data['activo'] = (bool)($data['activo'] ?? true);
+
+        Catalogo::create($data);
+
+        return redirect()->route('catalogos.index')->with('ok','Catálogo creado');
     }
 
     public function show($id)
     {
-        // En demo: respondemos 404 si no existe
-        $item = $this->seed()->firstWhere('id', (int)$id);
-        if (!$item) {
-            abort(404);
-        }
+        $catalogo = Catalogo::findOrFail($id);
+
+        // Listado de items del catálogo (paginado)
+        $items = $catalogo->items()
+            ->orderByRaw('COALESCE(orden, 999999) asc')
+            ->orderBy('nombre')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('pages.profile.funcionario.catalogos.show', [
-            'active'  => 'catalogos',
-            'catalogo'=> $item,
+            'active'   => 'catalogos',
+            'catalogo' => $catalogo,
+            'items'    => $items,
         ]);
     }
 
     public function destroy($id)
     {
-        // En la demo no eliminamos nada. En BD: Catalogo::findOrFail($id)->delete();
-        return back()->with('ok', 'Catálogo eliminado.');
+        Catalogo::findOrFail($id)->delete(); // cascade a items por FK
+        return back()->with('ok','Catálogo eliminado.');
     }
-    public function create()
-{
-    // Solo renderiza la pantalla de alta (clon visual)
-    return view('pages.profile.funcionario.catalogos.create', [
-        'active' => 'catalogos',
-    ]);
-}
 
-public function subcatalogosSeed()
-{
-    // Demo (clona la UI). En prod, traer desde BD.
-    return collect([
-        ['id' => '1SmNbPMRvt3hE8hSJ6A3', 'nombre' => 'CONEXIÓN ÚNICA', 'slug' => 'conexionUnica'],
-        ['id' => 'fqsLvhiDF4xLTwULRvV3', 'nombre' => 'CASA Nº',          'slug' => 'casaN'],
-        ['id' => '3gCKU82ZScKomPPSI2Z7q','nombre' => 'DPTO Nº',          'slug' => 'dptoN'],
-        ['id' => 'Fq3717BlI2WqhkOTSJ',   'nombre' => 'LOCAL Nº',         'slug' => 'localN'],
-        ['id' => 'H5IFGXMd19YrwrEONagf', 'nombre' => 'ESP.COM. Nº',      'slug' => 'espComN'],
-        ['id' => '3wnjKoyTc8yyKT4CDvKM', 'nombre' => 'DEPÓSITO Nº',      'slug' => 'depositoN'],
-        ['id' => 'W4Vqawsw88S8AuxAyfDp', 'nombre' => 'GALPÓN Nº',        'slug' => 'galponN'],
-        ['id' => 'Oh9MQijQm2jE5lGW7X1M', 'nombre' => 'OFICINA Nº',       'slug' => 'oficinaN'],
-        ['id' => 'DgnKSbyiKHP2whH7dxIDV','nombre' => 'PORTAL ING. Nº',    'slug' => 'portalIngN'],
-    ]);
-}
+    /* ───────────── Subcatálogos / Ítems ───────────── */
 
-public function subcatalogos(Request $request, $id)
+    // Listado “subcatálogos” (ítems) de un catálogo
+    public function subcatalogos(Request $request, $id)
 {
-    // En demo ignoramos $id; en prod usalo para filtrar subcatálogos de ese catálogo.
-    $perPage = (int)($request->get('per_page', 10));
-    $page    = (int)($request->get('page', 1));
-
-    $all   = $this->subcatalogosSeed()->values();
-    $total = $all->count();
-    $slice = $all->slice(($page-1)*$perPage, $perPage)->values();
+    $catalogo = Catalogo::findOrFail($id);
+    $items = $catalogo->items()
+        ->orderByRaw('COALESCE(orden, 999999) asc')->orderBy('nombre')
+        ->paginate((int)$request->get('per_page', 10))->withQueryString();
 
     return view('pages.profile.funcionario.catalogos.subcatalogos', [
         'active'       => 'catalogos',
-        'catalogoId'   => $id,
-        'subcatalogos' => $slice,
-        'page'         => $page,
-        'perPage'      => $perPage,
-        'total'        => $total,
-    ]);
-}
-// ---- Mock de opciones / subcatálogos ----
-protected function seedOptions($catalogoId)
-{
-    // Podés personalizar por catálogo si querés;
-    // por ahora devolvemos el set de la maqueta
-    return collect([
-        ['id'=>'1SmNbPMRvt3hE8hSJ6A3','nombre'=>'CONEXIÓN ÚNICA','slug'=>'conexionUnica','icono'=>'mdi-account'],
-        ['id'=>'fqsLvhiDF4xLTwULRvy3','nombre'=>'CASA Nº','slug'=>'casaN','icono'=>'mdi-home'],
-        ['id'=>'3gCKU82zScKomPPSlZ7q','nombre'=>'DPTO Nº','slug'=>'dptoN','icono'=>'mdi-office-building'],
-        ['id'=>'Fq37I7I8Il2WqhkOTSJj','nombre'=>'LOCAL Nº','slug'=>'localN','icono'=>'mdi-storefront'],
-        ['id'=>'H5IFGXMdl9YrwREOnaqf','nombre'=>'ESP.COM. Nº','slug'=>'espComN','icono'=>'mdi-domain'],
-        ['id'=>'3wnjKoyTc8yyKT4CDvKM','nombre'=>'DEPÓSITO Nº','slug'=>'depositoN','icono'=>'mdi-warehouse'],
-        ['id'=>'W4Vqawsw88S8AuxAyfDp','nombre'=>'GALPÓN Nº','slug'=>'galponN','icono'=>'mdi-warehouse'],
-        ['id'=>'Oh9MQijQm2jE5IGwTXIM','nombre'=>'OFICINA Nº','slug'=>'oficinaN','icono'=>'mdi-domain'],
-        ['id'=>'DgnKSbyiKHP2wH7dxIDV','nombre'=>'PORTAL ING. Nº','slug'=>'portalIngN','icono'=>'mdi-gate'],
+        'catalogoId'   => $catalogo->id,
+        'catalogo'     => $catalogo,      // si querés usar nombre en el breadcrumb
+        'subcatalogos' => $items,
+        'page'         => $items->currentPage(),
+        'perPage'      => $items->perPage(),
+        'total'        => $items->total(),
     ]);
 }
 
-public function subIndex($catalogoId, Request $request)
-{
-    $perPage = (int)$request->get('per_page', 10);
-    $page    = (int)$request->get('page', 1);
+    // Si tenés vistas “sub.index / sub.show” mantenemos equivalentes:
+    public function subIndex($catalogoId, Request $request)
+    {
+        $catalogo = Catalogo::findOrFail($catalogoId);
+        $perPage  = (int)$request->get('per_page', 10);
 
-    $all   = $this->seedOptions($catalogoId)->values();
-    $total = $all->count();
-    $slice = $all->slice(($page-1)*$perPage, $perPage)->values();
+        $items = $catalogo->items()
+            ->orderByRaw('COALESCE(orden, 999999) asc')
+            ->orderBy('nombre')
+            ->paginate($perPage)
+            ->withQueryString();
 
-    return view('pages.profile.funcionario.catalogos.sub.index', [
-        'active'      => 'catalogos',
-        'catalogoId'  => $catalogoId,
-        'items'       => $slice,
-        'page'        => $page,
-        'perPage'     => $perPage,
-        'total'       => $total,
-    ]);
-}
-
-public function subShow($catalogoId, $optId)
-{
-    $opt = $this->seedOptions($catalogoId)->firstWhere('id', $optId);
-    abort_unless($opt, 404);
-
-    return view('pages.profile.funcionario.catalogos.sub.show', [
-        'active'     => 'catalogos',
-        'catalogoId' => $catalogoId,
-        'opt'        => $opt,
-    ]);
-}
-public function subUpload(Request $request, $catalogoId, $optId)
-{
-    // Si el formulario viene con 'mode=csv', tratamos archivo
-    if ($request->input('mode') === 'csv') {
-        $request->validate([
-            'csv' => ['required','file','mimes:csv,txt'],
+        return view('pages.profile.funcionario.catalogos.sub.index', [
+            'active'     => 'catalogos',
+            'catalogoId' => $catalogo->id,
+            'items'      => $items,
+            'page'       => $items->currentPage(),
+            'perPage'    => $items->perPage(),
+            'total'      => $items->total(),
         ]);
-        // Aquí parsearías el CSV y guardarías los términos en BD…
-        return back()->with('ok', 'Archivo CSV recibido (demo).');
     }
 
-    // Si no, es "Agregar un término"
-    $request->validate([
-        'nombre' => ['required','string','max:255'],
-        'slug'   => ['required','string','max:255'],
-        'icon'   => ['nullable','string','max:255'],
+    public function subShow($catalogoId, $optId)
+    {
+        $catalogo = Catalogo::findOrFail($catalogoId);
+        $opt      = $catalogo->items()->whereKey($optId)->firstOrFail();
+
+        return view('pages.profile.funcionario.catalogos.sub.show', [
+            'active'     => 'catalogos',
+            'catalogoId' => $catalogo->id,
+            'opt'        => $opt,
+        ]);
+    }
+
+    // Alta de ítem o importación CSV
+// Alta manual
+public function subStore(Request $request, $id)
+{
+    $catalogo = \App\Models\Catalogo::findOrFail($id);
+
+    $data = $request->validate([
+        'nombre'     => ['required','string','max:255'],
+        'slug'       => ['nullable','string','max:255'],
+        'icono'      => ['nullable','string','max:255'],
+        'orden'      => ['nullable','integer'],
+        'activo'     => ['nullable','in:0,1'],       // ⬅️ acepta 0/1
+        'jerarquico' => ['nullable','in:0,1'],       // ⬅️ acepta 0/1
     ]);
 
-    // Aquí crearías el término en BD…
-    return back()->with('ok', 'Término agregado (demo).');
+    $activo     = $request->boolean('activo');       // ⬅️ castea on/yes/1 a true
+    $jerarquico = $request->boolean('jerarquico');
+
+    \App\Models\CatalogoItem::create([
+        'catalogo_id' => $catalogo->id,
+        'nombre'      => $data['nombre'],
+        'codigo'      => null,
+        'orden'       => $data['orden'] ?? null,
+        'activo'      => $activo,
+        'meta'        => [
+            'slug'       => $data['slug'] ?: \Illuminate\Support\Str::slug($data['nombre']),
+            'icono'      => $data['icono'] ?? null,
+            'jerarquico' => $jerarquico,
+        ],
+    ]);
+
+    return back()->with('ok','Término agregado.');
 }
-public function subDestroy($catalogoId, $optId)
+
+
+
+// Upload CSV (con o sin cabecera)
+public function subUpload(Request $request, $id)
 {
-    // En demo validamos que exista; en producción eliminá en BD
-    //$exists = $this->seedOptions($catalogoId)->firstWhere('id', $optId);
-    //abort_unless($exists, 404);
+    $catalogo = Catalogo::findOrFail($id);
+    $request->validate(['csv' => ['required','file','mimes:csv,txt']]);
 
-    // Aquí iría: CatalogoOpcion::where('catalogo_id', $catalogoId)->where('id', $optId)->delete();
-    return back()->with('ok', 'Término eliminado correctamente.');
+    $h = fopen($request->file('csv')->getRealPath(), 'r');
+    $count = 0; $header = null;
+
+    while (($row = fgetcsv($h, 0, ',')) !== false) {
+        if ($header === null) {
+            $header = array_map('mb_strtolower', $row);
+            if (!in_array('nombre', $header)) { // sin cabecera
+                $header = ['nombre','slug','icono','orden','activo','jerarquico'];
+                // re-procesamos esta fila como datos
+                $row = array_pad($row, count($header), null);
+            } else {
+                continue; // ya seteamos header, próxima vuelta trae datos
+            }
+        }
+        $row = array_pad($row, count($header), null);
+        $data = array_combine($header, $row);
+
+        $nombre = trim($data['nombre'] ?? '');
+        if ($nombre === '') continue;
+
+        CatalogoItem::create([
+            'catalogo_id' => $catalogo->id,
+            'nombre'      => $nombre,
+            'orden'       => isset($data['orden']) ? (int)$data['orden'] : null,
+            'activo'      => isset($data['activo']) ? (bool)$data['activo'] : true,
+            'meta'        => [
+                'slug'       => ($data['slug'] ?? null) ?: Str::slug($nombre),
+                'icono'      => $data['icono'] ?? null,
+                'jerarquico' => isset($data['jerarquico']) ? (bool)$data['jerarquico'] : false,
+            ],
+        ]);
+        $count++;
+    }
+    fclose($h);
+
+    return back()->with('ok', "Se importaron {$count} términos.");
 }
 
 
-}
+    public function subDestroy($catalogoId, $optId)
+    {
+        $catalogo = Catalogo::findOrFail($catalogoId);
+        $catalogo->items()->whereKey($optId)->firstOrFail()->delete();
 
+        return back()->with('ok', 'Término eliminado correctamente.');
+    }
+}

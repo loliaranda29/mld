@@ -111,7 +111,7 @@
           <textarea id="jsonOutput" class="form-control" rows="10" readonly x-text="JSON.stringify(state, null, 2)"></textarea>
         </div>
 
-        <!-- ====== NUEVO: Flujograma tipo “diagrama” (no elimina lo anterior) ====== -->
+        <!-- ====== Flujograma tipo “diagrama” ====== -->
         <div class="mt-3">
           <label class="form-label">Vista flujo del formulario (diagrama)</label>
           <div id="flowCanvas"
@@ -119,12 +119,12 @@
                style="height: 420px; min-height: 420px;"
                x-init="renderFlow()"></div>
           <small class="text-muted d-block mt-2">
-            Zoom con la rueda, arrastrar para mover. Flechas continuas = orden. Flechas punteadas = derivaciones.
+            <strong>Doble clic</strong> en un campo para editar. <strong>Clic derecho</strong> (o <kbd>Supr</kbd>) para eliminar. Zoom con la rueda; arrastrar para mover.
           </small>
         </div>
-        <!-- ====== /NUEVO ====== -->
+        <!-- ====== /Flujograma ====== -->
 
-        <!-- ====== NUEVO: listado de secciones activables ====== -->
+        <!-- ====== Listado de secciones activables ====== -->
         <div class="mt-4">
           <label class="form-label">Secciones activables (plantillas para requerimientos)</label>
           <ul class="list-group">
@@ -140,7 +140,7 @@
           </ul>
           <small class="text-muted d-block mt-1">Estas secciones no se muestran en el diagrama inicial y podrán habilitarse durante el trámite para pedir info/documentación adicional.</small>
         </div>
-        <!-- ====== /NUEVO ====== -->
+        <!-- ====== /Listado activables ====== -->
       </div>
     </div>
   </div>
@@ -377,9 +377,11 @@
         // Estado principal
         state: base,
 
-        // === NUEVO: props para el diagrama ===
+        // Props del diagrama
         cy: null,
         _flowTimer: null,
+        _lastTap: { t: 0, id: null },
+        _selectedNodeId: null,
 
         // Paleta de componentes
         components: [
@@ -397,41 +399,47 @@
         ],
 
         init() {
-        this.updateHidden();
-        this.renderFlow();
+          this.updateHidden();
+          this.renderFlow();
 
-        // Cuando se muestra el tab “Formulario”, reencuadrar
-        const tabBtn = document.getElementById('formulario-tab');
-        if (tabBtn) {
-          tabBtn.addEventListener('shown.bs.tab', () => this._refit());
-        }
+          // Reencuadre al mostrar tab
+          const tabBtn = document.getElementById('formulario-tab');
+          if (tabBtn) {
+            tabBtn.addEventListener('shown.bs.tab', () => this._refit());
+          }
 
-        // Reencuadrar en resize
-        window.addEventListener('resize', () => this._refit());
+          // Reencuadre al redimensionar
+          window.addEventListener('resize', () => this._refit());
 
-        // Al entrar en el viewport por primera vez, reencuadrar
-        const container = document.getElementById('flowCanvas');
-        if (container && 'IntersectionObserver' in window) {
-          const io = new IntersectionObserver((entries, obs) => {
-            if (entries[0]?.isIntersecting) {
-              this._refit();
-              obs.disconnect();
+          // Reencuadre al entrar en viewport
+          const container = document.getElementById('flowCanvas');
+          if (container && 'IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries, obs) => {
+              if (entries[0]?.isIntersecting) {
+                this._refit();
+                obs.disconnect();
+              }
+            });
+            io.observe(container);
+          }
+
+          // Eliminar con Supr/Backspace si hay un nodo seleccionado
+          document.addEventListener('keydown', (e) => {
+            if ((e.key === 'Delete' || e.key === 'Backspace') && this._selectedNodeId) {
+              this._handleDeleteNode(this._selectedNodeId);
             }
           });
-          io.observe(container);
-        }
-      },
-
+        },
 
         updateHidden() {
           if (this.$refs && this.$refs.formularioJson) {
             this.$refs.formularioJson.value = JSON.stringify(this.state);
           }
-          this.scheduleFlow(); // <- NUEVO
+          this.scheduleFlow();
         },
 
         addSection() {
-          // NUEVO: activable por defecto en false
+          // activable por defecto en false
           (this.state.sections ??= []).push({ name: 'Nueva sección', fields: [], repeatable: false, activable: false });
           this.updateHidden();
         },
@@ -464,7 +472,7 @@
           }
           if (['select','radio','checkbox'].includes(item.type)) {
             field.options = [];
-            field.conditions = {}; // <- reglas por opción
+            field.conditions = {}; // reglas por opción
           }
           (this.state.sections[sIndex].fields ??= []).push(field);
           this.updateHidden();
@@ -475,7 +483,7 @@
           this.updateHidden();
         },
 
-        // === Botón Editar ===
+        // Abrir modal desde la lista
         editField(sectionIndex, index) {
           this.selectedSection = sectionIndex;
           this.selectedField   = index;
@@ -543,7 +551,7 @@
           this.updateHidden();
         },
 
-        // ===== NUEVO: Diagrama =====
+        // ===== Diagrama =====
         scheduleFlow() {
           clearTimeout(this._flowTimer);
           this._flowTimer = setTimeout(() => this.renderFlow(), 200);
@@ -553,7 +561,7 @@
           const container = document.getElementById('flowCanvas');
           if (!container) return;
 
-          // NUEVO: construir elementos filtrando secciones activables
+          // construir elementos excluyendo secciones activables
           const elements = this._buildFlowElementsForDiagram();
 
           if (!this.cy) {
@@ -564,145 +572,199 @@
               boxSelectionEnabled: false,
               autoungrabify: true,
               style: [
-                  // Secciones
-                  {
-                    selector: 'node.section',
-                    style: {
-                      'shape': 'round-rectangle',
-                      'background-color': '#cfd8dc',
-                      'border-width': 1,
-                      'border-color': '#90a4ae',
-                      'label': 'data(label)',
-                      'font-size': 12,
-                      'text-valign': 'center',
-                      'text-halign': 'center',
-                      // ← texto SIEMPRE oscuro
-                      'color': '#0f172a',
-                      'text-outline-width': 0,
-                      'width': 'label',
-                      'height': 'label',
-                      'padding': '8px 12px'
-                    }
-                  },
-                  // Entradas
-                  {
-                    selector: 'node.input',
-                    style: {
-                      'shape': 'round-rectangle',
-                      'background-color': '#60a5fa',
-                      'border-width': 0,
-                      'label': 'data(label)',
-                      // ← texto oscuro (antes estaba en blanco)
-                      'color': '#0f172a',
-                      'text-outline-width': 0,
-                      'font-weight': 600,
-                      'text-wrap': 'wrap',
-                      'text-max-width': 180,
-                      'width': 'label',
-                      'height': 'label',
-                      'padding': '8px 12px'
-                    }
-                  },
-                  // Elección
-                  {
-                    selector: 'node.choice',
-                    style: {
-                      'shape': 'round-rectangle',
-                      'background-color': '#22c55e',
-                      'label': 'data(label)',
-                      // ← texto oscuro (antes estaba en blanco)
-                      'color': '#0f172a',
-                      'text-outline-width': 0,
-                      'font-weight': 600,
-                      'text-wrap': 'wrap',
-                      'text-max-width': 180,
-                      'width': 'label',
-                      'height': 'label',
-                      'padding': '8px 12px'
-                    }
-                  },
-                  // Especiales
-                  {
-                    selector: 'node.special',
-                    style: {
-                      'shape': 'round-rectangle',
-                      'background-color': '#f59e0b',
-                      'label': 'data(label)',
-                      // ya era oscuro, dejo el mismo tono
-                      'color': '#0f172a',
-                      'text-outline-width': 0,
-                      'font-weight': 700,
-                      'text-wrap': 'wrap',
-                      'text-max-width': 220,
-                      'width': 'label',
-                      'height': 'label',
-                      'padding': '8px 12px'
-                    }
-                  },
-                  // Flujo normal
-                  {
-                    selector: 'edge.flow',
-                    style: {
-                      'width': 2,
-                      'line-color': '#94a3b8',
-                      'target-arrow-color': '#94a3b8',
-                      'target-arrow-shape': 'triangle',
-                      'curve-style': 'bezier'
-                    }
-                  },
-                  // Condiciones/derivaciones
-                  {
-                    selector: 'edge.cond',
-                    style: {
-                      'width': 2,
-                      'line-color': '#ef4444',
-                      'target-arrow-color': '#ef4444',
-                      'target-arrow-shape': 'triangle',
-                      'line-style': 'dashed',
-                      'curve-style': 'bezier',
-                      'label': 'data(label)',
-                      'font-size': 10,
-                      'color': '#0f172a',                 // ← también texto oscuro en las etiquetas de aristas
-                      'text-background-color': '#fff',
-                      'text-background-opacity': 0.7,
-                      'text-background-padding': 2
-                    }
+                // Secciones
+                {
+                  selector: 'node.section',
+                  style: {
+                    'shape': 'round-rectangle',
+                    'background-color': '#cfd8dc',
+                    'border-width': 1,
+                    'border-color': '#90a4ae',
+                    'label': 'data(label)',
+                    'font-size': 12,
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'color': '#0f172a',
+                    'text-outline-width': 0,
+                    'text-wrap': 'wrap',
+                    'text-max-width': 200,
+                    'width': 'label',
+                    'height': 'label',
+                    'padding': '10px'
                   }
-                ]
-
+                },
+                // Entradas
+                {
+                  selector: 'node.input',
+                  style: {
+                    'shape': 'round-rectangle',
+                    'background-color': '#60a5fa',
+                    'border-width': 0,
+                    'label': 'data(label)',
+                    'color': '#0f172a',
+                    'text-outline-width': 0,
+                    'font-weight': 600,
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'text-wrap': 'wrap',
+                    'text-max-width': 200,
+                    'width': 'label',
+                    'height': 'label',
+                    'padding': '10px'
+                  }
+                },
+                // Elección
+                {
+                  selector: 'node.choice',
+                  style: {
+                    'shape': 'round-rectangle',
+                    'background-color': '#22c55e',
+                    'label': 'data(label)',
+                    'color': '#0f172a',
+                    'text-outline-width': 0,
+                    'font-weight': 600,
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'text-wrap': 'wrap',
+                    'text-max-width': 200,
+                    'width': 'label',
+                    'height': 'label',
+                    'padding': '10px'
+                  }
+                },
+                // Especiales
+                {
+                  selector: 'node.special',
+                  style: {
+                    'shape': 'round-rectangle',
+                    'background-color': '#f59e0b',
+                    'label': 'data(label)',
+                    'color': '#0f172a',
+                    'text-outline-width': 0,
+                    'font-weight': 700,
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'text-wrap': 'wrap',
+                    'text-max-width': 220,
+                    'width': 'label',
+                    'height': 'label',
+                    'padding': '10px'
+                  }
+                },
+                // Flujo normal
+                {
+                  selector: 'edge.flow',
+                  style: {
+                    'width': 2,
+                    'line-color': '#94a3b8',
+                    'target-arrow-color': '#94a3b8',
+                    'target-arrow-shape': 'triangle',
+                    'curve-style': 'bezier'
+                  }
+                },
+                // Condiciones/derivaciones
+                {
+                  selector: 'edge.cond',
+                  style: {
+                    'width': 2,
+                    'line-color': '#ef4444',
+                    'target-arrow-color': '#ef4444',
+                    'target-arrow-shape': 'triangle',
+                    'line-style': 'dashed',
+                    'curve-style': 'bezier',
+                    'label': 'data(label)',
+                    'font-size': 10,
+                    'color': '#0f172a',
+                    'text-background-color': '#fff',
+                    'text-background-opacity': 0.7,
+                    'text-background-padding': 2
+                  }
+                }
+              ]
             });
+
+            // ---- Interacciones ----
+            // Selección y doble clic/tap
+            this.cy.on('tap', 'node', (evt) => {
+              const id = evt.target.id();
+              this._selectedNodeId = id;
+
+              const now = Date.now();
+              if (this._lastTap && this._lastTap.id === id && (now - this._lastTap.t) < 350) {
+                this._handleDblClickNode(id);
+                this._lastTap = { t: 0, id: null };
+              } else {
+                this._lastTap = { t: now, id };
+              }
+            });
+
+            // Limpiar selección al tocar el fondo
+            this.cy.on('tap', (evt) => {
+              if (evt.target === this.cy) this._selectedNodeId = null;
+            });
+
+            // Clic derecho (context tap) para eliminar
+            this.cy.on('cxttap', 'node', (evt) => {
+              const id = evt.target.id();
+              this._handleDeleteNode(id);
+            });
+
           } else {
             this.cy.json({ elements });
           }
 
+          // Layout compacto (líneas más cortas)
           const layout = this.cy.layout({
-          name: 'breadthfirst',
-          directed: true,
-          nodeDimensionsIncludeLabels: true,
-          padding: 16,           // padding más chico
-          spacingFactor: 0.6,    // líneas ~a la mitad
-          animate: false,
-          roots: this.cy.collection('node.section')
-        });
-        layout.run();
+            name: 'breadthfirst',
+            directed: true,
+            nodeDimensionsIncludeLabels: true,
+            padding: 16,
+            spacingFactor: 0.6,
+            animate: false,
+            roots: this.cy.collection('node.section')
+          });
+          layout.run();
 
-        // Muy importante: encuadrar y centrar tras posicionar
-        this._refit();
+          // Reencuadrar
+          this._refit();
         },
 
         _refit() {
-        try {
-          if (!this.cy) return;
-          // recalcular tamaño por si el contenedor cambió
-          this.cy.resize();
-          // ajustar zoom para que entre todo, con un padding cómodo
-          this.cy.fit(this.cy.elements(), 48);  // padding en px
-          // centrar por si quedó con pan residual
-          this.cy.center();
-        } catch (e) {
-          console.warn('refit falló', e);
-        }
-      },
+          try {
+            if (!this.cy) return;
+            this.cy.resize();
+            this.cy.fit(this.cy.elements(), 48); // padding px
+            this.cy.center();
+          } catch (e) {
+            console.warn('refit falló', e);
+          }
+        },
+
+        _handleDblClickNode(id) {
+          // Doble clic: abrir modal si es un campo
+          if (id.startsWith('f-')) {
+            const parts = id.split('-'); // ['f', sIdx, fIdx]
+            const sIdx = parseInt(parts[1], 10);
+            const fIdx = parseInt(parts[2], 10);
+            if (Number.isInteger(sIdx) && Number.isInteger(fIdx)) {
+              this.editField(sIdx, fIdx);
+            }
+          }
+        },
+
+        _handleDeleteNode(id) {
+          // Sólo borrar si es un campo
+          if (!id.startsWith('f-')) return;
+          const parts = id.split('-'); // ['f', sIdx, fIdx]
+          const sIdx = parseInt(parts[1], 10);
+          const fIdx = parseInt(parts[2], 10);
+          if (!Number.isInteger(sIdx) || !Number.isInteger(fIdx)) return;
+
+          if (confirm('¿Eliminar este campo del formulario?')) {
+            this.removeField(sIdx, fIdx);
+            this.scheduleFlow();
+          }
+        },
 
         // ====== ORIGINAL (sin filtro) ======
         _buildFlowElements() {
@@ -773,12 +835,11 @@
           return els;
         },
 
-        // ====== NUEVO: versión para el diagrama (excluye activables) ======
+        // ====== Versión para el diagrama (excluye activables) ======
         _buildFlowElementsForDiagram() {
           const els = [];
           const all = (this.state && Array.isArray(this.state.sections)) ? this.state.sections : [];
 
-          // solo las NO activables
           const sections = all.filter(s => !s.activable);
 
           const sectionIndexByName = new Map();
@@ -806,7 +867,6 @@
               els.push({ data: { id: `e-${prevId}-${id}`, source: prevId, target: id }, classes: 'flow' });
               prevId = id;
 
-              // Condición general (derivar siempre)
               if (f.condition) {
                 const toIdx = sectionIndexByName.get((f.condition || '').trim());
                 if (typeof toIdx === 'number') {
@@ -822,7 +882,6 @@
                 }
               }
 
-              // Condiciones por opción
               if (f.conditions && typeof f.conditions === 'object') {
                 for (const [opt, secName] of Object.entries(f.conditions)) {
                   const toIdx = sectionIndexByName.get((secName || '').trim());
@@ -844,7 +903,7 @@
 
           return els;
         }
-        // ===== /NUEVO =====
+        // ===== /Diagrama =====
       };
 
     } catch (e) {
@@ -878,3 +937,4 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+

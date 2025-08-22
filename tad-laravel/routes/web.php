@@ -125,6 +125,10 @@ Route::prefix('funcionario')->group(function () {
   Route::put('/tramite/{tramite}',        [Tramite_configController::class, 'update'])->name('funcionario.tramite.update');
   Route::get('/tramite/{tramite}',        [Tramite_configController::class, 'show'])->name('funcionario.tramite.show');
   Route::delete('/tramites/{id}', [Tramite_configController::class, 'destroy'])->name('funcionario.tramites.destroy');
+  Route::post('/tramites/media-upload', [\App\Http\Controllers\Tramite_configController::class,'mediaUpload'])
+    ->name('tramites.media.upload')
+    ->middleware('auth'); // ajusta al guard que uses
+
 });
 
 // Legacy: tu listado anterior
@@ -184,19 +188,24 @@ Route::prefix('funcionario/pagos')->name('pagos.')->group(function () {
 });
 
 /* --- Catálogos (tal cual) --- */
+
+
 Route::prefix('funcionario/catalogos')->name('catalogos.')->group(function () {
   Route::get('/',        [CatalogosAdminController::class, 'index'])->name('index');
-  Route::get('/crear',   [CatalogosAdminController::class, 'create'])->name('create'); // ⬅️ NUEVO
+  Route::get('/crear',   [CatalogosAdminController::class, 'create'])->name('create');
   Route::post('/',       [CatalogosAdminController::class, 'store'])->name('store');
   Route::delete('{id}',  [CatalogosAdminController::class, 'destroy'])->name('destroy');
   Route::get('{id}',     [CatalogosAdminController::class, 'show'])->name('show');
 
-  // Subcatálogos
-  Route::get('{id}/subcatalogos',                 [CatalogosAdminController::class, 'subcatalogos'])->name('subcatalogos');
-  Route::get('{id}/subcatalogos/{optId}',         [CatalogosAdminController::class, 'subShow'])->name('sub.show');
-  Route::post('{id}/subcatalogos/{optId}/upload', [CatalogosAdminController::class, 'subUpload'])->name('sub.upload');
-  Route::delete('{id}/subcatalogos/{optId}',      [CatalogosAdminController::class, 'subDestroy'])->name('sub.destroy');
+  // Subcatálogos (ítems)
+  Route::get('{id}/subcatalogos',            [CatalogosAdminController::class,'subcatalogos'])->name('subcatalogos');
+  Route::post('{id}/subcatalogos',           [CatalogosAdminController::class,'subStore'])->name('sub.store');     // 👈 NUEVA
+  Route::post('{id}/subcatalogos/upload',    [CatalogosAdminController::class,'subUpload'])->name('sub.upload');   // 👈 SIN optId
+  Route::get('{id}/subcatalogos/{optId}',    [CatalogosAdminController::class,'subShow'])->name('sub.show');
+  Route::delete('{id}/subcatalogos/{optId}', [CatalogosAdminController::class,'subDestroy'])->name('sub.destroy');
 });
+
+
 
 /* --- Filtros (funcionario) --- */
 Route::prefix('funcionario/filtros')->name('filtros.')->group(function () {

@@ -15,7 +15,13 @@ class Tramite extends Model
         'nombre','descripcion','publicado','disponible','mostrar_inicio',
         'tipo','estatus','mensaje',
         'general_json','formulario_json','etapas_json','documento_json','config_json',
-        'parent_id',
+        'parent_id', 'tutorial_html','modalidad','implica_costo','detalle_costo_html',
+        'telefono_oficina','horario_atencion',
+        'dependencia_id','dependencia_nombre',
+        'categoria_id','categoria_nombre',
+        'oficina_id','oficina_nombre',
+        'ubicacion_id','ubicacion_nombre',
+        'descripcion_html','requisitos_html','pasos_html',
     ];
 
     // --- Relaciones para jerarquía y vínculos ---
@@ -54,6 +60,9 @@ class Tramite extends Model
     'etapas_json'     => 'array',
     'documento_json'  => 'array',
     'config_json'     => 'array',
+    'publicado' => 'boolean',
+    'disponible' => 'boolean',
+    'mostrar_inicio' => 'boolean',
 ];
 public function seccionesActivables(): array
 {

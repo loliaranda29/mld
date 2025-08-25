@@ -128,7 +128,8 @@ Route::prefix('funcionario')->group(function () {
   Route::post('/tramites/media-upload', [\App\Http\Controllers\Tramite_configController::class,'mediaUpload'])
     ->name('tramites.media.upload')
     ->middleware('auth'); // ajusta al guard que uses
-
+  Route::post('/funcionario/tramites/media', [Tramite_configController::class, 'mediaUpload'])
+    ->name('tramites.media');
 });
 
 // Legacy: tu listado anterior

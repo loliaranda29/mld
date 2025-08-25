@@ -1,28 +1,72 @@
 @php
-    // Traer lo que venga (array por cast, o string JSON) y normalizar
-    $raw = $tramite->formulario_json ?? null;
-
-    if (is_string($raw)) {
-        $formInit = json_decode($raw, true);
-    } elseif (is_array($raw)) {
-        $formInit = $raw;
-    } else {
-        $formInit = null;
+    // Intenta decodificar JSON hasta 3 veces (por si quedó doble/triple-escapado)
+    function deep_decode($v, $max = 3) {
+        $out = $v;
+        for ($i = 0; $i < $max; $i++) {
+            if (is_array($out)) return $out;
+            if (is_string($out)) {
+                $tmp = json_decode($out, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $out = $tmp;
+                    continue;
+                }
+            }
+            break;
+        }
+        return is_array($out) ? $out : [];
     }
 
-    // Fallback limpio si no hay datos válidos
-    if (!is_array($formInit) || !isset($formInit['sections']) || !is_array($formInit['sections'])) {
+    // Heurística: si la cadena tiene mojibake (Ã, Â, â…), reinterpreta y corrige.
+    // "NÃºmero" -> "Número", "TelÃ©fono" -> "Teléfono", etc.
+    function utf8_maybe_fix(string $s): string {
+        if (preg_match('/[ÃÂâÊÎÔÛ]/u', $s)) {
+            // utf8_decode: UTF-8 -> ISO-8859-1  (reversa del error)
+            // utf8_encode: ISO-8859-1 -> UTF-8  (cadena final correcta)
+            return utf8_encode(utf8_decode($s));
+        }
+        return $s;
+    }
+
+    // Aplica el fix recursivo sobre arrays/objetos
+    function utf8_sanitize_deep($value) {
+        if (is_array($value)) {
+            $out = [];
+            foreach ($value as $k => $v) {
+                $newK = is_string($k) ? utf8_maybe_fix($k) : $k;
+                $out[$newK] = utf8_sanitize_deep($v);
+            }
+            return $out;
+        }
+        if (is_string($value)) {
+            return utf8_maybe_fix($value);
+        }
+        return $value;
+    }
+
+    // 1) Tomamos lo que venga del modelo
+    $raw      = $tramite->formulario_json ?? null;
+
+    // 2) Decodificación profunda (por si está doble/ triple-JSON)
+    $formInit = deep_decode($raw);
+
+    // 3) Saneamos posibles mojibake de acentos/ñ
+    $formInit = utf8_sanitize_deep($formInit);
+
+    // 4) Fallback seguro
+    if (!isset($formInit['sections']) || !is_array($formInit['sections'])) {
         $formInit = ['sections' => [ ['name' => 'Inicio del trámite', 'fields' => []] ]];
     }
+
+    // 5) Enviamos al front en base64 para evitar problemas de comillas/entidades
+    $initialB64 = base64_encode(json_encode($formInit, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
 @endphp
 
 <div
-  x-data="formBuilder($el.dataset.initial || '{}')"
+  x-data="formBuilder(JSON.parse(atob($el.dataset.initial || 'e30=')))"
   x-init="init()"
-  data-initial='@json($formInit, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'
+  data-initial="{{ $initialB64 }}"
   class="row"
 >
-
 
   <!-- Panel izquierdo -->
   <div class="col-md-4">
@@ -76,7 +120,6 @@
                       <label class="form-check-label" :for="'repeatable_' + sIndex">Repetible</label>
                     </div>
 
-                    <!-- NUEVO: marcar sección como activable durante el trámite -->
                     <div class="form-check me-2">
                       <input class="form-check-input" type="checkbox" :id="'activable_' + sIndex" x-model="section.activable" @change="updateHidden()">
                       <label class="form-check-label" :for="'activable_' + sIndex">Activable durante el trámite</label>
@@ -111,7 +154,7 @@
           <textarea id="jsonOutput" class="form-control" rows="10" readonly x-text="JSON.stringify(state, null, 2)"></textarea>
         </div>
 
-        <!-- ====== Flujograma tipo “diagrama” ====== -->
+        <!-- Diagrama -->
         <div class="mt-3">
           <label class="form-label">Vista flujo del formulario (diagrama)</label>
           <div id="flowCanvas"
@@ -122,9 +165,8 @@
             <strong>Doble clic</strong> en un campo para editar. <strong>Clic derecho</strong> (o <kbd>Supr</kbd>) para eliminar. Zoom con la rueda; arrastrar para mover.
           </small>
         </div>
-        <!-- ====== /Flujograma ====== -->
 
-        <!-- ====== Listado de secciones activables ====== -->
+        <!-- Secciones activables -->
         <div class="mt-4">
           <label class="form-label">Secciones activables (plantillas para requerimientos)</label>
           <ul class="list-group">
@@ -140,12 +182,11 @@
           </ul>
           <small class="text-muted d-block mt-1">Estas secciones no se muestran en el diagrama inicial y podrán habilitarse durante el trámite para pedir info/documentación adicional.</small>
         </div>
-        <!-- ====== /Listado activables ====== -->
       </div>
     </div>
   </div>
 
-  {{-- ========== MODAL DE EDICIÓN ========== --}}
+  {{-- Modal edición --}}
   <div class="modal fade" id="editModal" tabindex="-1" x-ref="modal" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content" x-show="selectedField !== null" x-transition>
@@ -229,7 +270,7 @@
                 </div>
               </div>
 
-              <!-- Opciones + Reglas por opción (select/radio/checkbox) -->
+              <!-- Opciones + reglas por opción -->
               <template x-if="['select','radio','checkbox'].includes(state.sections[selectedSection].fields[selectedField].type)">
                 <div class="mt-3">
                   <label class="form-label">Opciones</label>
@@ -267,7 +308,7 @@
                 </div>
               </template>
 
-              <!-- Config de archivo -->
+              <!-- Archivo -->
               <template x-if="state.sections[selectedSection].fields[selectedField].type === 'file'">
                 <div class="mt-3">
                   <label class="form-label">Tamaño máximo (MB)</label>
@@ -287,7 +328,7 @@
                 </div>
               </template>
 
-              <!-- Config de API -->
+              <!-- API -->
               <template x-if="state.sections[selectedSection].fields[selectedField].type === 'api'">
                 <div class="mt-3">
                   <label class="form-label">Método</label>
@@ -308,7 +349,7 @@
                 </div>
               </template>
 
-              <!-- EditorJS para richtext -->
+              <!-- Richtext -->
               <template x-if="state.sections[selectedSection].fields[selectedField].type === 'richtext'">
                 <div class="mt-3">
                   <label class="form-label">Contenido enriquecido</label>
@@ -327,7 +368,6 @@
       </div>
     </div>
   </div>
-  {{-- ========== /MODAL ========== --}}
 
   {{-- Hidden que envía el JSON al back --}}
   <input type="hidden" name="formulario_json" x-ref="formularioJson" :value="JSON.stringify(state)">
@@ -344,28 +384,20 @@
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/embed@2.5.3"></script>
 
-<!-- NUEVO: librería para el diagrama -->
+<!-- Diagrama -->
 <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
-
-<!-- Layout Dagre (opcional pero recomendado) -->
 <script src="https://unpkg.com/dagre@0.8.5/dist/dagre.min.js"></script>
 <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
-
 
 <script>
   function formBuilder(initialRaw) {
     try {
       let initial;
-      try {
-        initial = typeof initialRaw === 'string' ? JSON.parse(initialRaw) : initialRaw;
-      } catch (e) {
-        console.warn('JSON inicial inválido, usando base por defecto', e, initialRaw);
-        initial = null;
-      }
+      try { initial = typeof initialRaw === 'string' ? JSON.parse(initialRaw) : initialRaw; }
+      catch { initial = null; }
 
       const base = (initial && typeof initial === 'object' && Array.isArray(initial.sections))
-        ? initial
-        : { sections: [ { name: 'Inicio del trámite', fields: [] } ] };
+        ? initial : { sections: [ { name: 'Inicio del trámite', fields: [] } ] };
 
       return {
         useSections: true,
@@ -374,16 +406,13 @@
         selectedSection: 0,
         editor: null,
 
-        // Estado principal
         state: base,
 
-        // Props del diagrama
         cy: null,
         _flowTimer: null,
         _lastTap: { t: 0, id: null },
         _selectedNodeId: null,
 
-        // Paleta de componentes
         components: [
           { type: 'text',     label: 'Respuesta breve',          name: 'respuesta_breve' },
           { type: 'textarea', label: 'Párrafo',                  name: 'parrafo' },
@@ -401,29 +430,16 @@
         init() {
           this.updateHidden();
           this.renderFlow();
-
-          // Reencuadre al mostrar tab
           const tabBtn = document.getElementById('formulario-tab');
-          if (tabBtn) {
-            tabBtn.addEventListener('shown.bs.tab', () => this._refit());
-          }
-
-          // Reencuadre al redimensionar
+          if (tabBtn) tabBtn.addEventListener('shown.bs.tab', () => this._refit());
           window.addEventListener('resize', () => this._refit());
-
-          // Reencuadre al entrar en viewport
           const container = document.getElementById('flowCanvas');
           if (container && 'IntersectionObserver' in window) {
             const io = new IntersectionObserver((entries, obs) => {
-              if (entries[0]?.isIntersecting) {
-                this._refit();
-                obs.disconnect();
-              }
+              if (entries[0]?.isIntersecting) { this._refit(); obs.disconnect(); }
             });
             io.observe(container);
           }
-
-          // Eliminar con Supr/Backspace si hay un nodo seleccionado
           document.addEventListener('keydown', (e) => {
             if ((e.key === 'Delete' || e.key === 'Backspace') && this._selectedNodeId) {
               this._handleDeleteNode(this._selectedNodeId);
@@ -439,7 +455,6 @@
         },
 
         addSection() {
-          // activable por defecto en false
           (this.state.sections ??= []).push({ name: 'Nueva sección', fields: [], repeatable: false, activable: false });
           this.updateHidden();
         },
@@ -472,7 +487,7 @@
           }
           if (['select','radio','checkbox'].includes(item.type)) {
             field.options = [];
-            field.conditions = {}; // reglas por opción
+            field.conditions = {};
           }
           (this.state.sections[sIndex].fields ??= []).push(field);
           this.updateHidden();
@@ -483,15 +498,12 @@
           this.updateHidden();
         },
 
-        // Abrir modal desde la lista
         editField(sectionIndex, index) {
           this.selectedSection = sectionIndex;
           this.selectedField   = index;
 
           this.$nextTick(() => {
             const field = this.state.sections[sectionIndex].fields[index];
-
-            // Re-inicializar EditorJS solo si el campo es richtext
             if (field.type === 'richtext') {
               const holder = document.getElementById('editorjs');
               if (holder) holder.innerHTML = '';
@@ -509,35 +521,21 @@
                 }
               });
             }
-
-            // Abrir modal
             this.openModal();
           });
         },
 
         openModal() {
           const el = this.$refs?.modal;
-          if (!el) {
-            console.warn('Modal ref no encontrado');
-            return;
-          }
-
+          if (!el) return;
           if (!window.bootstrap || !window.bootstrap.Modal) {
-            // Fallback si Bootstrap no está disponible
-            el.classList.add('show');
-            el.style.display = 'block';
-            el.removeAttribute('aria-hidden');
-            el.setAttribute('aria-modal', 'true');
-            document.body.classList.add('modal-open');
-            return;
+            el.classList.add('show'); el.style.display = 'block';
+            el.removeAttribute('aria-hidden'); el.setAttribute('aria-modal', 'true');
+            document.body.classList.add('modal-open'); return;
           }
-
-          let inst;
-          if (typeof window.bootstrap.Modal.getOrCreateInstance === 'function') {
-            inst = window.bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
-          } else {
-            inst = window.bootstrap.Modal.getInstance(el) || new window.bootstrap.Modal(el, { backdrop: 'static' });
-          }
+          let inst = (typeof window.bootstrap.Modal.getOrCreateInstance === 'function')
+            ? window.bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' })
+            : (window.bootstrap.Modal.getInstance(el) || new window.bootstrap.Modal(el, { backdrop: 'static' }));
           inst.show();
         },
 
@@ -551,7 +549,7 @@
           this.updateHidden();
         },
 
-        // ===== Diagrama =====
+        // Diagrama
         scheduleFlow() {
           clearTimeout(this._flowTimer);
           this._flowTimer = setTimeout(() => this.renderFlow(), 200);
@@ -561,372 +559,109 @@
           const container = document.getElementById('flowCanvas');
           if (!container) return;
 
-          // construir elementos excluyendo secciones activables
           const elements = this._buildFlowElementsForDiagram();
 
           if (!this.cy) {
             this.cy = cytoscape({
-              container,
-              elements,
-              wheelSensitivity: 0.2,
-              boxSelectionEnabled: false,
-              autoungrabify: true,
+              container, elements, wheelSensitivity: 0.2, boxSelectionEnabled: false, autoungrabify: true,
               style: [
-                // Secciones
-                {
-                  selector: 'node.section',
-                  style: {
-                    'shape': 'round-rectangle',
-                    'background-color': '#cfd8dc',
-                    'border-width': 1,
-                    'border-color': '#90a4ae',
-                    'label': 'data(label)',
-                    'font-size': 12,
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'color': '#0f172a',
-                    'text-outline-width': 0,
-                    'text-wrap': 'wrap',
-                    'text-max-width': 200,
-                    'width': 'label',
-                    'height': 'label',
-                    'padding': '10px'
-                  }
-                },
-                // Entradas
-                {
-                  selector: 'node.input',
-                  style: {
-                    'shape': 'round-rectangle',
-                    'background-color': '#60a5fa',
-                    'border-width': 0,
-                    'label': 'data(label)',
-                    'color': '#0f172a',
-                    'text-outline-width': 0,
-                    'font-weight': 600,
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'text-wrap': 'wrap',
-                    'text-max-width': 200,
-                    'width': 'label',
-                    'height': 'label',
-                    'padding': '10px'
-                  }
-                },
-                // Elección
-                {
-                  selector: 'node.choice',
-                  style: {
-                    'shape': 'round-rectangle',
-                    'background-color': '#22c55e',
-                    'label': 'data(label)',
-                    'color': '#0f172a',
-                    'text-outline-width': 0,
-                    'font-weight': 600,
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'text-wrap': 'wrap',
-                    'text-max-width': 200,
-                    'width': 'label',
-                    'height': 'label',
-                    'padding': '10px'
-                  }
-                },
-                // Especiales
-                {
-                  selector: 'node.special',
-                  style: {
-                    'shape': 'round-rectangle',
-                    'background-color': '#f59e0b',
-                    'label': 'data(label)',
-                    'color': '#0f172a',
-                    'text-outline-width': 0,
-                    'font-weight': 700,
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'text-wrap': 'wrap',
-                    'text-max-width': 220,
-                    'width': 'label',
-                    'height': 'label',
-                    'padding': '10px'
-                  }
-                },
-                // Flujo normal
-                {
-                  selector: 'edge.flow',
-                  style: {
-                    'width': 2,
-                    'line-color': '#94a3b8',
-                    'target-arrow-color': '#94a3b8',
-                    'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier'
-                  }
-                },
-                // Condiciones/derivaciones
-                {
-                  selector: 'edge.cond',
-                  style: {
-                    'width': 2,
-                    'line-color': '#ef4444',
-                    'target-arrow-color': '#ef4444',
-                    'target-arrow-shape': 'triangle',
-                    'line-style': 'dashed',
-                    'curve-style': 'bezier',
-                    'label': 'data(label)',
-                    'font-size': 10,
-                    'color': '#0f172a',
-                    'text-background-color': '#fff',
-                    'text-background-opacity': 0.7,
-                    'text-background-padding': 2
-                  }
-                }
+                { selector: 'node.section', style: { 'shape':'round-rectangle','background-color':'#cfd8dc','border-width':1,'border-color':'#90a4ae','label':'data(label)','font-size':12,'text-valign':'center','text-halign':'center','color':'#0f172a','text-outline-width':0,'text-wrap':'wrap','text-max-width':200,'width':'label','height':'label','padding':'10px' } },
+                { selector: 'node.input',   style: { 'shape':'round-rectangle','background-color':'#60a5fa','border-width':0,'label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':600,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':200,'width':'label','height':'label','padding':'10px' } },
+                { selector: 'node.choice',  style: { 'shape':'round-rectangle','background-color':'#22c55e','label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':600,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':200,'width':'label','height':'label','padding':'10px' } },
+                { selector: 'node.special', style: { 'shape':'round-rectangle','background-color':'#f59e0b','label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':700,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':220,'width':'label','height':'label','padding':'10px' } },
+                { selector: 'edge.flow',    style: { 'width':2,'line-color':'#94a3b8','target-arrow-color':'#94a3b8','target-arrow-shape':'triangle','curve-style':'bezier' } },
+                { selector: 'edge.cond',    style: { 'width':2,'line-color':'#ef4444','target-arrow-color':'#ef4444','target-arrow-shape':'triangle','line-style':'dashed','curve-style':'bezier','label':'data(label)','font-size':10,'color':'#0f172a','text-background-color':'#fff','text-background-opacity':0.7,'text-background-padding':2 } },
               ]
             });
 
-            // ---- Interacciones ----
-            // Selección y doble clic/tap
             this.cy.on('tap', 'node', (evt) => {
               const id = evt.target.id();
               this._selectedNodeId = id;
-
               const now = Date.now();
-              if (this._lastTap && this._lastTap.id === id && (now - this._lastTap.t) < 350) {
-                this._handleDblClickNode(id);
-                this._lastTap = { t: 0, id: null };
-              } else {
-                this._lastTap = { t: now, id };
-              }
+              if (this._lastTap && this._lastTap.id === id && (now - this._lastTap.t) < 350) { this._handleDblClickNode(id); this._lastTap = { t: 0, id: null }; }
+              else { this._lastTap = { t: now, id }; }
             });
 
-            // Limpiar selección al tocar el fondo
-            this.cy.on('tap', (evt) => {
-              if (evt.target === this.cy) this._selectedNodeId = null;
-            });
-
-            // Clic derecho (context tap) para eliminar
-            this.cy.on('cxttap', 'node', (evt) => {
-              const id = evt.target.id();
-              this._handleDeleteNode(id);
-            });
+            this.cy.on('tap', (evt) => { if (evt.target === this.cy) this._selectedNodeId = null; });
+            this.cy.on('cxttap', 'node', (evt) => { this._handleDeleteNode(evt.target.id()); });
 
           } else {
             this.cy.json({ elements });
           }
 
-          // Layout compacto (líneas más cortas)
           const layout = this.cy.layout({
-            name: 'breadthfirst',
-            directed: true,
-            nodeDimensionsIncludeLabels: true,
-            padding: 16,
-            spacingFactor: 0.6,
-            animate: false,
-            roots: this.cy.collection('node.section')
+            name: 'breadthfirst', directed: true, nodeDimensionsIncludeLabels: true,
+            padding: 16, spacingFactor: 0.6, animate: false, roots: this.cy.collection('node.section')
           });
           layout.run();
-
-          // Reencuadrar
           this._refit();
         },
 
         _refit() {
-          try {
-            if (!this.cy) return;
-            this.cy.resize();
-            this.cy.fit(this.cy.elements(), 48); // padding px
-            this.cy.center();
-          } catch (e) {
-            console.warn('refit falló', e);
-          }
+          try { if (!this.cy) return; this.cy.resize(); this.cy.fit(this.cy.elements(), 48); this.cy.center(); }
+          catch (e) { console.warn('refit falló', e); }
         },
 
         _handleDblClickNode(id) {
-          // Doble clic: abrir modal si es un campo
-          if (id.startsWith('f-')) {
-            const parts = id.split('-'); // ['f', sIdx, fIdx]
-            const sIdx = parseInt(parts[1], 10);
-            const fIdx = parseInt(parts[2], 10);
-            if (Number.isInteger(sIdx) && Number.isInteger(fIdx)) {
-              this.editField(sIdx, fIdx);
-            }
-          }
+          if (!id.startsWith('f-')) return;
+          const parts = id.split('-'); const sIdx = parseInt(parts[1], 10); const fIdx = parseInt(parts[2], 10);
+          if (Number.isInteger(sIdx) && Number.isInteger(fIdx)) this.editField(sIdx, fIdx);
         },
 
         _handleDeleteNode(id) {
-          // Sólo borrar si es un campo
           if (!id.startsWith('f-')) return;
-          const parts = id.split('-'); // ['f', sIdx, fIdx]
-          const sIdx = parseInt(parts[1], 10);
-          const fIdx = parseInt(parts[2], 10);
+          const parts = id.split('-'); const sIdx = parseInt(parts[1], 10); const fIdx = parseInt(parts[2], 10);
           if (!Number.isInteger(sIdx) || !Number.isInteger(fIdx)) return;
-
-          if (confirm('¿Eliminar este campo del formulario?')) {
-            this.removeField(sIdx, fIdx);
-            this.scheduleFlow();
-          }
+          if (confirm('¿Eliminar este campo del formulario?')) { this.removeField(sIdx, fIdx); this.scheduleFlow(); }
         },
 
-        // ====== ORIGINAL (sin filtro) ======
-        _buildFlowElements() {
-          const els = [];
-          const sections = (this.state && Array.isArray(this.state.sections)) ? this.state.sections : [];
-
-          const sectionIndexByName = new Map();
-          sections.forEach((s, i) => sectionIndexByName.set((s.name || '').trim(), i));
-
-          sections.forEach((s, sIdx) => {
-            els.push({
-              data: { id: `sec-${sIdx}`, label: s.name || `Sección ${sIdx+1}` },
-              classes: 'section'
-            });
-
-            const fields = Array.isArray(s.fields) ? s.fields : [];
-            let prevId = `sec-${sIdx}`;
-
-            fields.forEach((f, fIdx) => {
-              const id = `f-${sIdx}-${fIdx}`;
-              const label = f.label || f.name || `Campo ${fIdx+1}`;
-              const type = (f.type || '').toLowerCase();
-
-              let klass = 'input';
-              if (['select','radio','checkbox','date'].includes(type)) klass = 'choice';
-              if (['file','api','code','richtext'].includes(type))   klass = 'special';
-
-              els.push({ data: { id, label }, classes: klass });
-              els.push({ data: { id: `e-${prevId}-${id}`, source: prevId, target: id }, classes: 'flow' });
-              prevId = id;
-
-              // Condición general (derivar siempre)
-              if (f.condition) {
-                const toIdx = sectionIndexByName.get((f.condition || '').trim());
-                if (typeof toIdx === 'number') {
-                  els.push({
-                    data: {
-                      id: `cg-${id}-sec-${toIdx}`,
-                      source: id,
-                      target: `sec-${toIdx}`,
-                      label: ''
-                    },
-                    classes: 'cond'
-                  });
-                }
-              }
-
-              // Condiciones por opción
-              if (f.conditions && typeof f.conditions === 'object') {
-                for (const [opt, secName] of Object.entries(f.conditions)) {
-                  const toIdx = sectionIndexByName.get((secName || '').trim());
-                  if (typeof toIdx === 'number') {
-                    els.push({
-                      data: {
-                        id: `c-${id}-sec-${toIdx}-${opt}`,
-                        source: id,
-                        target: `sec-${toIdx}`,
-                        label: String(opt)
-                      },
-                      classes: 'cond'
-                    });
-                  }
-                }
-              }
-            });
-          });
-
-          return els;
-        },
-
-        // ====== Versión para el diagrama (excluye activables) ======
+        // Construcción de elementos (excluye activables)
         _buildFlowElementsForDiagram() {
           const els = [];
           const all = (this.state && Array.isArray(this.state.sections)) ? this.state.sections : [];
-
           const sections = all.filter(s => !s.activable);
 
-          const sectionIndexByName = new Map();
-          sections.forEach((s, i) => sectionIndexByName.set((s.name || '').trim(), i));
+          const idxByName = new Map();
+          sections.forEach((s, i) => idxByName.set((s.name || '').trim(), i));
 
           sections.forEach((s, sIdx) => {
-            els.push({
-              data: { id: `sec-${sIdx}`, label: s.name || `Sección ${sIdx+1}` },
-              classes: 'section'
-            });
-
+            els.push({ data: { id: `sec-${sIdx}`, label: s.name || `Sección ${sIdx+1}` }, classes: 'section' });
             const fields = Array.isArray(s.fields) ? s.fields : [];
             let prevId = `sec-${sIdx}`;
-
             fields.forEach((f, fIdx) => {
               const id = `f-${sIdx}-${fIdx}`;
               const label = f.label || f.name || `Campo ${fIdx+1}`;
               const type = (f.type || '').toLowerCase();
-
               let klass = 'input';
               if (['select','radio','checkbox','date'].includes(type)) klass = 'choice';
               if (['file','api','code','richtext'].includes(type))   klass = 'special';
-
               els.push({ data: { id, label }, classes: klass });
               els.push({ data: { id: `e-${prevId}-${id}`, source: prevId, target: id }, classes: 'flow' });
               prevId = id;
 
               if (f.condition) {
-                const toIdx = sectionIndexByName.get((f.condition || '').trim());
+                const toIdx = idxByName.get((f.condition || '').trim());
                 if (typeof toIdx === 'number') {
-                  els.push({
-                    data: {
-                      id: `cg-${id}-sec-${toIdx}`,
-                      source: id,
-                      target: `sec-${toIdx}`,
-                      label: ''
-                    },
-                    classes: 'cond'
-                  });
+                  els.push({ data: { id: `cg-${id}-sec-${toIdx}`, source: id, target: `sec-${toIdx}`, label: '' }, classes: 'cond' });
                 }
               }
-
               if (f.conditions && typeof f.conditions === 'object') {
                 for (const [opt, secName] of Object.entries(f.conditions)) {
-                  const toIdx = sectionIndexByName.get((secName || '').trim());
+                  const toIdx = idxByName.get((secName || '').trim());
                   if (typeof toIdx === 'number') {
-                    els.push({
-                      data: {
-                        id: `c-${id}-sec-${toIdx}-${opt}`,
-                        source: id,
-                        target: `sec-${toIdx}`,
-                        label: String(opt)
-                      },
-                      classes: 'cond'
-                    });
+                    els.push({ data: { id: `c-${id}-sec-${toIdx}-${opt}`, source: id, target: `sec-${toIdx}`, label: String(opt) }, classes: 'cond' });
                   }
                 }
               }
             });
           });
-
           return els;
         }
-        // ===== /Diagrama =====
       };
 
     } catch (e) {
       console.error('formBuilder init error', e, { initialRaw });
-      // Fallback seguro para que Alpine no quede sin componente
-      return {
-        useSections: true,
-        useSteps: true,
-        selectedField: null,
-        selectedSection: 0,
-        editor: null,
-        state: { sections: [] },
-        components: [],
-        init(){},
-        updateHidden(){},
-        addSection(){},
-        removeSection(){},
-        addFieldToSection(){},
-        removeField(){},
-        editField(){},
-        handleDragStart(){},
-        handleDrop(){},
-      };
+      return { useSections: true, useSteps: true, selectedField: null, selectedSection: 0, editor: null, state: { sections: [] }, components: [], init(){}, updateHidden(){}, addSection(){}, removeSection(){}, addFieldToSection(){}, removeField(){}, editField(){}, handleDragStart(){}, handleDrop(){} };
     }
   }
 
@@ -937,4 +672,3 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-

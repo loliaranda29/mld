@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,33 +10,88 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tramite extends Model
 {
+    use HasFactory;
+
     protected $table = 'tramites';
 
+    /**
+     * Campos permitidos para asignación masiva.
+     * Ajustá esta lista si agregás/quitas columnas en la tabla `tramites`.
+     */
     protected $fillable = [
-        'nombre','descripcion','publicado','disponible','mostrar_inicio',
-        'tipo','estatus','mensaje',
-        'general_json','formulario_json','etapas_json','documento_json','config_json',
-        'parent_id', 'tutorial_html','modalidad','implica_costo','detalle_costo_html',
-        'telefono_oficina','horario_atencion',
-        'dependencia_id','dependencia_nombre',
-        'categoria_id','categoria_nombre',
-        'oficina_id','oficina_nombre',
-        'ubicacion_id','ubicacion_nombre',
-        'descripcion_html','requisitos_html','pasos_html',
+        // Básicos
+        'nombre',
+        'descripcion',
+        'tipo',
+        'estatus',
+        'mensaje',
+
+        // JSON por pestañas
+        'general_json',
+        'formulario_json',
+        'etapas_json',
+        'documento_json',
+        'config_json',
+
+        // Switches / flags
+        'publicado',
+        'disponible',
+        'mostrar_inicio',
+        'acepta_solicitudes',
+        'acepta_pruebas',
+        'modulo_citas',
+        'modulo_inspectores',
+
+        // Jerarquía
+        'parent_id',
     ];
 
-    // --- Relaciones para jerarquía y vínculos ---
-    public function parent()
+    /**
+     * Casts para convertir automáticamente al LEER/ESCRIBIR.
+     * (Si seteás arrays desde el controlador, Eloquent serializa a JSON solo).
+     */
+    protected $casts = [
+        'general_json'    => 'array',
+        'formulario_json' => 'array',
+        'etapas_json'     => 'array',
+        'documento_json'  => 'array',
+        'config_json'     => 'array',
+
+        'publicado'          => 'boolean',
+        'disponible'         => 'boolean',
+        'mostrar_inicio'     => 'boolean',
+        'acepta_solicitudes' => 'boolean',
+        'acepta_pruebas'     => 'boolean',
+        'modulo_citas'       => 'boolean',
+        'modulo_inspectores' => 'boolean',
+    ];
+
+    /**
+     * Valores por defecto (evita null en JSONs nuevos).
+     */
+    protected $attributes = [
+        'general_json'    => '[]',
+        'formulario_json' => '[]',
+        'etapas_json'     => '[]',
+        'documento_json'  => '[]',
+        'config_json'     => '[]',
+    ];
+
+    /* =========================================================
+     | Relaciones
+     * ========================================================= */
+
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
 
-    public function hijos()
+    public function hijos(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
     }
 
-    public function relacionados()
+    public function relacionados(): BelongsToMany
     {
         return $this->belongsToMany(
             self::class,
@@ -45,7 +101,7 @@ class Tramite extends Model
         )->withPivot('tipo')->withTimestamps();
     }
 
-    public function relacionadosComoDestino()
+    public function relacionadosComoDestino(): BelongsToMany
     {
         return $this->belongsToMany(
             self::class,
@@ -54,24 +110,18 @@ class Tramite extends Model
             'tramite_id'
         )->withPivot('tipo')->withTimestamps();
     }
-    protected $casts = [
-    'general_json'    => 'array',
-    'formulario_json' => 'array',
-    'etapas_json'     => 'array',
-    'documento_json'  => 'array',
-    'config_json'     => 'array',
-    'publicado' => 'boolean',
-    'disponible' => 'boolean',
-    'mostrar_inicio' => 'boolean',
-];
-public function seccionesActivables(): array
-{
-    $json = $this->formulario_json;
-    if (is_string($json)) $json = json_decode($json, true);
 
-    $sections = is_array($json['sections'] ?? null) ? $json['sections'] : [];
-    return array_values(array_filter($sections, fn($s) => !empty($s['activable'])));
-}
+    /**
+     * Devuelve las secciones "activables" del builder de formulario.
+     */
+    public function seccionesActivables(): array
+    {
+        $json = $this->formulario_json;
+        if (is_string($json)) {
+            $json = json_decode($json, true);
+        }
 
-
+        $sections = is_array($json['sections'] ?? null) ? $json['sections'] : [];
+        return array_values(array_filter($sections, fn ($s) => !empty($s['activable'])));
+    }
 }

@@ -1,11 +1,12 @@
-<div x-data="gestorEtapas()" x-init="init()" class="row">
+<div x-data="gestorEtapas()" x-init="init()" class="row" @keydown.enter.prevent>
     <!-- Tipos de etapa -->
     <div class="col-md-4">
         <div class="card mb-3">
             <div class="card-header bg-dark text-white">Tipos de Etapas</div>
             <div class="card-body">
                 <template x-for="tipo in tiposEtapa" :key="tipo.codigo">
-                    <button class="btn btn-outline-primary w-100 mb-2 text-start" @click="agregarEtapa(tipo)">
+                    <button type="button" class="btn btn-outline-primary w-100 mb-2 text-start"
+                            @click.prevent="agregarEtapa(tipo)">
                         <i :class="tipo.icono" class="me-1"></i>
                         <span x-text="tipo.nombre"></span>
                     </button>
@@ -28,13 +29,16 @@
                                     <small class="text-muted" x-text="etapa.descripcion"></small>
                                 </div>
                                 <div class="ms-auto d-flex gap-2">
-                                    <button class="btn btn-sm btn-outline-secondary" @click="etapa.show = !etapa.show">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            @click.prevent="etapa.show = !etapa.show">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-secondary" @click="editarCondiciones(index)">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            @click.prevent="editarCondiciones(index)">
                                         <i class="bi bi-code-slash"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger" @click="eliminarEtapa(index)">
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            @click.prevent="eliminarEtapa(index)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -52,7 +56,7 @@
                                 <div class="row mb-2">
                                     <div class="col">
                                         <label class="form-label">Tiempo de vida</label>
-                                        <input type="number" class="form-control" x-model="etapa.tiempoVida">
+                                        <input type="number" class="form-control" x-model.number="etapa.tiempoVida">
                                     </div>
                                     <div class="col">
                                         <label class="form-label">Tipo de días</label>
@@ -89,13 +93,18 @@
                                                             <td x-text="concepto.pago"></td>
                                                             <td x-text="concepto.tipo"></td>
                                                             <td x-text="concepto.monto"></td>
-                                                            <td><button class="btn btn-sm btn-danger" @click="etapa.conceptos.splice(ci, 1)">🗑️</button></td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-sm btn-danger"
+                                                                        @click.prevent="etapa.conceptos.splice(ci, 1)">🗑️
+                                                                </button>
+                                                            </td>
                                                         </tr>
                                                     </template>
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <button class="btn btn-outline-primary btn-sm" @click="agregarConcepto(etapa)">Agregar concepto</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm"
+                                                @click.prevent="agregarConcepto(etapa)">Agregar concepto</button>
                                     </div>
                                 </template>
 
@@ -109,48 +118,55 @@
                                                     <div class="fw-bold" x-text="sub.nombre"></div>
                                                     <small class="text-muted" x-text="sub.descripcion"></small>
                                                     <div class="form-check mt-1">
-                                                        <input type="checkbox" class="form-check-input" x-model="sub.limitarArchivo" :id="'limitar-'+si">
+                                                        <input type="checkbox" class="form-check-input"
+                                                               x-model="sub.limitarArchivo" :id="'limitar-'+si">
                                                         <label class="form-check-label" :for="'limitar-'+si">Limitar a un archivo</label>
                                                     </div>
-                                                    <button class="btn btn-sm btn-link text-danger position-absolute top-0 end-0" @click="etapa.subetapas.splice(si, 1)">🗑️</button>
+                                                    <button type="button" class="btn btn-sm btn-link text-danger position-absolute top-0 end-0"
+                                                            @click.prevent="etapa.subetapas.splice(si, 1)">🗑️</button>
                                                 </div>
                                             </template>
                                         </div>
-                                        <button class="btn btn-outline-primary btn-sm mt-2" @click="agregarSubetapa(etapa)">Agregar subetapa</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                                                @click.prevent="agregarSubetapa(etapa)">Agregar subetapa</button>
                                     </div>
                                 </template>
 
                                 <!-- Observaciones -->
                                 <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" x-model="etapa.hayPrevencion">
-                                    <label class="form-check-label">Hay observaciones</label>
+                                    <input class="form-check-input" type="checkbox" x-model="etapa.hayPrevencion" id="hayPrev">
+                                    <label class="form-check-label" for="hayPrev">Hay observaciones</label>
                                 </div>
                                 <div class="row mb-2" x-show="etapa.hayPrevencion">
                                     <div class="col">
                                         <label class="form-label">Máx. observaciones</label>
-                                        <input type="number" class="form-control" x-model="etapa.maxPrevenciones">
+                                        <input type="number" class="form-control" x-model.number="etapa.maxPrevenciones">
                                     </div>
                                     <div class="col">
                                         <label class="form-label">Duración observación (horas)</label>
-                                        <input type="number" class="form-control" x-model="etapa.duracionPrevencion">
+                                        <input type="number" class="form-control" x-model.number="etapa.duracionPrevencion">
                                     </div>
                                 </div>
                                 <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" x-model="etapa.rechazarAuto">
-                                    <label class="form-check-label">Rechazar automáticamente si no responde</label>
+                                    <input class="form-check-input" type="checkbox" x-model="etapa.rechazarAuto" id="rechAuto">
+                                    <label class="form-check-label" for="rechAuto">Rechazar automáticamente si no responde</label>
                                 </div>
 
                                 <!-- Involucrados -->
                                 <div class="mb-3">
                                     <label class="form-label d-block">Involucrados</label>
-                                    <button class="btn btn-sm btn-outline-primary mb-2" @click="asignarInvolucrados(etapa)">
+                                    <button type="button" class="btn btn-sm btn-outline-primary mb-2"
+                                            @click.prevent="asignarInvolucrados(etapa)">
                                         Asignar involucrados
                                     </button>
                                     <ul class="list-group">
                                         <template x-for="(inv, i) in etapa.involucrados" :key="i">
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 <span x-text="inv.nombre"></span>
-                                                <button class="btn btn-sm btn-link text-danger" @click="etapa.involucrados.splice(i, 1)"><i class="bi bi-trash"></i></button>
+                                                <button type="button" class="btn btn-sm btn-link text-danger"
+                                                        @click.prevent="etapa.involucrados.splice(i, 1)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </li>
                                         </template>
                                     </ul>
@@ -162,8 +178,11 @@
 
                 <!-- JSON generado -->
                 <label class="form-label">JSON generado:</label>
-                <textarea class="form-control mb-3" rows="6" readonly x-text="JSON.stringify(etapas, null, 2)"></textarea>
-                <input type="hidden" name="etapas" x-ref="etapasInput" />
+                <textarea class="form-control mb-3" rows="6" readonly
+                          x-text="JSON.stringify(etapas, null, 2)"></textarea>
+
+                <!-- Hidden que viaja al backend siempre actualizado -->
+                <input type="hidden" name="etapas" x-ref="etapasInput" :value="JSON.stringify(etapas)" />
 
                 <!-- Vista de flujo con SVG -->
                 <h5 class="mt-4">Vista de Flujo</h5>
@@ -188,14 +207,13 @@
                     <textarea x-model="condicionesJson" class="form-control" rows="8"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-primary" @click="guardarCondiciones()">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @click.prevent="guardarCondiciones()">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 
 <!-- Librerías necesarias -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -207,10 +225,10 @@ function gestorEtapas() {
     return {
         etapas: [],
         tiposEtapa: [
-            { codigo: 'revision', nombre: 'Revisión', icono: 'bi bi-list-check' },
-            { codigo: 'pagos', nombre: 'Pagos', icono: 'bi bi-credit-card' },
-            { codigo: 'documento', nombre: 'Emisión de documento', icono: 'bi bi-file-earmark-check' },
-            { codigo: 'subetapa', nombre: 'Subetapas', icono: 'bi bi-diagram-3' }
+            { codigo: 'revision',  nombre: 'Revisión',              icono: 'bi bi-list-check' },
+            { codigo: 'pagos',     nombre: 'Pagos',                 icono: 'bi bi-credit-card' },
+            { codigo: 'documento', nombre: 'Emisión de documento',  icono: 'bi bi-file-earmark-check' },
+            { codigo: 'subetapa',  nombre: 'Subetapas',             icono: 'bi bi-diagram-3' }
         ],
         condicionesJson: '',
         etapaEditando: null,
@@ -219,42 +237,72 @@ function gestorEtapas() {
             const self = this;
             new Sortable(document.getElementById('sortableEtapas'), {
                 animation: 150,
-                onEnd: function (evt) {
+                onEnd(evt) {
                     const movedItem = self.etapas.splice(evt.oldIndex, 1)[0];
                     self.etapas.splice(evt.newIndex, 0, movedItem);
-                    self.actualizarJSON();
                 }
             });
             this.renderFlujo();
-        },
 
-        $watch: {
-            etapas() {
+            // Observa cambios profundos y refresca flujo
+            this.$watch(() => JSON.stringify(this.etapas), () => {
                 this.renderFlujo();
-                this.actualizarJSON();
-            }
+            });
         },
 
         agregarEtapa(tipo) {
-            this.etapas.push({
-                uid: Date.now(),
-                tipo: tipo,
+            const base = {
+                uid: Date.now() + Math.random(),
+                tipo,
+                nombre: tipo.nombre,
                 descripcion: 'Descripción de la etapa...',
-                condiciones: {}
-            });
-            this.actualizarJSON();
+                tiempoVida: null,
+                tipoDia: 'habil',
+                hayPrevencion: false,
+                maxPrevenciones: null,
+                duracionPrevencion: null,
+                rechazarAuto: false,
+                involucrados: [],
+                condiciones: {},
+                show: true
+            };
+
+            if (tipo.codigo === 'pagos') {
+                base.conceptos = [];
+            }
+            if (tipo.codigo === 'subetapa') {
+                base.subetapas = [];
+            }
+
+            this.etapas.push(base);
         },
 
         eliminarEtapa(index) {
             this.etapas.splice(index, 1);
-            this.actualizarJSON();
         },
 
-        actualizarJSON() {
-            if (this.$refs.etapasInput) {
-                this.$refs.etapasInput.value = JSON.stringify(this.etapas);
-            }
+        // ==== Apoyos para UI que usabas en la vista ====
+        agregarConcepto(etapa) {
+            if (!Array.isArray(etapa.conceptos)) etapa.conceptos = [];
+            etapa.conceptos.push({
+                clave: '',
+                codigo: '',
+                descripcion: '',
+                pago: '',
+                tipo: '',
+                monto: 0
+            });
         },
+
+        agregarSubetapa(etapa) {
+            if (!Array.isArray(etapa.subetapas)) etapa.subetapas = [];
+            etapa.subetapas.push({
+                nombre: 'Nueva subetapa',
+                descripcion: '',
+                limitarArchivo: false
+            });
+        },
+        // ===============================================
 
         editarCondiciones(index) {
             this.etapaEditando = index;
@@ -288,7 +336,7 @@ function gestorEtapas() {
                     });
                 });
 
-                this.etapas.forEach((etapa, index) => {
+                this.etapas.forEach((etapa) => {
                     const origenId = etapa.uid;
                     if (etapa.condiciones) {
                         for (const [condicion, destinoIndex] of Object.entries(etapa.condiciones)) {

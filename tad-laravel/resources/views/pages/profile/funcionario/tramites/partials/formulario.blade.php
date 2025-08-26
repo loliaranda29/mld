@@ -17,11 +17,8 @@
     }
 
     // Heurística: si la cadena tiene mojibake (Ã, Â, â…), reinterpreta y corrige.
-    // "NÃºmero" -> "Número", "TelÃ©fono" -> "Teléfono", etc.
     function utf8_maybe_fix(string $s): string {
         if (preg_match('/[ÃÂâÊÎÔÛ]/u', $s)) {
-            // utf8_decode: UTF-8 -> ISO-8859-1  (reversa del error)
-            // utf8_encode: ISO-8859-1 -> UTF-8  (cadena final correcta)
             return utf8_encode(utf8_decode($s));
         }
         return $s;
@@ -57,14 +54,35 @@
         $formInit = ['sections' => [ ['name' => 'Inicio del trámite', 'fields' => []] ]];
     }
 
-    // 5) Enviamos al front en base64 para evitar problemas de comillas/entidades
-    $initialB64 = base64_encode(json_encode($formInit, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+    // 5) Catálogos para el builder (si el controlador no los envió, intentamos cargarlos aquí)
+    try {
+        $__cats = $catalogosBuilder ?? \App\Models\Catalogo::with(['items' => function($q){
+            $q->where('activo', 1)->orderBy('orden')->orderBy('nombre');
+        }])->get(['id','nombre','slug'])->map(function($c){
+            return [
+                'id'     => $c->id,
+                'nombre' => $c->nombre,
+                'slug'   => $c->slug,
+                'items'  => $c->items->pluck('nombre')->values()->all(),
+            ];
+        })->all();
+    } catch (\Throwable $e) {
+        $__cats = [];
+    }
+
+    // 6) Enviamos al front en base64 para evitar problemas de comillas/entidades
+    $initialB64   = base64_encode(json_encode($formInit, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+    $catalogsB64  = base64_encode(json_encode($__cats,  JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
 @endphp
 
 <div
-  x-data="formBuilder(JSON.parse(atob($el.dataset.initial || 'e30=')))"
+  x-data="formBuilder(
+            JSON.parse(atob($el.dataset.initial || 'e30=')),
+            JSON.parse(atob($el.dataset.catalogs || 'e30='))
+          )"
   x-init="init()"
   data-initial="{{ $initialB64 }}"
+  data-catalogs="{{ $catalogsB64 }}"
   class="row"
 >
 
@@ -242,21 +260,6 @@
               </div>
 
               <div class="row g-3 mt-2">
-                <div class="col-md-6">
-                  <label class="form-label">Pista (texto)</label>
-                  <input type="text" class="form-control"
-                         x-model="state.sections[selectedSection].fields[selectedField].help"
-                         @input="updateHidden()">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Pista (imagen o video)</label>
-                  <input type="text" class="form-control" placeholder="URL de imagen o video"
-                         x-model="state.sections[selectedSection].fields[selectedField].media"
-                         @input="updateHidden()">
-                </div>
-              </div>
-
-              <div class="row g-3 mt-2">
                 <div class="col-md-12">
                   <label class="form-label">Deriva a sección (general)</label>
                   <select class="form-select"
@@ -266,6 +269,8 @@
                     <template x-for="(sec, i) in state.sections" :key="i">
                       <option :value="sec.name" x-text="sec.name"></option>
                     </template>
+                    <!-- <<< nuevo: ir a confirmar -->
+                    <option value="__CONFIRM__">Ir a Confirmar (fin)</option>
                   </select>
                 </div>
               </div>
@@ -273,38 +278,66 @@
               <!-- Opciones + reglas por opción -->
               <template x-if="['select','radio','checkbox'].includes(state.sections[selectedSection].fields[selectedField].type)">
                 <div class="mt-3">
-                  <label class="form-label">Opciones</label>
-                  <template x-for="(opt, i) in state.sections[selectedSection].fields[selectedField].options" :key="i">
-                    <div class="mb-2">
-                      <div class="d-flex gap-2 align-items-center">
-                        <input class="form-control"
-                               x-model="state.sections[selectedSection].fields[selectedField].options[i]"
-                               @input="updateHidden()">
-                        <button class="btn btn-outline-danger btn-sm"
-                                @click.prevent="
-                                  state.sections[selectedSection].fields[selectedField].conditions &&
-                                  delete state.sections[selectedSection].fields[selectedField].conditions[opt];
-                                  state.sections[selectedSection].fields[selectedField].options.splice(i,1);
-                                  updateHidden();
-                                ">×</button>
+                  <!-- <<< nuevo: usar catálogo -->
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           id="useCatalog"
+                           x-model="state.sections[selectedSection].fields[selectedField].useCatalog"
+                           @change="onToggleUseCatalog()">
+                    <label class="form-check-label" for="useCatalog">Usar catálogo</label>
+                  </div>
+
+                  <div class="mb-2" x-show="state.sections[selectedSection].fields[selectedField].useCatalog">
+                    <label class="form-label">Catálogo</label>
+                    <select class="form-select"
+                            x-model="state.sections[selectedSection].fields[selectedField].catalogSlug"
+                            @change="applyCatalogOptions()">
+                      <option value="">— Seleccionar —</option>
+                      <template x-for="c in catalogs" :key="c.slug">
+                        <option :value="c.slug" x-text="c.nombre"></option>
+                      </template>
+                    </select>
+                    <small class="text-muted">Se guardará la referencia al catálogo y se precargarán sus opciones actuales.</small>
+                  </div>
+
+                  <!-- Manual de opciones (se oculta si hay catálogo) -->
+                  <div x-show="!state.sections[selectedSection].fields[selectedField].useCatalog">
+                    <label class="form-label">Opciones</label>
+                    <template x-for="(opt, i) in state.sections[selectedSection].fields[selectedField].options" :key="i">
+                      <div class="mb-2">
+                        <div class="d-flex gap-2 align-items-center">
+                          <input class="form-control"
+                                 @focus="$event.target.dataset.prev = state.sections[selectedSection].fields[selectedField].options[i]"
+                                 @input="handleOptionEdit(i, $event)"
+                                 x-model="state.sections[selectedSection].fields[selectedField].options[i]">
+                          <button class="btn btn-outline-danger btn-sm"
+                                  @click.prevent="
+                                    state.sections[selectedSection].fields[selectedField].conditions &&
+                                    delete state.sections[selectedSection].fields[selectedField].conditions[opt];
+                                    state.sections[selectedSection].fields[selectedField].options.splice(i,1);
+                                    updateHidden();
+                                  ">×</button>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center mt-1">
+                          <small class="text-muted">Si elige</small>
+                          <span class="badge bg-light text-dark" x-text="opt || '—'"></span>
+                          <small class="text-muted">→ ir a</small>
+                          <select class="form-select form-select-sm w-auto"
+                                  x-model="(state.sections[selectedSection].fields[selectedField].conditions || (state.sections[selectedSection].fields[selectedField].conditions = {}))[opt]"
+                                  @change="updateHidden()">
+                            <option value="">(seguir normal)</option>
+                            <template x-for="(sec, idx) in state.sections" :key="idx">
+                              <option :value="sec.name" x-text="sec.name"></option>
+                            </template>
+                            <!-- <<< nuevo: confirmar -->
+                            <option value="__CONFIRM__">Confirmar (fin de formulario)</option>
+                          </select>
+                        </div>
                       </div>
-                      <div class="d-flex gap-2 align-items-center mt-1">
-                        <small class="text-muted">Si elige</small>
-                        <span class="badge bg-light text-dark" x-text="opt || '—'"></span>
-                        <small class="text-muted">→ ir a</small>
-                        <select class="form-select form-select-sm w-auto"
-                                x-model="(state.sections[selectedSection].fields[selectedField].conditions || (state.sections[selectedSection].fields[selectedField].conditions = {}))[opt]"
-                                @change="updateHidden()">
-                          <option value="">(seguir normal)</option>
-                          <template x-for="(sec, idx) in state.sections" :key="idx">
-                            <option :value="sec.name" x-text="sec.name"></option>
-                          </template>
-                        </select>
-                      </div>
-                    </div>
-                  </template>
-                  <button class="btn btn-outline-success btn-sm"
-                          @click.prevent="state.sections[selectedSection].fields[selectedField].options.push(''); updateHidden()">+ Agregar opción</button>
+                    </template>
+                    <button class="btn btn-outline-success btn-sm"
+                            @click.prevent="state.sections[selectedSection].fields[selectedField].options.push(''); updateHidden()">+ Agregar opción</button>
+                  </div>
                 </div>
               </template>
 
@@ -390,14 +423,46 @@
 <script src="https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
 
 <script>
-  function formBuilder(initialRaw) {
+  // Registrar extensión dagre si es necesario
+  try { if (window.cytoscape && window.cytoscapeDagre) { cytoscape.use(window.cytoscapeDagre); } } catch(e) {}
+
+  // --- JS helpers para reparar mojibake en el cliente ---
+  function jsMaybeFixUtf(s){
+    try {
+      if (typeof s === 'string' && /[ÃÂâÊÎÔÛ]/.test(s)) {
+        // Latin1 -> UTF-8 (hack clásico)
+        return decodeURIComponent(escape(s));
+      }
+    } catch(e) {}
+    return s;
+  }
+  function fixStateEncodingDeep(v){
+    if (Array.isArray(v)) return v.map(fixStateEncodingDeep);
+    if (v && typeof v === 'object') {
+      const o = {};
+      for (const k in v) {
+        const nk = typeof k === 'string' ? jsMaybeFixUtf(k) : k;
+        o[nk] = fixStateEncodingDeep(v[k]);
+      }
+      return o;
+    }
+    if (typeof v === 'string') return jsMaybeFixUtf(v);
+    return v;
+  }
+
+  function formBuilder(initialRaw, catalogsRaw) {
     try {
       let initial;
       try { initial = typeof initialRaw === 'string' ? JSON.parse(initialRaw) : initialRaw; }
       catch { initial = null; }
 
-      const base = (initial && typeof initial === 'object' && Array.isArray(initial.sections))
+      let base = (initial && typeof initial === 'object' && Array.isArray(initial.sections))
         ? initial : { sections: [ { name: 'Inicio del trámite', fields: [] } ] };
+
+      // Repara en cliente si llegó con mojibake
+      base = fixStateEncodingDeep(base);
+
+      const catalogs = Array.isArray(catalogsRaw) ? catalogsRaw : [];
 
       return {
         useSections: true,
@@ -407,11 +472,13 @@
         editor: null,
 
         state: base,
+        catalogs,
 
         cy: null,
         _flowTimer: null,
         _lastTap: { t: 0, id: null },
         _selectedNodeId: null,
+        _formEl: null,
 
         components: [
           { type: 'text',     label: 'Respuesta breve',          name: 'respuesta_breve' },
@@ -427,7 +494,35 @@
           { type: 'richtext', label: 'Texto enriquecido',        name: 'richtext' }
         ],
 
+        // ------------ NUEVO: normalización segura ------------
+        _isPlainObject(v){ return !!v && typeof v === 'object' && !Array.isArray(v); },
+        _normalizeField(f){
+          if (!f) return;
+          if (['select','radio','checkbox'].includes((f.type||'').toLowerCase())) {
+            if (!Array.isArray(f.options)) f.options = [];
+            // Si llegó como [], convertir a objeto {}
+            if (!this._isPlainObject(f.conditions)) f.conditions = {};
+          }
+        },
+        _normalizeAll(){
+          const secs = Array.isArray(this.state.sections) ? this.state.sections : [];
+          secs.forEach(s => {
+            const fields = Array.isArray(s.fields) ? s.fields : [];
+            fields.forEach(f => this._normalizeField(f));
+          });
+        },
+        // ------------------------------------------------------
+
         init() {
+          // Escucha envío del formulario para sincronizar justo antes de POST
+          this._formEl = this.$root?.closest('form') || document.querySelector('form');
+          if (this._formEl) {
+            this._formEl.addEventListener('submit', () => this._syncHiddenEverywhere(), { passive: true });
+          }
+
+          // Normaliza TODO antes de empezar (evita que x-model escriba sobre [])
+          this._normalizeAll();
+
           this.updateHidden();
           this.renderFlow();
           const tabBtn = document.getElementById('formulario-tab');
@@ -447,10 +542,22 @@
           });
         },
 
+        // Sincroniza hidden local y *todos* los hidden del form padre (y corrige encoding antes)
+        _syncHiddenEverywhere() {
+          // Normaliza por si acaso justo antes de serializar
+          this._normalizeAll();
+          const fixed = fixStateEncodingDeep(this.state);
+          const payload = JSON.stringify(fixed);
+          try {
+            document.querySelectorAll('input[name="formulario_json"]').forEach(el => { el.value = payload; });
+          } catch(e) {}
+          if (this.$refs && this.$refs.formularioJson) this.$refs.formularioJson.value = payload;
+          try { window.dispatchEvent(new CustomEvent('mld:formulario-updated', { detail: payload })); } catch(e) {}
+        },
+
         updateHidden() {
-          if (this.$refs && this.$refs.formularioJson) {
-            this.$refs.formularioJson.value = JSON.stringify(this.state);
-          }
+          // Sanear en cliente y propagar
+          this._syncHiddenEverywhere();
           this.scheduleFlow();
         },
 
@@ -473,7 +580,11 @@
             media: '',
             content: '',
             condition: '',
-            validation: 'none'
+            validation: 'none',
+            // Soporte catálogo
+            useCatalog: false,
+            catalogSlug: '',
+            catalog: null
           };
           if (item.type === 'file') {
             field.maxSize  = 5;
@@ -487,7 +598,7 @@
           }
           if (['select','radio','checkbox'].includes(item.type)) {
             field.options = [];
-            field.conditions = {};
+            field.conditions = {}; // <<< importante: objeto, no arreglo
           }
           (this.state.sections[sIndex].fields ??= []).push(field);
           this.updateHidden();
@@ -502,9 +613,13 @@
           this.selectedSection = sectionIndex;
           this.selectedField   = index;
 
+          // Normaliza el campo seleccionado (evita conditions como [])
+          const field = this.state.sections[sectionIndex].fields[index];
+          this._normalizeField(field);
+
           this.$nextTick(() => {
-            const field = this.state.sections[sectionIndex].fields[index];
-            if (field.type === 'richtext') {
+            const f = this.state.sections[sectionIndex].fields[index];
+            if (f.type === 'richtext') {
               const holder = document.getElementById('editorjs');
               if (holder) holder.innerHTML = '';
               if (this.editor && this.editor.destroy) this.editor.destroy();
@@ -513,7 +628,7 @@
                 holder: 'editorjs',
                 autofocus: true,
                 tools: { header: Header, list: List, embed: Embed, image: { class: ImageTool } },
-                data: safeParse(field.content),
+                data: safeParse(f.content),
                 onChange: async () => {
                   const output = await this.editor.save();
                   this.state.sections[this.selectedSection].fields[this.selectedField].content = JSON.stringify(output);
@@ -523,6 +638,42 @@
             }
             this.openModal();
           });
+        },
+
+        onToggleUseCatalog() {
+          const f = this.state.sections[this.selectedSection].fields[this.selectedField];
+          if (f.useCatalog) this.applyCatalogOptions();
+          this.updateHidden();
+        },
+
+        applyCatalogOptions() {
+          const f = this.state.sections[this.selectedSection].fields[this.selectedField];
+          if (!f) return;
+          if (!f.useCatalog || !f.catalogSlug) return this.updateHidden();
+
+          const cat = (this.catalogs || []).find(c => c.slug === f.catalogSlug);
+          if (!cat) return this.updateHidden();
+
+          f.catalog  = { id: cat.id, slug: cat.slug, nombre: cat.nombre };
+          f.options  = Array.isArray(cat.items) ? [...cat.items] : [];
+          // Asegura que conditions sea objeto tras recargar opciones
+          if (!this._isPlainObject(f.conditions)) f.conditions = {};
+          this.updateHidden();
+        },
+
+        // *** NUEVO ***: re-mapea la clave en conditions cuando cambia el texto de la opción
+        handleOptionEdit(i, ev) {
+          const f = this.state.sections[this.selectedSection].fields[this.selectedField];
+          // Asegura objeto antes de tocar claves
+          if (!this._isPlainObject(f.conditions)) f.conditions = {};
+          const prev = ev.target.dataset.prev ?? '';
+          const now  = f.options[i] ?? '';
+          if (prev && prev !== now && f.conditions && Object.prototype.hasOwnProperty.call(f.conditions, prev)) {
+            f.conditions[now] = f.conditions[prev];
+            delete f.conditions[prev];
+          }
+          ev.target.dataset.prev = now;
+          this.updateHidden();
         },
 
         openModal() {
@@ -565,10 +716,10 @@
             this.cy = cytoscape({
               container, elements, wheelSensitivity: 0.2, boxSelectionEnabled: false, autoungrabify: true,
               style: [
-                { selector: 'node.section', style: { 'shape':'round-rectangle','background-color':'#cfd8dc','border-width':1,'border-color':'#90a4ae','label':'data(label)','font-size':12,'text-valign':'center','text-halign':'center','color':'#0f172a','text-outline-width':0,'text-wrap':'wrap','text-max-width':200,'width':'label','height':'label','padding':'10px' } },
-                { selector: 'node.input',   style: { 'shape':'round-rectangle','background-color':'#60a5fa','border-width':0,'label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':600,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':200,'width':'label','height':'label','padding':'10px' } },
-                { selector: 'node.choice',  style: { 'shape':'round-rectangle','background-color':'#22c55e','label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':600,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':200,'width':'label','height':'label','padding':'10px' } },
-                { selector: 'node.special', style: { 'shape':'round-rectangle','background-color':'#f59e0b','label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':700,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':220,'width':'label','height':'label','padding':'10px' } },
+                { selector: 'node.section', style: { 'shape':'round-rectangle','background-color':'#cfd8dc','border-width':1,'border-color':'#90a4ae','label':'data(label)','font-size':12,'text-valign':'center','text-halign':'center','color':'#0f172a','text-outline-width':0,'text-wrap':'wrap','text-max-width':220,'width':'label','height':'label','padding':'12px' } },
+                { selector: 'node.input',   style: { 'shape':'round-rectangle','background-color':'#60a5fa','border-width':0,'label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':600,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':220,'width':'label','height':'label','padding':'10px' } },
+                { selector: 'node.choice',  style: { 'shape':'round-rectangle','background-color':'#22c55e','label':'data(label)','color':'#0f172a','text-outline-width':0,'font-weight':600,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':220,'width':'label','height':'label','padding':'10px' } },
+                { selector: 'node.special', style: { 'shape':'round-rectangle','background-color':'#f59e0b','label':'data(label)','color':'#0f172a','font-weight':700,'text-valign':'center','text-halign':'center','text-wrap':'wrap','text-max-width':240,'width':'label','height':'label','padding':'12px' } },
                 { selector: 'edge.flow',    style: { 'width':2,'line-color':'#94a3b8','target-arrow-color':'#94a3b8','target-arrow-shape':'triangle','curve-style':'bezier' } },
                 { selector: 'edge.cond',    style: { 'width':2,'line-color':'#ef4444','target-arrow-color':'#ef4444','target-arrow-shape':'triangle','line-style':'dashed','curve-style':'bezier','label':'data(label)','font-size':10,'color':'#0f172a','text-background-color':'#fff','text-background-opacity':0.7,'text-background-padding':2 } },
               ]
@@ -589,9 +740,16 @@
             this.cy.json({ elements });
           }
 
+          // Layout dagre con separación mayor
           const layout = this.cy.layout({
-            name: 'breadthfirst', directed: true, nodeDimensionsIncludeLabels: true,
-            padding: 16, spacingFactor: 0.6, animate: false, roots: this.cy.collection('node.section')
+            name: (typeof cytoscape !== 'undefined' && cytoscape.prototype && cytoscape.prototype.layout && window.cytoscapeDagre) ? 'dagre' : 'breadthfirst',
+            nodeSep: 90,
+            rankSep: 140,
+            edgeSep: 24,
+            rankDir: 'TB',
+            spacingFactor: 0.9,
+            animate: false,
+            padding: 32
           });
           layout.run();
           this._refit();
@@ -615,7 +773,7 @@
           if (confirm('¿Eliminar este campo del formulario?')) { this.removeField(sIdx, fIdx); this.scheduleFlow(); }
         },
 
-        // Construcción de elementos (excluye activables)
+        // Construcción de elementos (incluye "Confirmar" si hay reglas que lo apunten)
         _buildFlowElementsForDiagram() {
           const els = [];
           const all = (this.state && Array.isArray(this.state.sections)) ? this.state.sections : [];
@@ -623,6 +781,8 @@
 
           const idxByName = new Map();
           sections.forEach((s, i) => idxByName.set((s.name || '').trim(), i));
+
+          let usesConfirm = false;
 
           sections.forEach((s, sIdx) => {
             els.push({ data: { id: `sec-${sIdx}`, label: s.name || `Sección ${sIdx+1}` }, classes: 'section' });
@@ -640,21 +800,36 @@
               prevId = id;
 
               if (f.condition) {
-                const toIdx = idxByName.get((f.condition || '').trim());
-                if (typeof toIdx === 'number') {
-                  els.push({ data: { id: `cg-${id}-sec-${toIdx}`, source: id, target: `sec-${toIdx}`, label: '' }, classes: 'cond' });
+                if (f.condition === '__CONFIRM__') {
+                  usesConfirm = true;
+                  els.push({ data: { id: `cg-${id}-confirm`, source: id, target: `confirm`, label: '' }, classes: 'cond' });
+                } else {
+                  const toIdx = idxByName.get((f.condition || '').trim());
+                  if (typeof toIdx === 'number') {
+                    els.push({ data: { id: `cg-${id}-sec-${toIdx}`, source: id, target: `sec-${toIdx}`, label: '' }, classes: 'cond' });
+                  }
                 }
               }
               if (f.conditions && typeof f.conditions === 'object') {
                 for (const [opt, secName] of Object.entries(f.conditions)) {
-                  const toIdx = idxByName.get((secName || '').trim());
-                  if (typeof toIdx === 'number') {
-                    els.push({ data: { id: `c-${id}-sec-${toIdx}-${opt}`, source: id, target: `sec-${toIdx}`, label: String(opt) }, classes: 'cond' });
+                  if (secName === '__CONFIRM__') {
+                    usesConfirm = true;
+                    els.push({ data: { id: `c-${id}-confirm-${opt}`, source: id, target: `confirm`, label: String(opt) }, classes: 'cond' });
+                  } else {
+                    const toIdx = idxByName.get((secName || '').trim());
+                    if (typeof toIdx === 'number') {
+                      els.push({ data: { id: `c-${id}-sec-${toIdx}-${opt}`, source: id, target: `sec-${toIdx}`, label: String(opt) }, classes: 'cond' });
+                    }
                   }
                 }
               }
             });
           });
+
+          if (usesConfirm) {
+            els.push({ data: { id: 'confirm', label: 'Confirmar' }, classes: 'special' });
+          }
+
           return els;
         }
       };

@@ -1,27 +1,59 @@
-{{-- resources/views/pages/profile/funcionario/tramites/tramite_create.blade.php --}}
 @extends('layouts.app-funcionario')
 
 @section('profile_content')
+@php
+    /** @var \App\Models\Tramite|null $tramite */
+    $tramite = $tramite ?? null;
+
+    // Detectar si es edición de un registro existente
+    $isEdit = $tramite instanceof \App\Models\Tramite && $tramite->exists;
+
+    // Normalizar estados para Alpine: si vienen como string JSON, decodificar a array
+    $F = $tramite->formulario_json ?? [];
+    if (is_string($F)) { $tmp = json_decode($F, true); $F = is_array($tmp) ? $tmp : []; }
+
+    $E = $etapas ?? [];
+    if (is_string($E)) { $tmp = json_decode($E, true); $E = is_array($tmp) ? $tmp : []; }
+
+    $D = $tramite->documento_json ?? [];
+    if (is_string($D)) { $tmp = json_decode($D, true); $D = is_array($tmp) ? $tmp : []; }
+
+    $C = $tramite->config_json ?? ['acepta_solicitudes' => false, 'acepta_pruebas' => false];
+    if (is_string($C)) { $tmp = json_decode($C, true); $C = is_array($tmp) ? $tmp : ['acepta_solicitudes' => false, 'acepta_pruebas' => false]; }
+
+    // Colección para relaciones
+    $todos = $todos ?? collect();
+@endphp
+
 <div class="container">
-    <h1 class="h3 mb-3">{{ isset($tramite) ? 'Editar Trámite' : 'Crear Nuevo Trámite' }}</h1>
+    <h1 class="h3 mb-3">{{ $isEdit ? 'Editar Trámite' : 'Crear Nuevo Trámite' }}</h1>
 
     <form
         method="POST"
-        action="{{ isset($tramite) ? route('funcionario.tramites.update', $tramite->id) : route('funcionario.tramites.store') }}"
+        action="{{ $isEdit
+            ? route('funcionario.tramites.update', $tramite)   /* PUT /funcionario/tramites/{tramite} */
+            : route('funcionario.tramites.store')              /* POST /funcionario/tramites */
+        }}"
         x-data="{
             // Estados que editan los partials
-            formulario: @js($tramite->formulario_json ?? []),
-            etapas:     @js($etapas ?? []),
-            bloques:    @js($tramite->documento_json ?? []),
-            // ❗ FIX: usar array PHP, no objeto JS
-            config:     @js($tramite->config_json ?? ['acepta_solicitudes' => false, 'acepta_pruebas' => false]),
+            formulario: @js($F),
+            etapas:     @js($E),
+            bloques:    @js($D),
+            // ⚠️ Mantener array plano para toggles/flags
+            config:     @js($C),
 
             // Helper para enviar JSON 'limpio'
             toJson(v){ try { return JSON.stringify(v ?? {}); } catch(e){ return '{}'; } }
         }"
+        x-init="
+            // Sincroniza con el builder: cuando éste actualiza, reflejamos acá
+            window.addEventListener('mld:formulario-updated', (e) => {
+                try { formulario = JSON.parse(e.detail || '{}'); } catch (_) { formulario = {}; }
+            });
+        "
     >
         @csrf
-        @if(isset($tramite)) @method('PUT') @endif
+        @if($isEdit) @method('PUT') @endif
 
         {{-- Errores de validación --}}
         @if ($errors->any())
@@ -101,7 +133,7 @@
                     <div class="tab-pane fade" id="tab-etapas" role="tabpanel" aria-labelledby="etapas-tab">
                         @include('pages.profile.funcionario.tramites.partials.etapas', [
                             'tramite' => $tramite ?? null,
-                            'etapas'  => $etapas  ?? []
+                            'etapas'  => $E
                         ])
                     </div>
 
@@ -120,7 +152,7 @@
                         <div class="p-2">
                             @include('pages.profile.funcionario.tramites.partials.relaciones', [
                                 'tramite' => $tramite ?? null,
-                                'todos'   => $todos   ?? collect(),
+                                'todos'   => $todos,
                             ])
                         </div>
                     </div>

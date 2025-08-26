@@ -86,7 +86,7 @@ return [
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
-            'charset' => 'utf8',
+            'charset' => 'UTF-8',
             'prefix' => '',
             'prefix_indexes' => true,
              'encrypt' => env('DB_ENCRYPT', 'yes'),

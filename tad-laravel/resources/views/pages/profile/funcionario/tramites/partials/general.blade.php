@@ -64,8 +64,8 @@
 
           <div class="col-md-6">
             <label class="form-label">Teléfono oficina</label>
-            <input type="text" name="telefono_oficina" class="form-control"
-                   value="{{ old('telefono_oficina', data_get($g,'telefono_oficina')) }}">
+            <input type="text" name="telefono_oficina" class="form-control
+                   " value="{{ old('telefono_oficina', data_get($g,'telefono_oficina')) }}">
           </div>
 
           <div class="col-md-6">
@@ -179,6 +179,80 @@
       old('pasos_html', data_get($g,'pasos_html'))
     !!}</textarea>
   </div>
+
+  {{-- =========================
+       SWITCHES / FLAGS NUEVOS
+     ========================= --}}
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">Visibilidad y estado</div>
+      <div class="card-body">
+
+        {{-- Publicar trámite --}}
+        <div class="form-check form-switch d-flex align-items-center mb-2">
+          <input type="hidden" name="publicado" :value="config.publicado ? 1 : 0">
+          <input class="form-check-input me-2" type="checkbox" id="sw_publicado" x-model="config.publicado">
+          <label class="form-check-label" for="sw_publicado">Publicar trámite</label>
+        </div>
+        <small class="text-muted d-block mb-3">
+          El ciudadano podrá encontrar la ficha en la plataforma.
+        </small>
+
+        {{-- Disponible en línea --}}
+        <div class="form-check form-switch d-flex align-items-center mb-2">
+          <input type="hidden" name="disponible" :value="config.disponible ? 1 : 0">
+          <input class="form-check-input me-2" type="checkbox" id="sw_disponible" x-model="config.disponible">
+          <label class="form-check-label" for="sw_disponible">Disponible en línea</label>
+        </div>
+        <small class="text-muted d-block mb-3">
+          Habilita que el trámite esté operativo en línea.
+        </small>
+
+        {{-- Aceptar solicitudes ciudadanas --}}
+        <div class="form-check form-switch d-flex align-items-center mb-2">
+          <input type="hidden" name="acepta_solicitudes" :value="config.acepta_solicitudes ? 1 : 0">
+          <input class="form-check-input me-2" type="checkbox" id="sw_acepta_solicitudes" x-model="config.acepta_solicitudes">
+          <label class="form-check-label" for="sw_acepta_solicitudes">Aceptar solicitudes ciudadanas</label>
+        </div>
+        <small class="text-muted d-block mb-3">
+          Permite que el ciudadano inicie el trámite.
+        </small>
+
+        {{-- Aceptar solicitudes de prueba --}}
+        <div class="form-check form-switch d-flex align-items-center mb-2">
+          <input type="hidden" name="acepta_pruebas" :value="config.acepta_pruebas ? 1 : 0">
+          <input class="form-check-input me-2" type="checkbox" id="sw_acepta_pruebas" x-model="config.acepta_pruebas">
+          <label class="form-check-label" for="sw_acepta_pruebas">Aceptar solicitudes de prueba</label>
+        </div>
+        <small class="text-muted d-block">
+          Permite pruebas internas del trámite por parte de funcionarios.
+        </small>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">Módulos</div>
+      <div class="card-body">
+        {{-- Módulo citas --}}
+        <div class="form-check form-switch d-flex align-items-center mb-2">
+          <input type="hidden" name="modulo_citas" :value="config.modulo_citas ? 1 : 0">
+          <input class="form-check-input me-2" type="checkbox" id="sw_modulo_citas" x-model="config.modulo_citas">
+          <label class="form-check-label" for="sw_modulo_citas">Módulo citas</label>
+        </div>
+
+        {{-- Módulo inspectores --}}
+        <div class="form-check form-switch d-flex align-items-center">
+          <input type="hidden" name="modulo_inspectores" :value="config.modulo_inspectores ? 1 : 0">
+          <input class="form-check-input me-2" type="checkbox" id="sw_modulo_inspectores" x-model="config.modulo_inspectores">
+          <label class="form-check-label" for="sw_modulo_inspectores">Módulo inspectores</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 {{-- ====== Scripts del editor (TinyMCE con fotos + videos) ====== --}}

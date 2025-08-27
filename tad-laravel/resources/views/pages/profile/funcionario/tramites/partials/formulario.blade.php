@@ -263,6 +263,7 @@
                 <div class="col-md-12">
                   <label class="form-label">Deriva a sección (general)</label>
                   <select class="form-select"
+                          :key="'gen-'+selectedSection+'-'+selectedField"  <!-- clave para rehidratación -->
                           x-model="state.sections[selectedSection].fields[selectedField].condition"
                           @change="updateHidden()">
                     <option value="">(sin derivación)</option>
@@ -290,6 +291,7 @@
                   <div class="mb-2" x-show="state.sections[selectedSection].fields[selectedField].useCatalog">
                     <label class="form-label">Catálogo</label>
                     <select class="form-select"
+                            :key="'cat-'+selectedSection+'-'+selectedField"  <!-- fuerza hidratación -->
                             x-model="state.sections[selectedSection].fields[selectedField].catalogSlug"
                             @change="applyCatalogOptions()">
                       <option value="">— Seleccionar —</option>
@@ -298,12 +300,34 @@
                       </template>
                     </select>
                     <small class="text-muted">Se guardará la referencia al catálogo y se precargarán sus opciones actuales.</small>
+
+                    <!-- NUEVO: Derivaciones por opción (catálogo) -->
+                    <div class="mt-3">
+                      <label class="form-label">Derivaciones por opción (catálogo)</label>
+                      <template x-for="(opt, i) in catalogOptionsForSelected()" :key="'copt-'+selectedSection+'-'+selectedField+'-'+i">
+                        <div class="mb-2 d-flex flex-wrap align-items-center gap-2">
+                          <small class="text-muted">Si elige</small>
+                          <span class="badge bg-light text-dark" x-text="opt"></span>
+                          <small class="text-muted">→ ir a</small>
+                          <select class="form-select form-select-sm w-auto"
+                                  :key="'cgo-'+selectedSection+'-'+selectedField+'-'+i"
+                                  x-model="state.sections[selectedSection].fields[selectedField].conditions[opt]"
+                                  @change="updateHidden()">
+                            <option value="">(seguir normal)</option>
+                            <template x-for="(sec, idx) in state.sections" :key="idx">
+                              <option :value="sec.name" x-text="sec.name"></option>
+                            </template>
+                            <option value="__CONFIRM__">Confirmar (fin de formulario)</option>
+                          </select>
+                        </div>
+                      </template>
+                    </div>
                   </div>
 
                   <!-- Manual de opciones (se oculta si hay catálogo) -->
                   <div x-show="!state.sections[selectedSection].fields[selectedField].useCatalog">
                     <label class="form-label">Opciones</label>
-                    <template x-for="(opt, i) in state.sections[selectedSection].fields[selectedField].options" :key="i">
+                    <template x-for="(opt, i) in state.sections[selectedSection].fields[selectedField].options" :key="'mopt-'+i">
                       <div class="mb-2">
                         <div class="d-flex gap-2 align-items-center">
                           <input class="form-control"
@@ -318,21 +342,33 @@
                                     updateHidden();
                                   ">×</button>
                         </div>
-                        <div class="d-flex gap-2 align-items-center mt-1">
+
+                        <div class="d-flex gap-2 align-items-center mt-1"
+                             x-data="{
+                               get f(){ return state.sections[selectedSection].fields[selectedField] },
+                               get map(){
+                                 if (!this.f.conditions || Array.isArray(this.f.conditions)) this.f.conditions = {};
+                                 return this.f.conditions;
+                               },
+                               get key(){ return String(opt ?? '').trim() },
+                               get dest(){ return this.map[this.key] ?? '' },
+                               set dest(v){ this.map[this.key] = v; updateHidden(); }
+                             }">
                           <small class="text-muted">Si elige</small>
                           <span class="badge bg-light text-dark" x-text="opt || '—'"></span>
                           <small class="text-muted">→ ir a</small>
                           <select class="form-select form-select-sm w-auto"
-                                  x-model="(state.sections[selectedSection].fields[selectedField].conditions || (state.sections[selectedSection].fields[selectedField].conditions = {}))[opt]"
+                                  :key="'mgo-'+selectedSection+'-'+selectedField+'-'+i"
+                                  x-model="dest"
                                   @change="updateHidden()">
                             <option value="">(seguir normal)</option>
                             <template x-for="(sec, idx) in state.sections" :key="idx">
                               <option :value="sec.name" x-text="sec.name"></option>
                             </template>
-                            <!-- <<< nuevo: confirmar -->
                             <option value="__CONFIRM__">Confirmar (fin de formulario)</option>
                           </select>
                         </div>
+
                       </div>
                     </template>
                     <button class="btn btn-outline-success btn-sm"
@@ -494,25 +530,6 @@
           { type: 'richtext', label: 'Texto enriquecido',        name: 'richtext' }
         ],
 
-        // ------------ NUEVO: normalización segura ------------
-        _isPlainObject(v){ return !!v && typeof v === 'object' && !Array.isArray(v); },
-        _normalizeField(f){
-          if (!f) return;
-          if (['select','radio','checkbox'].includes((f.type||'').toLowerCase())) {
-            if (!Array.isArray(f.options)) f.options = [];
-            // Si llegó como [], convertir a objeto {}
-            if (!this._isPlainObject(f.conditions)) f.conditions = {};
-          }
-        },
-        _normalizeAll(){
-          const secs = Array.isArray(this.state.sections) ? this.state.sections : [];
-          secs.forEach(s => {
-            const fields = Array.isArray(s.fields) ? s.fields : [];
-            fields.forEach(f => this._normalizeField(f));
-          });
-        },
-        // ------------------------------------------------------
-
         init() {
           // Escucha envío del formulario para sincronizar justo antes de POST
           this._formEl = this.$root?.closest('form') || document.querySelector('form');
@@ -520,8 +537,8 @@
             this._formEl.addEventListener('submit', () => this._syncHiddenEverywhere(), { passive: true });
           }
 
-          // Normaliza TODO antes de empezar (evita que x-model escriba sobre [])
-          this._normalizeAll();
+          // --- normaliza condiciones y catálogos cargados desde BD
+          this.normalizeState();
 
           this.updateHidden();
           this.renderFlow();
@@ -542,10 +559,42 @@
           });
         },
 
+        // --- normaliza el estado para que el UI se hidrate bien
+        normalizeState() {
+          try {
+            for (const sec of (this.state.sections || [])) {
+              for (const f of (sec.fields || [])) {
+                // conditions siempre objeto
+                if (Array.isArray(f.conditions) || !f.conditions) f.conditions = {};
+
+                // catálogo: completar slug desde objeto si faltara
+                if (f.useCatalog) {
+                  if ((!f.catalogSlug || !String(f.catalogSlug).trim()) && f.catalog?.slug) {
+                    f.catalogSlug = f.catalog.slug;
+                  }
+                  const cat = (this.catalogs || []).find(c => c.slug === f.catalogSlug);
+                  if (cat) {
+                    f.catalog = { id: cat.id, slug: cat.slug, nombre: cat.nombre };
+                    // Opciones visibles del combo (aunque no edites manualmente)
+                    f.options = Array.isArray(cat.items) ? [...cat.items] : (Array.isArray(f.options) ? f.options : []);
+                  }
+                }
+              }
+            }
+          } catch(e) { console.warn('normalizeState fallo', e); }
+          this.updateHidden();
+        },
+
+        // Devuelve las opciones del catálogo seleccionado
+        catalogOptionsForSelected(){
+          const f = this.state.sections[this.selectedSection]?.fields[this.selectedField];
+          if (!f || !f.useCatalog) return [];
+          const cat = (this.catalogs || []).find(c => c.slug === f.catalogSlug);
+          return Array.isArray(cat?.items) ? cat.items : [];
+        },
+
         // Sincroniza hidden local y *todos* los hidden del form padre (y corrige encoding antes)
         _syncHiddenEverywhere() {
-          // Normaliza por si acaso justo antes de serializar
-          this._normalizeAll();
           const fixed = fixStateEncodingDeep(this.state);
           const payload = JSON.stringify(fixed);
           try {
@@ -598,7 +647,7 @@
           }
           if (['select','radio','checkbox'].includes(item.type)) {
             field.options = [];
-            field.conditions = {}; // <<< importante: objeto, no arreglo
+            field.conditions = {};
           }
           (this.state.sections[sIndex].fields ??= []).push(field);
           this.updateHidden();
@@ -613,13 +662,12 @@
           this.selectedSection = sectionIndex;
           this.selectedField   = index;
 
-          // Normaliza el campo seleccionado (evita conditions como [])
-          const field = this.state.sections[sectionIndex].fields[index];
-          this._normalizeField(field);
+          // Asegura estado consistente antes de pintar el modal
+          this.normalizeState();
 
           this.$nextTick(() => {
-            const f = this.state.sections[sectionIndex].fields[index];
-            if (f.type === 'richtext') {
+            const field = this.state.sections[sectionIndex].fields[index];
+            if (field.type === 'richtext') {
               const holder = document.getElementById('editorjs');
               if (holder) holder.innerHTML = '';
               if (this.editor && this.editor.destroy) this.editor.destroy();
@@ -628,7 +676,7 @@
                 holder: 'editorjs',
                 autofocus: true,
                 tools: { header: Header, list: List, embed: Embed, image: { class: ImageTool } },
-                data: safeParse(f.content),
+                data: safeParse(field.content),
                 onChange: async () => {
                   const output = await this.editor.save();
                   this.state.sections[this.selectedSection].fields[this.selectedField].content = JSON.stringify(output);
@@ -642,7 +690,12 @@
 
         onToggleUseCatalog() {
           const f = this.state.sections[this.selectedSection].fields[this.selectedField];
-          if (f.useCatalog) this.applyCatalogOptions();
+          if (f.useCatalog) {
+            if ((!f.catalogSlug || !String(f.catalogSlug).trim()) && f.catalog?.slug) {
+              f.catalogSlug = f.catalog.slug;
+            }
+            this.applyCatalogOptions();
+          }
           this.updateHidden();
         },
 
@@ -656,16 +709,12 @@
 
           f.catalog  = { id: cat.id, slug: cat.slug, nombre: cat.nombre };
           f.options  = Array.isArray(cat.items) ? [...cat.items] : [];
-          // Asegura que conditions sea objeto tras recargar opciones
-          if (!this._isPlainObject(f.conditions)) f.conditions = {};
           this.updateHidden();
         },
 
-        // *** NUEVO ***: re-mapea la clave en conditions cuando cambia el texto de la opción
+        // Remapea la clave en conditions cuando cambia el texto de la opción
         handleOptionEdit(i, ev) {
           const f = this.state.sections[this.selectedSection].fields[this.selectedField];
-          // Asegura objeto antes de tocar claves
-          if (!this._isPlainObject(f.conditions)) f.conditions = {};
           const prev = ev.target.dataset.prev ?? '';
           const now  = f.options[i] ?? '';
           if (prev && prev !== now && f.conditions && Object.prototype.hasOwnProperty.call(f.conditions, prev)) {
@@ -673,6 +722,28 @@
             delete f.conditions[prev];
           }
           ev.target.dataset.prev = now;
+          this.updateHidden();
+        },
+
+        // *** HELPERS para leer/escribir condiciones de una opción ***
+        getCond(opt) {
+          const f = this.state.sections[this.selectedSection]?.fields[this.selectedField];
+          if (!f) return '';
+          const key = String(opt ?? '').trim();
+          if (!key) return '';
+          return (f.conditions && Object.prototype.hasOwnProperty.call(f.conditions, key))
+            ? (f.conditions[key] ?? '')
+            : '';
+        },
+        setCond(opt, val) {
+          const f = this.state.sections[this.selectedSection]?.fields[this.selectedField];
+          if (!f) return;
+          const key = String(opt ?? '').trim();
+          if (!key) return;
+          if (!f.conditions) f.conditions = {};
+          const v = String(val ?? '');
+          if (!v) { delete f.conditions[key]; }
+          else { f.conditions[key] = v; }
           this.updateHidden();
         },
 

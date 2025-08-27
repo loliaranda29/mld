@@ -225,4 +225,14 @@ public function subUpload(Request $request, $id)
 
         return back()->with('ok', 'Término eliminado correctamente.');
     }
+
+    public function edit(Tramite $tramite)
+{
+    $catalogosBuilder = Catalogo::with(['items' => function ($q) {
+        $q->where('activo', 1)->orderBy('orden')->orderBy('nombre');
+    }])->get(['id','nombre','slug']);
+
+    return view('...formulario', compact('tramite', 'catalogosBuilder'));
+}
+
 }

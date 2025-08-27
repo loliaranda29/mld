@@ -50,6 +50,11 @@
             window.addEventListener('mld:formulario-updated', (e) => {
                 try { formulario = JSON.parse(e.detail || '{}'); } catch (_) { formulario = {}; }
             });
+
+            // NUEVO: escuchar actualizaciones del constructor de Etapas
+            window.addEventListener('mld:etapas-updated', (e) => {
+                try { etapas = JSON.parse(e.detail || '[]'); } catch (_) { etapas = []; }
+            });
         "
     >
         @csrf

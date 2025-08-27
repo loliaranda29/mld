@@ -1,4 +1,4 @@
-<div x-data="gestorEtapas()" x-init="init()" class="row" @keydown.enter.prevent>
+<div x-data="gestorEtapas()" x-init="init()" class="row" @keydown.enter.prevent data-initial='@json($etapas ?? [])'>
     <!-- Tipos de etapa -->
     <div class="col-md-4">
         <div class="card mb-3">
@@ -233,7 +233,29 @@ function gestorEtapas() {
         condicionesJson: '',
         etapaEditando: null,
 
+        // ---- NUEVO: emite cambios para sincronizar con el form padre y el hidden correcto ----
+        _emitEtapas() {
+            try {
+                const payload = JSON.stringify(this.etapas ?? []);
+                // Actualizar el hidden local (mantengo tu x-ref y name="etapas")
+                if (this.$refs.etapasInput) this.$refs.etapasInput.value = payload;
+                // Actualizar los hidden del formulario padre esperados por backend (etapas_json)
+                document.querySelectorAll('input[name="etapas_json"]').forEach(el => el.value = payload);
+                // Notificar al padre (igual que hace el builder de Formulario)
+                window.dispatchEvent(new CustomEvent('mld:etapas-updated', { detail: payload }));
+            } catch (e) {
+                console.error('No se pudo emitir etapas:', e);
+            }
+        },
+
         init() {
+            // Cargar estado inicial desde el atributo data-initial
+            try {
+                const raw = this.$el?.dataset?.initial || '[]';
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) this.etapas = parsed;
+            } catch (_) {}
+
             const self = this;
             new Sortable(document.getElementById('sortableEtapas'), {
                 animation: 150,
@@ -244,10 +266,14 @@ function gestorEtapas() {
             });
             this.renderFlujo();
 
-            // Observa cambios profundos y refresca flujo
+            // Observa cambios profundos, refresca flujo y emite sync
             this.$watch(() => JSON.stringify(this.etapas), () => {
                 this.renderFlujo();
+                this._emitEtapas();
             });
+
+            // Emitir al iniciar (para que el padre tenga el valor inicial)
+            this._emitEtapas();
         },
 
         agregarEtapa(tipo) {

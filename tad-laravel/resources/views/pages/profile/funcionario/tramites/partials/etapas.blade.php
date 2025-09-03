@@ -30,7 +30,7 @@
                                 </div>
                                 <div class="ms-auto d-flex gap-2">
                                     <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            @click.prevent="etapa.show = !etapa.show">
+                                            @click.prevent="etapa.show = !etapa.show; $nextTick(()=>attachSubSortable())">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-secondary"
@@ -67,75 +67,114 @@
                                     </div>
                                 </div>
 
-                                <!-- Pagos: listado de conceptos -->
-                                <template x-if="etapa.tipo.codigo === 'pagos'">
-                                    <div class="mb-3 border p-2">
-                                        <label class="form-label">Listado de conceptos a cobrar</label>
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Clave</th>
-                                                        <th>Concepto</th>
-                                                        <th>Descripción</th>
-                                                        <th>Pago</th>
-                                                        <th>Tipo</th>
-                                                        <th>Monto</th>
-                                                        <th>Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <template x-for="(concepto, ci) in etapa.conceptos" :key="ci">
-                                                        <tr>
-                                                            <td x-text="concepto.clave"></td>
-                                                            <td x-text="concepto.codigo"></td>
-                                                            <td x-text="concepto.descripcion"></td>
-                                                            <td x-text="concepto.pago"></td>
-                                                            <td x-text="concepto.tipo"></td>
-                                                            <td x-text="concepto.monto"></td>
-                                                            <td>
-                                                                <button type="button" class="btn btn-sm btn-danger"
-                                                                        @click.prevent="etapa.conceptos.splice(ci, 1)">🗑️
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    </template>
-                                                </tbody>
-                                            </table>
+                                <!-- ===== OPCIÓN GLOBAL: Adjuntos en documentos de salida ===== -->
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" :id="'swAdjSalida-'+etapa.uid"
+                                           x-model="etapa.adjuntosEnSalida">
+                                    <label class="form-check-label" :for="'swAdjSalida-'+etapa.uid">
+                                        Adjuntos en documentos de salida
+                                        <i class="bi bi-info-circle ms-1" data-bs-toggle="tooltip"
+                                           title="Si está activo, los archivos/adjuntos correspondientes se incluirán en los documentos emitidos en esta etapa."></i>
+                                    </label>
+                                </div>
+                                <!-- ===== /OPCIÓN GLOBAL ===== -->
+
+                                <!-- ===== EMISIÓN DE DOCUMENTO: opciones específicas ===== -->
+                                <template x-if="etapa.tipo.codigo === 'documento'">
+                                    <div class="mb-3 border rounded p-3">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" :id="'swNotifDoc-'+etapa.uid"
+                                                   x-model="etapa.notificarConclusion">
+                                            <label class="form-check-label" :for="'swNotifDoc-'+etapa.uid">
+                                                Notificar al usuario de la conclusión de la etapa
+                                            </label>
                                         </div>
-                                        <button type="button" class="btn btn-outline-primary btn-sm"
-                                                @click.prevent="agregarConcepto(etapa)">Agregar concepto</button>
+
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" :id="'swObsOperador-'+etapa.uid"
+                                                   x-model="etapa.permitirObsOperador">
+                                            <label class="form-check-label" :for="'swObsOperador-'+etapa.uid">
+                                                Permitir al operador agregar observaciones
+                                            </label>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <label class="form-label">Elija lo que se va a emitir <span class="text-danger">*</span></label>
+                                            <select class="form-select" x-model="etapa.tipoEmision">
+                                                <option value="certificado">Certificado</option>
+                                                <option value="informe">Informe</option>
+                                                <option value="constancia">Constancia</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </template>
+                                <!-- ===== /EMISIÓN DE DOCUMENTO ===== -->
 
-                                <!-- Subetapas: gestión visual -->
+                                <!-- Subetapas: gestión visual y flujo -->
                                 <template x-if="etapa.tipo.codigo === 'subetapa'">
                                     <div class="mt-3 border p-2">
                                         <label class="form-label">Subetapas</label>
-                                        <div class="d-flex flex-wrap gap-3">
+
+                                        <!-- Tipo de flujo subetapas -->
+                                        <div class="d-flex align-items-center gap-4 mb-2">
+                                            <span class="text-muted small">Selecciona el tipo de flujo</span>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" :name="'flujo-'+etapa.uid"
+                                                       value="secuencial" x-model="etapa.sub_flujoTipo">
+                                                <label class="form-check-label">Secuencial</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" :name="'flujo-'+etapa.uid"
+                                                       value="simultaneo" x-model="etapa.sub_flujoTipo">
+                                                <label class="form-check-label">Simultáneo</label>
+                                            </div>
+                                            <i class="bi bi-info-circle small text-muted"
+                                               data-bs-toggle="tooltip"
+                                               title="Secuencial: se ejecutan en el orden de la lista (arrastrá para reordenar). Simultáneo: se ejecutan en paralelo."></i>
+                                        </div>
+
+                                        <div class="d-flex flex-wrap gap-3" :id="'sublist-'+etapa.uid">
                                             <template x-for="(sub, si) in etapa.subetapas" :key="si">
-                                                <div class="border p-2 rounded bg-light position-relative">
-                                                    <div class="fw-bold" x-text="sub.nombre"></div>
-                                                    <small class="text-muted" x-text="sub.descripcion"></small>
-                                                    <div class="form-check mt-1">
-                                                        <input type="checkbox" class="form-check-input"
-                                                               x-model="sub.limitarArchivo" :id="'limitar-'+si">
-                                                        <label class="form-check-label" :for="'limitar-'+si">Limitar a un archivo</label>
+                                                <div class="border p-2 rounded bg-light position-relative" style="min-width:250px;" :data-index="si">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="fw-bold">
+                                                            <span class="badge bg-secondary me-1" x-show="etapa.sub_flujoTipo==='secuencial'">#<span x-text="si+1"></span></span>
+                                                            <span x-text="sub.nombre"></span>
+                                                        </div>
+                                                        <!-- Tuerca -->
+                                                        <div class="dropdown">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                                                <i class="bi bi-gear"></i>
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                                <li><a href="#" class="dropdown-item" @click.prevent="abrirEditorSubetapa(etapa, si)">Editar</a></li>
+                                                                <li><a href="#" class="dropdown-item text-danger" @click.prevent="etapa.subetapas.splice(si,1)">Eliminar</a></li>
+                                                            </ul>
+                                                        </div>
                                                     </div>
-                                                    <button type="button" class="btn btn-sm btn-link text-danger position-absolute top-0 end-0"
-                                                            @click.prevent="etapa.subetapas.splice(si, 1)">🗑️</button>
+
+                                                    <small class="text-muted" x-text="sub.descripcion"></small>
+
+                                                    <div class="form-check mt-2">
+                                                        <input type="checkbox" class="form-check-input"
+                                                               x-model="sub.limitarArchivo" :id="'limitar-'+etapa.uid+'-'+si">
+                                                        <label class="form-check-label" :for="'limitar-'+etapa.uid+'-'+si">
+                                                            Limitar a un archivo
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </div>
+
                                         <button type="button" class="btn btn-outline-primary btn-sm mt-2"
-                                                @click.prevent="agregarSubetapa(etapa)">Agregar subetapa</button>
+                                                @click.prevent="agregarSubetapa(etapa); $nextTick(()=>attachSubSortable())">Agregar subetapa</button>
                                     </div>
                                 </template>
 
-                                <!-- Observaciones -->
+                                <!-- Observaciones (generales de etapa) -->
                                 <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" x-model="etapa.hayPrevencion" id="hayPrev">
-                                    <label class="form-check-label" for="hayPrev">Hay observaciones</label>
+                                    <input class="form-check-input" type="checkbox" x-model="etapa.hayPrevencion" :id="'hayPrev-'+etapa.uid">
+                                    <label class="form-check-label" :for="'hayPrev-'+etapa.uid">Hay observaciones</label>
                                 </div>
                                 <div class="row mb-2" x-show="etapa.hayPrevencion">
                                     <div class="col">
@@ -148,8 +187,8 @@
                                     </div>
                                 </div>
                                 <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" x-model="etapa.rechazarAuto" id="rechAuto">
-                                    <label class="form-check-label" for="rechAuto">Rechazar automáticamente si no responde</label>
+                                    <input class="form-check-input" type="checkbox" x-model="etapa.rechazarAuto" :id="'rechAuto-'+etapa.uid">
+                                    <label class="form-check-label" :for="'rechAuto-'+etapa.uid">Rechazar automáticamente si no responde</label>
                                 </div>
 
                                 <!-- Involucrados -->
@@ -213,6 +252,138 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal editor de Subetapa (sin cambios relevantes) -->
+    <div class="modal fade" id="editorSubetapaModal" tabindex="-1" aria-hidden="true" x-ref="subModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 x-text="subEdit?.titulo || 'Editar subetapa'">Editar subetapa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre de la etapa <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" x-model="subEdit.nombre">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tiempo de vida <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" x-model.number="subEdit.tiempoVida">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tipo de días <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="subHabil" value="habil" x-model="subEdit.tipoDia">
+                                    <label class="form-check-label" for="subHabil">Día(s) hábil(es)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="subNatural" value="natural" x-model="subEdit.tipoDia">
+                                    <label class="form-check-label" for="subNatural">Día(s) natural(es)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Descripción de la etapa <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" x-model="subEdit.descripcion">
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="subNotif" x-model="subEdit.notificar">
+                                <label class="form-check-label" for="subNotif">Notificar al usuario de la conclusión de la etapa</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- Opción: permitir continuar sin área -->
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="permitirSinArea" x-model="subEdit.permitirSinArea">
+                                <label class="form-check-label" for="permitirSinArea">
+                                    Permitir continuar sin seleccionar área (saltar esta subetapa)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6" x-show="subEdit.permitirSinArea">
+                            <label class="form-label">Si no se asigna área, saltar a:</label>
+                            <select class="form-select" x-model="subEdit.destinoSinArea">
+                                <option :value="null">Siguiente etapa por defecto</option>
+                                <template x-for="(e, i) in etapas" :key="'dest-'+i">
+                                    <option :value="i" x-text="(i+1)+'. '+(e.nombre || e.tipo?.nombre || 'Etapa')"
+                                            :disabled="e.uid === subEditOwner?.uid"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- Involucrados -->
+                    <div class="mb-2 d-flex gap-2">
+                        <input type="text" class="form-control" placeholder="Nombre del involucrado" x-model="tmpInv.nombre">
+                        <input type="email" class="form-control" placeholder="Email" x-model="tmpInv.email">
+                        <select class="form-select" x-model="tmpInv.conclusion">
+                            <option value="conclusion">Conclusión</option>
+                            <option value="revision">Revisión</option>
+                            <option value="dictamen">Dictamen</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-primary"
+                                :disabled="!tmpInv.nombre || !tmpInv.email"
+                                @click.prevent="agregarInvolucradoTmp()">Agregar involucrado</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del involucrado</th>
+                                    <th>Email</th>
+                                    <th>Tipo de conclusión</th>
+                                    <th class="text-center" style="width:60px">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(inv, i) in subEdit.involucrados" :key="i">
+                                    <tr>
+                                        <td><input type="text" class="form-control form-control-sm" x-model="inv.nombre"></td>
+                                        <td><input type="email" class="form-control form-control-sm" x-model="inv.email"></td>
+                                        <td>
+                                            <select class="form-select form-select-sm" x-model="inv.conclusion">
+                                                <option value="conclusion">Conclusión</option>
+                                                <option value="revision">Revisión</option>
+                                                <option value="dictamen">Dictamen</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-link text-danger" @click.prevent="subEdit.involucrados.splice(i,1)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <tr x-show="!subEdit.involucrados?.length">
+                                    <td colspan="4" class="text-center text-muted">Sin involucrados</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @click.prevent="guardarEditorSubetapa()">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Librerías necesarias -->
@@ -233,23 +404,26 @@ function gestorEtapas() {
         condicionesJson: '',
         etapaEditando: null,
 
-        // ---- NUEVO: emite cambios para sincronizar con el form padre y el hidden correcto ----
+        // editor subetapas
+        subEdit: null,
+        subEditOwner: null,
+        subEditIndex: null,
+        tmpInv: { nombre:'', email:'', conclusion:'conclusion' },
+
+        // sortables por etapa (para subetapas)
+        sortablesSub: {},
+
         _emitEtapas() {
             try {
                 const payload = JSON.stringify(this.etapas ?? []);
-                // Actualizar el hidden local (mantengo tu x-ref y name="etapas")
                 if (this.$refs.etapasInput) this.$refs.etapasInput.value = payload;
-                // Actualizar los hidden del formulario padre esperados por backend (etapas_json)
                 document.querySelectorAll('input[name="etapas_json"]').forEach(el => el.value = payload);
-                // Notificar al padre (igual que hace el builder de Formulario)
                 window.dispatchEvent(new CustomEvent('mld:etapas-updated', { detail: payload }));
-            } catch (e) {
-                console.error('No se pudo emitir etapas:', e);
-            }
+            } catch (e) { console.error('No se pudo emitir etapas:', e); }
         },
 
         init() {
-            // Cargar estado inicial desde el atributo data-initial
+            // cargar inicial
             try {
                 const raw = this.$el?.dataset?.initial || '[]';
                 const parsed = JSON.parse(raw);
@@ -264,16 +438,38 @@ function gestorEtapas() {
                     self.etapas.splice(evt.newIndex, 0, movedItem);
                 }
             });
+
             this.renderFlujo();
 
-            // Observa cambios profundos, refresca flujo y emite sync
             this.$watch(() => JSON.stringify(this.etapas), () => {
                 this.renderFlujo();
                 this._emitEtapas();
+                this.$nextTick(()=>this.attachSubSortable());
             });
 
-            // Emitir al iniciar (para que el padre tenga el valor inicial)
             this._emitEtapas();
+            this.$nextTick(()=>this.attachSubSortable());
+        },
+
+        attachSubSortable() {
+            // Crea Sortable en cada contenedor de subetapas (por etapa)
+            this.etapas.forEach((etapa, idx) => {
+                if (etapa.tipo?.codigo !== 'subetapa') return;
+                const id = `sublist-${etapa.uid}`;
+                const el = document.getElementById(id);
+                if (!el || this.sortablesSub[id]) return;
+
+                this.sortablesSub[id] = new Sortable(el, {
+                    animation: 150,
+                    draggable: '.border.rounded.bg-light.position-relative',
+                    onEnd: (evt) => {
+                        const list = this.etapas[idx].subetapas || [];
+                        const moved = list.splice(evt.oldIndex, 1)[0];
+                        list.splice(evt.newIndex, 0, moved);
+                        this.etapas[idx].subetapas = list;
+                    }
+                });
+            });
         },
 
         agregarEtapa(tipo) {
@@ -284,6 +480,9 @@ function gestorEtapas() {
                 descripcion: 'Descripción de la etapa...',
                 tiempoVida: null,
                 tipoDia: 'habil',
+                // NUEVO: disponible en todas las etapas
+                adjuntosEnSalida: false,
+
                 hayPrevencion: false,
                 maxPrevenciones: null,
                 duracionPrevencion: null,
@@ -293,42 +492,82 @@ function gestorEtapas() {
                 show: true
             };
 
-            if (tipo.codigo === 'pagos') {
-                base.conceptos = [];
-            }
+            if (tipo.codigo === 'pagos') base.conceptos = [];
             if (tipo.codigo === 'subetapa') {
                 base.subetapas = [];
+                base.sub_flujoTipo = 'secuencial';
+            }
+            if (tipo.codigo === 'documento') {
+                base.notificarConclusion   = false;
+                base.permitirObsOperador   = false;
+                base.tipoEmision           = 'certificado';
             }
 
             this.etapas.push(base);
+            this.$nextTick(()=>this.attachSubSortable());
         },
 
-        eliminarEtapa(index) {
-            this.etapas.splice(index, 1);
-        },
+        eliminarEtapa(index) { this.etapas.splice(index, 1); },
 
-        // ==== Apoyos para UI que usabas en la vista ====
+        // pagos
         agregarConcepto(etapa) {
             if (!Array.isArray(etapa.conceptos)) etapa.conceptos = [];
-            etapa.conceptos.push({
-                clave: '',
-                codigo: '',
-                descripcion: '',
-                pago: '',
-                tipo: '',
-                monto: 0
-            });
+            etapa.conceptos.push({ clave:'', codigo:'', descripcion:'', pago:'', tipo:'', monto:0 });
         },
 
+        // subetapas
         agregarSubetapa(etapa) {
             if (!Array.isArray(etapa.subetapas)) etapa.subetapas = [];
             etapa.subetapas.push({
                 nombre: 'Nueva subetapa',
                 descripcion: '',
-                limitarArchivo: false
+                limitarArchivo: false,
+                tiempoVida: 1,
+                tipoDia: 'habil',
+                notificar: false,
+                involucrados: [],
+                permitirSinArea: true,
+                destinoSinArea: null
             });
         },
-        // ===============================================
+
+        abrirEditorSubetapa(etapa, si) {
+            this.subEditOwner = etapa;
+            this.subEditIndex = si;
+            const src = etapa.subetapas[si] || {};
+            this.subEdit = JSON.parse(JSON.stringify({
+                nombre: src.nombre || '',
+                descripcion: src.descripcion || '',
+                limitarArchivo: !!src.limitarArchivo,
+                tiempoVida: src.tiempoVida ?? 1,
+                tipoDia: src.tipoDia || 'habil',
+                notificar: !!src.notificar,
+                involucrados: Array.isArray(src.involucrados) ? src.involucrados : [],
+                permitirSinArea: src.permitirSinArea !== false,
+                destinoSinArea: (src.destinoSinArea ?? null)
+            }));
+            this.tmpInv = { nombre:'', email:'', conclusion:'conclusion' };
+            new bootstrap.Modal(this.$refs.subModal).show();
+        },
+
+        agregarInvolucradoTmp() {
+            if (!this.subEdit) return;
+            this.subEdit.involucrados.push({ ...this.tmpInv });
+            this.tmpInv = { nombre:'', email:'', conclusion:'conclusion' };
+        },
+
+        guardarEditorSubetapa() {
+            try {
+                if (!this.subEditOwner || this.subEditIndex === null) return;
+                this.subEditOwner.subetapas[this.subEditIndex] = JSON.parse(JSON.stringify(this.subEdit));
+                bootstrap.Modal.getInstance(this.$refs.subModal).hide();
+                this.renderFlujo();
+                this._emitEtapas();
+            } catch (e) {
+                console.error(e);
+                alert('Error guardando la subetapa');
+            }
+        },
 
         editarCondiciones(index) {
             this.etapaEditando = index;
@@ -353,6 +592,7 @@ function gestorEtapas() {
 
                 const g = new dagreD3.graphlib.Graph().setGraph({ rankdir: 'TB' });
 
+                // nodos
                 this.etapas.forEach((etapa, index) => {
                     g.setNode(etapa.uid, {
                         label: `${index + 1}. ${etapa.tipo.nombre}`,
@@ -362,7 +602,8 @@ function gestorEtapas() {
                     });
                 });
 
-                this.etapas.forEach((etapa) => {
+                // edges
+                this.etapas.forEach((etapa, idx) => {
                     const origenId = etapa.uid;
                     if (etapa.condiciones) {
                         for (const [condicion, destinoIndex] of Object.entries(etapa.condiciones)) {
@@ -377,6 +618,25 @@ function gestorEtapas() {
                             }
                         }
                     }
+
+                    // salto “sin área” en subetapas
+                    if (etapa.tipo?.codigo === 'subetapa' && Array.isArray(etapa.subetapas)) {
+                        etapa.subetapas.forEach(sub => {
+                            if (sub.permitirSinArea) {
+                                let destinoIdx = sub.destinoSinArea;
+                                if (destinoIdx === null || destinoIdx === undefined) destinoIdx = idx + 1;
+                                const destino = this.etapas[destinoIdx];
+                                if (destino) {
+                                    g.setEdge(origenId, destino.uid, {
+                                        label: 'Sin área',
+                                        arrowhead: 'vee',
+                                        lineInterpolate: 'basis',
+                                        style: 'stroke-dasharray: 5,5; stroke: #999; stroke-width: 2px;'
+                                    });
+                                }
+                            }
+                        });
+                    }
                 });
 
                 const svg = d3.select(this.$refs.svg);
@@ -390,6 +650,12 @@ function gestorEtapas() {
                 const bbox = svgGroup.getBBox();
                 svg.attr("viewBox", [bbox.x - 20, bbox.y - 20, bbox.width + 40, bbox.height + 40]);
             });
+        },
+
+        // placeholder: “Asignar involucrados” a nivel etapa
+        asignarInvolucrados(etapa) {
+            if (!Array.isArray(etapa.involucrados)) etapa.involucrados = [];
+            etapa.involucrados.push({ nombre: 'Funcionario demo', email: 'demo@municipio.gob.ar' });
         }
     };
 }

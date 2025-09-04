@@ -30,6 +30,8 @@ use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\RegistroController;
+use App\Http\Controllers\Funcionario\TramiteConfigController;
+use App\Http\Controllers\Funcionario\TramiteRelacionesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -252,3 +254,21 @@ Route::prefix('funcionario/configuracion')->name('configuracion.')->group(functi
     Route::get('/mapa',                 [ConfiguracionAdminController::class, 'mapaIndex'])->name('mapa.index');
     Route::post('/mapa/guardar',        [ConfiguracionAdminController::class, 'mapaGuardar'])->name('mapa.guardar');
 });
+
+Route::prefix('funcionario/tramites/{tramite}/config')
+    ->name('funcionario.tramites.config.')
+    ->middleware(['web','auth'])
+    ->group(function () {
+        Route::post('folio/preview', [TramiteConfigController::class, 'previewFolio'])->name('folio.preview');
+        Route::post('folio/generar', [TramiteConfigController::class, 'generarFolio'])->name('folio.generar');
+        Route::post('folio/reset',   [TramiteConfigController::class, 'resetFolio'])->name('folio.reset');
+    });
+
+    Route::prefix('funcionario/tramites')
+    ->name('funcionario.tramites.')
+    ->middleware(['web','auth'])
+    ->group(function () {
+        // solo actualizar la pestaña Relaciones
+        Route::post('{tramite}/relaciones', [TramiteRelacionesController::class, 'update'])
+            ->name('relaciones.update');
+    });

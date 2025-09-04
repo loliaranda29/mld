@@ -1,6 +1,6 @@
 @extends('layouts.app-funcionario')
 
-@section('content')
+@section('profile_content')
 <div class="container py-4" x-data="formBuilder()">
     <h2>Constructor de Formulario para: {{ $tramite->nombre }}</h2>
 

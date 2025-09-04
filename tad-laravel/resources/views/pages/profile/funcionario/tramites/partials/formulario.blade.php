@@ -1,54 +1,12 @@
 @php
     // Intenta decodificar JSON hasta 3 veces (por si quedó doble/triple-escapado)
-    function deep_decode($v, $max = 3) {
-        $out = $v;
-        for ($i = 0; $i < $max; $i++) {
-            if (is_array($out)) return $out;
-            if (is_string($out)) {
-                $tmp = json_decode($out, true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    $out = $tmp;
-                    continue;
-                }
-            }
-            break;
-        }
-        return is_array($out) ? $out : [];
-    }
-
-    // Heurística: si la cadena tiene mojibake (Ã, Â, â…), reinterpreta y corrige.
-    function utf8_maybe_fix(string $s): string {
-        if (preg_match('/[ÃÂâÊÎÔÛ]/u', $s)) {
-            return utf8_encode(utf8_decode($s));
-        }
-        return $s;
-    }
-
     // Aplica el fix recursivo sobre arrays/objetos
-    function utf8_sanitize_deep($value) {
-        if (is_array($value)) {
-            $out = [];
-            foreach ($value as $k => $v) {
-                $newK = is_string($k) ? utf8_maybe_fix($k) : $k;
-                $out[$newK] = utf8_sanitize_deep($v);
-            }
-            return $out;
-        }
-        if (is_string($value)) {
-            return utf8_maybe_fix($value);
-        }
-        return $value;
-    }
+
 
     // 1) Tomamos lo que venga del modelo
     $raw      = $tramite->formulario_json ?? null;
 
-    // 2) Decodificación profunda (por si está doble/ triple-JSON)
-    $formInit = deep_decode($raw);
-
-    // 3) Saneamos posibles mojibake de acentos/ñ
-    $formInit = utf8_sanitize_deep($formInit);
-
+  
     // 4) Fallback seguro
     if (!isset($formInit['sections']) || !is_array($formInit['sections'])) {
         $formInit = ['sections' => [ ['name' => 'Inicio del trámite', 'fields' => []] ]];

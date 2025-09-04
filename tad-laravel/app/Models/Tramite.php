@@ -124,4 +124,25 @@ class Tramite extends Model
         $sections = is_array($json['sections'] ?? null) ? $json['sections'] : [];
         return array_values(array_filter($sections, fn ($s) => !empty($s['activable'])));
     }
+
+    /** Vínculos laterales (relación muchos-a-muchos consigo mismo) */
+    public function vinculos(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Tramite::class,
+            'tramite_vinculos',      // tabla pivote
+            'tramite_id',            // FK a este
+            'vinculo_id'             // FK al relacionado
+        );
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Tramite $t) {
+            DB::table('tramite_vinculos')
+                ->where('tramite_id', $t->id)
+                ->orWhere('vinculo_id', $t->id)
+                ->delete();
+        });
+    }
 }

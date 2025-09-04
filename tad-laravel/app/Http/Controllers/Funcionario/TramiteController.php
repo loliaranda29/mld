@@ -30,13 +30,49 @@ class TramiteController extends Controller
     }
 
     public function edit(Tramite $tramite)
-    {
-        // Pasamos a la vista los JSON ya “casted” a array (por $casts del modelo)
-        return view('pages.profile.funcionario.tramites.create', [
-            'tramite' => $tramite,
-            // si necesitás variables auxiliares:
-            'etapas'  => $tramite->etapas_json ?? [],
-            'todos'   => collect(), // relaciones etc.
-        ]);
+{
+    // Excluir el propio trámite
+    $base = Tramite::query()->where('id', '!=', $tramite->id);
+
+    // Posibles padres: excluimos descendientes para no crear ciclos
+    $descendientesIds = $this->descendantsIds($tramite); // helper simple abajo
+    $tramitesPosiblesPadre = (clone $base)
+        ->whereNotIn('id', $descendientesIds)
+        ->orderBy('nombre')
+        ->get();
+
+    // Posibles hijos: todos menos el propio y su padre (no obligatorio)
+    $tramitesPosiblesHijo = (clone $base)
+        ->orderBy('nombre')
+        ->get();
+
+    // Para vínculos: todos menos el propio
+    $tramitesParaVincular = (clone $base)
+        ->orderBy('nombre')
+        ->get();
+
+    return view('pages.profile.funcionario.tramites.editar', [
+        'tramite' => $tramite->load(['parent','children','vinculos']),
+        'tramitesPosiblesPadre'  => $tramitesPosiblesPadre,
+        'tramitesPosiblesHijo'   => $tramitesPosiblesHijo,
+        'tramitesParaVincular'   => $tramitesParaVincular,
+        // ...otros datos que ya mandás (tabs, etc.)
+    ]);
+}
+
+/** Retorna IDs de todos los descendientes del trámite (para evitar ciclos). */
+private function descendantsIds(Tramite $root): array
+{
+    $ids = [];
+    $queue = [$root];
+    while ($node = array_shift($queue)) {
+        foreach ($node->children as $child) {
+            if (!in_array($child->id, $ids, true)) {
+                $ids[] = $child->id;
+                $queue[] = $child->loadMissing('children');
+            }
+        }
     }
+    return $ids;
+}
 }

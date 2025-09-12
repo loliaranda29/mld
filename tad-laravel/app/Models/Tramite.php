@@ -145,4 +145,10 @@ class Tramite extends Model
                 ->delete();
         });
     }
+    // ...
+public function solicitudes()
+{
+    return $this->hasMany(\App\Models\Solicitud::class, 'tramite_id');
+}
+
 }

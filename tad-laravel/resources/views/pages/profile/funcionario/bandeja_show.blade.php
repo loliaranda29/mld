@@ -85,66 +85,15 @@
   </div>
 
   <!-- Panel derecho: Tabs de contenido -->
-  <div class="col-md-7">
-    <div class="card shadow-sm">
-      <div class="card-body p-0">
-        <!-- Tabs -->
-        <ul class="nav nav-tabs px-3 pt-3" id="tabsDetalle" role="tablist">
-          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabSolicitante">Datos del solicitante</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabInicio">Inicio de Trámite</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDocumentos">Documento</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabDenuncia">Denuncia</button></li>
-          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabJurada">Declaración jurada</button></li>
-        </ul>
+{{-- Reemplazá los textos fijos por: --}}
+<h5 class="fw-bold text-primary mb-2">{{ $solicitud->expediente }}</h5>
+<p class="small text-muted mb-1">Trámite:</p>
+<p class="fw-bold">{{ $solicitud->tramite->nombre ?? '—' }}</p>
+<p class="small text-muted mb-1">Estado:</p>
+<span class="badge bg-secondary">{{ $solicitud->estado }}</span>
 
-        <div class="tab-content p-3">
-          <!-- Tab Activa -->
-          <div class="tab-pane fade show active" id="tabSolicitante">
-            {{-- FORMULARIO DATOS DEL SOLICITANTE --}}
-            <h6 class="fw-bold bg-dark text-white p-2 rounded">Datos del solicitante</h6>
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label fw-bold">CUIL</label>
-                <input type="text" class="form-control" value="20166659834" readonly>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Nombre</label>
-                <input type="text" class="form-control" value="Alfonso Ignacio" readonly>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Apellido paterno</label>
-                <input type="text" class="form-control" value="Ibaceta" readonly>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label fw-bold">Fecha de nacimiento</label>
-                <input type="text" class="form-control" value="1964-10-04" readonly>
-              </div>
-              <div class="col-md-12">
-                <label class="form-label fw-bold">Teléfono celular</label>
-                <input type="text" class="form-control" readonly>
-              </div>
-            </div>
+<pre class="small mt-3 bg-light p-3 rounded">{{ json_encode($solicitud->datos, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
 
-            <h6 class="fw-bold bg-dark text-white p-2 rounded">Dirección del solicitante</h6>
-            <div class="row g-3">
-              <div class="col-md-6"><input type="text" class="form-control" placeholder="Teléfono fijo"></div>
-              <div class="col-md-6"><input type="text" class="form-control" placeholder="Calle"></div>
-              <div class="col-md-6"><input type="text" class="form-control" placeholder="Número exterior"></div>
-              <div class="col-md-6"><input type="text" class="form-control" placeholder="Depto."></div>
-              <div class="col-md-6"><input type="text" class="form-control" placeholder="Barrio"></div>
-              <div class="col-md-6"><input type="text" class="form-control" placeholder="Código postal"></div>
-              <div class="col-md-12"><input type="text" class="form-control" placeholder="Referencias"></div>
-            </div>
-          </div>
 
-          <!-- Otras pestañas -->
-          <div class="tab-pane fade" id="tabInicio">Contenido de Inicio de Trámite</div>
-          <div class="tab-pane fade" id="tabDocumentos">Contenido de Documentos</div>
-          <div class="tab-pane fade" id="tabDenuncia">Contenido de Denuncia</div>
-          <div class="tab-pane fade" id="tabJurada">Contenido de Declaración Jurada</div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 @endsection

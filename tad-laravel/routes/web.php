@@ -32,6 +32,7 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\Funcionario\TramiteConfigController;
 use App\Http\Controllers\Funcionario\TramiteRelacionesController;
+use App\Http\Controllers\SolicitudesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,7 +83,51 @@ Route::prefix('profile')->name('profile.')->group(function () {
   });
 
   Route::get('/citas', [CitasController::class, 'index'])->name('citas');
+
+  Route::prefix('solicitudes')->name('solicitudes.')->group(function () {
+        Route::get('/', [SolicitudesController::class, 'index'])->name('index');
+        Route::get('/{id}', [SolicitudesController::class, 'show'])->name('show');
+    });
+
+    // NUEVO: Iniciar una solicitud a partir de una plantilla de trámite
+    Route::post('/tramites/{tramite}/iniciar', [SolicitudesController::class, 'store'])
+        ->name('tramites.iniciar');
+
+    // Mis documentos (instancias/solicitudes) – mantiene el nombre que usa el layout
+    Route::get('/tramites', [SolicitudesController::class, 'index'])->name('tramites');
+    Route::get('/tramites/{id}', [SolicitudesController::class, 'show'])->name('tramites.detail');
+
+    // Iniciar una solicitud desde una plantilla de trámite
+    Route::post('/tramites/{tramite}/iniciar', [SolicitudesController::class, 'store'])->name('tramites.iniciar');
+
+    // (Opcional) Catálogo de plantillas públicas para que el ciudadano elija e inicie
+    // Catálogo de trámites disponibles para iniciar
+Route::get('/catalogo', function () {
+    $plantillas = \App\Models\Tramite::query()
+        ->when(\Schema::hasColumn('tramites','disponible'), fn($q)=>$q->where('disponible',1))
+        ->when(\Schema::hasColumn('tramites','acepta_solicitudes'), fn($q)=>$q->where('acepta_solicitudes',1))
+        ->orderBy('nombre')
+        ->paginate(12);
+
+    return view('pages.profile.ciudadano.catalogo', compact('plantillas'));
+})->name('catalogo');
+Route::get('/profile/catalogo', function () {
+    $plantillas = \App\Models\Tramite::query()
+        ->when(\Schema::hasColumn('tramites','disponible'), fn($q)=>$q->where('disponible',1))
+        ->when(\Schema::hasColumn('tramites','acepta_solicitudes'), fn($q)=>$q->where('acepta_solicitudes',1))
+        ->orderBy('nombre')
+        ->paginate(12);
+
+    return view('pages.profile.ciudadano.catalogo', [
+        'active'     => 'tramites',    // ← necesario para el menú del layout
+        'plantillas' => $plantillas,
+    ]);
+})->name('profile.catalogo');
+
+
 });
+
+
 
 // 👔 Ruta home de funcionario
 Route::get('/funcionario', [FuncionarioController::class, 'home'])->name('funcionario.home');

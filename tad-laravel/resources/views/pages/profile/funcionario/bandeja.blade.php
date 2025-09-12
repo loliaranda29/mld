@@ -61,46 +61,32 @@
       <a class="nav-link" href="#">Cerrados <span class="badge bg-secondary">146</span></a>
     </li>
   </ul>
+<div class="card p-3">
+  @if(isset($solicitudes) && $solicitudes->count())
+    @foreach($solicitudes as $s)
+      <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+        <div>
+          <div class="small text-muted">Expediente</div>
+          <div class="fw-bold">{{ $s->expediente }}</div>
+          <div class="small mt-1">
+            Trámite: <span class="fw-semibold">{{ $s->tramite->nombre ?? '—' }}</span>
+            · Ciudadano: <span class="text-muted">{{ $s->usuario->name ?? $s->usuario->email }}</span>
+          </div>
+          <div class="small text-muted">Estado: <span class="badge bg-light text-dark">{{ $s->estado }}</span></div>
+        </div>
+        <a class="btn btn-outline-primary btn-sm" href="{{ route('funcionario.bandeja.show', $s->id) }}">Abrir</a>
+      </div>
+    @endforeach
 
-  <!-- Tabla -->
-  <div class="card">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th></th>
-            <th>Trámite</th>
-            <th>Folio/Prefolio del Expediente</th>
-            <th>Tramitante</th>
-            <th>Fecha de recepción de solicitud</th>
-            <th class="text-center">Estatus</th>
-            <th>Operador(es) asignado(s)</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="checkbox"></td>
-            <td>Asistencia presencial para Licencias</td>
-            <td>TRM-2025-0001</td>
-            <td>Alicia Aranda</td>
-            <td>21/07/2025 08:40:05 hrs</td>
-            <td class="text-center"><span class="badge bg-success">Activo</span></td>
-            <td>-</td>
-           <td>
-                <a href="{{ route('funcionario.bandeja.show', 1) }}" class="btn btn-sm btn-outline-primary" title="Ver solicitud">
-                    <i class="bi bi-file-earmark-text"></i>
-                </a>
-            </td>
-
-          </tr>
-          <tr>
-            <td colspan="8" class="text-center text-muted py-3">Sin más registros</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="mt-3">
+      {{ $solicitudes->links() }}
     </div>
-    <div class="card-footer d-flex justify-content-between align-items-center">
+  @else
+    <div class="alert alert-info mb-0">No hay solicitudes para mostrar.</div>
+  @endif
+</div>
+ 
+<div class="card-footer d-flex justify-content-between align-items-center">
       <div>
         Filas por página:
         <select class="form-select d-inline w-auto ms-2">

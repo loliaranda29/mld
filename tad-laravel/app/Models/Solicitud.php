@@ -3,20 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Solicitud extends Model
 {
-    use HasFactory;
-
     protected $table = 'solicitudes';
 
     protected $fillable = [
-        'tramite_id',
-        'usuario_id',
-        'expediente',
-        'estado',
-        'datos',
+        'tramite_id','usuario_id','expediente','estado','datos',
     ];
 
     protected $casts = [
@@ -30,6 +23,8 @@ class Solicitud extends Model
 
     public function usuario()
     {
+        // si tu modelo de usuarios se llama Usuario y usa tabla 'users'
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
+    
 }

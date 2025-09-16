@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+@php($active = $active ?? '')
 <div class="container py-4">
   <div class="row">
     <!-- Menú lateral en forma de tarjetas -->

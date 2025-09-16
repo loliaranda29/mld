@@ -7,7 +7,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FuncionarioController;
 use App\Http\Controllers\InspeccionesController;
 use App\Http\Controllers\PagosController;
-use App\Http\Controllers\tramitesController;
+// ✅ usar el controlador real que existe en tu app (sin subnamespace Profile)
+use App\Http\Controllers\TramitesController;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -61,76 +62,49 @@ Route::post('reset-password', [LoginController::class, 'reset'])->name('password
 
 // Perfil (ciudadano)
 Route::prefix('profile')->name('profile.')->group(function () {
-  Route::get('/', [ProfileController::class, 'index'])->name('index');
-  Route::get('/documentos', [ProfileController::class, 'documentos'])->name('documentos');
+    Route::get('/', [ProfileController::class, 'index'])->name('index');
+    Route::get('/documentos', [ProfileController::class, 'documentos'])->name('documentos');
 
-  // Pagos (perfil ciudadano)
-  Route::prefix('pagos')->name('pagos')->group(function () {
-    Route::get('/', [PagosController::class, 'index'])->name('');
-    Route::get('/{id}', [PagosController::class, 'show'])->name('.detail');
-  });
+    // Catálogo → ficha → iniciar
+    Route::get('/catalogo', [TramitesController::class, 'catalogo'])->name('catalogo');
+    Route::get('/tramites/{tramite}', [TramitesController::class, 'ficha'])->name('tramites.ficha');
 
-  // Inspecciones (perfil ciudadano)
-  Route::prefix('inspecciones')->name('inspecciones')->group(function () {
-    Route::get('/', [InspeccionesController::class, 'index'])->name('');
-    Route::get('/{id}', [InspeccionesController::class, 'show'])->name('.detail');
-  });
+    // 🔒 REQUERIR LOGIN PARA INICIAR
+    Route::post('/tramites/{tramite}/iniciar', [TramitesController::class, 'iniciar'])
+        ->middleware('auth')
+        ->name('tramites.iniciar');
 
-  // Trámites (perfil ciudadano)
-  Route::prefix('tramites')->name('tramites')->group(function () {
-    Route::get('/', [tramitesController::class, 'index'])->name('');
-    Route::get('/{id}', [tramitesController::class, 'show'])->name('.detail');
-  });
-
-  Route::get('/citas', [CitasController::class, 'index'])->name('citas');
-
-  Route::prefix('solicitudes')->name('solicitudes.')->group(function () {
+    // Mis solicitudes (protegidas)
+    Route::prefix('solicitudes')->middleware('auth')->name('solicitudes.')->group(function () {
         Route::get('/', [SolicitudesController::class, 'index'])->name('index');
         Route::get('/{id}', [SolicitudesController::class, 'show'])->name('show');
     });
 
-    // NUEVO: Iniciar una solicitud a partir de una plantilla de trámite
-    Route::post('/tramites/{tramite}/iniciar', [SolicitudesController::class, 'store'])
-        ->name('tramites.iniciar');
+    // Alias para el menú “Mis trámites” (protegidos)
+    Route::middleware('auth')->group(function () {
+        Route::get('/mis-tramites', [SolicitudesController::class, 'index'])->name('tramites');
+        Route::get('/mis-tramites/{id}', [SolicitudesController::class, 'show'])->name('tramites.detail');
+    });
 
-    // Mis documentos (instancias/solicitudes) – mantiene el nombre que usa el layout
-    Route::get('/tramites', [SolicitudesController::class, 'index'])->name('tramites');
-    Route::get('/tramites/{id}', [SolicitudesController::class, 'show'])->name('tramites.detail');
+    // Pagos / Inspecciones / Citas (si querés, también podés protegerlos con auth)
+    Route::prefix('pagos')->name('pagos')->group(function () {
+        Route::get('/', [PagosController::class, 'index'])->name('');
+        Route::get('/{id}', [PagosController::class, 'show'])->name('.detail');
+    });
 
-    // Iniciar una solicitud desde una plantilla de trámite
-    Route::post('/tramites/{tramite}/iniciar', [SolicitudesController::class, 'store'])->name('tramites.iniciar');
+    Route::prefix('inspecciones')->name('inspecciones')->group(function () {
+        Route::get('/', [InspeccionesController::class, 'index'])->name('');
+        Route::get('/{id}', [InspeccionesController::class, 'show'])->name('.detail');
+    });
 
-    // (Opcional) Catálogo de plantillas públicas para que el ciudadano elija e inicie
-    // Catálogo de trámites disponibles para iniciar
-Route::get('/catalogo', function () {
-    $plantillas = \App\Models\Tramite::query()
-        ->when(\Schema::hasColumn('tramites','disponible'), fn($q)=>$q->where('disponible',1))
-        ->when(\Schema::hasColumn('tramites','acepta_solicitudes'), fn($q)=>$q->where('acepta_solicitudes',1))
-        ->orderBy('nombre')
-        ->paginate(12);
-
-    return view('pages.profile.ciudadano.catalogo', compact('plantillas'));
-})->name('catalogo');
-Route::get('/profile/catalogo', function () {
-    $plantillas = \App\Models\Tramite::query()
-        ->when(\Schema::hasColumn('tramites','disponible'), fn($q)=>$q->where('disponible',1))
-        ->when(\Schema::hasColumn('tramites','acepta_solicitudes'), fn($q)=>$q->where('acepta_solicitudes',1))
-        ->orderBy('nombre')
-        ->paginate(12);
-
-    return view('pages.profile.ciudadano.catalogo', [
-        'active'     => 'tramites',    // ← necesario para el menú del layout
-        'plantillas' => $plantillas,
-    ]);
-})->name('profile.catalogo');
-
-
+    Route::get('/citas', [CitasController::class, 'index'])->name('citas');
 });
-
-
 
 // 👔 Ruta home de funcionario
 Route::get('/funcionario', [FuncionarioController::class, 'home'])->name('funcionario.home');
+Route::put('/solicitudes/{id}', [SolicitudesController::class, 'update'])
+    ->name('solicitudes.update');
+
 
 // 🔁 Cambiar entre perfiles (fix: usa profile.index)
 Route::post('/profile/switch', function () {
@@ -237,7 +211,6 @@ Route::prefix('funcionario/pagos')->name('pagos.')->group(function () {
 
 /* --- Catálogos (tal cual) --- */
 
-
 Route::prefix('funcionario/catalogos')->name('catalogos.')->group(function () {
   Route::get('/',        [CatalogosAdminController::class, 'index'])->name('index');
   Route::get('/crear',   [CatalogosAdminController::class, 'create'])->name('create');
@@ -252,8 +225,6 @@ Route::prefix('funcionario/catalogos')->name('catalogos.')->group(function () {
   Route::get('{id}/subcatalogos/{optId}',    [CatalogosAdminController::class,'subShow'])->name('sub.show');
   Route::delete('{id}/subcatalogos/{optId}', [CatalogosAdminController::class,'subDestroy'])->name('sub.destroy');
 });
-
-
 
 /* --- Filtros (funcionario) --- */
 Route::prefix('funcionario/filtros')->name('filtros.')->group(function () {
@@ -281,8 +252,6 @@ if (file_exists(__DIR__ . '/superadmin_tramites.php')) {
   require __DIR__ . '/superadmin_tramites.php';
 }
 
-
-
 Route::prefix('funcionario/configuracion')->name('configuracion.')->group(function () {
     Route::get('/',                     [ConfiguracionAdminController::class, 'index'])->name('index');
     Route::post('/guardar',             [ConfiguracionAdminController::class, 'guardar'])->name('guardar');
@@ -309,7 +278,7 @@ Route::prefix('funcionario/tramites/{tramite}/config')
         Route::post('folio/reset',   [TramiteConfigController::class, 'resetFolio'])->name('folio.reset');
     });
 
-    Route::prefix('funcionario/tramites')
+Route::prefix('funcionario/tramites')
     ->name('funcionario.tramites.')
     ->middleware(['web','auth'])
     ->group(function () {

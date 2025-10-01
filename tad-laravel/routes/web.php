@@ -60,27 +60,31 @@ Route::get('reset-password/{token}', function ($token) {
 
 Route::post('reset-password', [LoginController::class, 'reset'])->name('password.update');
 
-// Perfil (ciudadano)
 Route::prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [ProfileController::class, 'index'])->name('index');
     Route::get('/documentos', [ProfileController::class, 'documentos'])->name('documentos');
 
-    // Catálogo → ficha → iniciar
+    // Catálogo y ficha
     Route::get('/catalogo', [TramitesController::class, 'catalogo'])->name('catalogo');
     Route::get('/tramites/{tramite}', [TramitesController::class, 'ficha'])->name('tramites.ficha');
 
-    // 🔒 REQUERIR LOGIN PARA INICIAR
-    Route::post('/tramites/{tramite}/iniciar', [TramitesController::class, 'iniciar'])
+    // 👇 AHORA "iniciar" es GET: muestra el formulario sin grabar nada
+    Route::get('/tramites/{tramite}/iniciar', [SolicitudesController::class, 'create'])
         ->middleware('auth')
         ->name('tramites.iniciar');
 
-    // Mis solicitudes (protegidas)
+    // 👇 Guardado definitivo de la solicitud
+    Route::post('/solicitudes', [SolicitudesController::class, 'store'])
+        ->middleware('auth')
+        ->name('solicitudes.store');
+
+    // Mis solicitudes
     Route::prefix('solicitudes')->middleware('auth')->name('solicitudes.')->group(function () {
         Route::get('/', [SolicitudesController::class, 'index'])->name('index');
         Route::get('/{id}', [SolicitudesController::class, 'show'])->name('show');
     });
 
-    // Alias para el menú “Mis trámites” (protegidos)
+    // Alias “Mis trámites”
     Route::middleware('auth')->group(function () {
         Route::get('/mis-tramites', [SolicitudesController::class, 'index'])->name('tramites');
         Route::get('/mis-tramites/{id}', [SolicitudesController::class, 'show'])->name('tramites.detail');
@@ -99,6 +103,15 @@ Route::prefix('profile')->name('profile.')->group(function () {
 
     Route::get('/citas', [CitasController::class, 'index'])->name('citas');
 });
+
+/* ========= NUEVA RUTA PARA EL WIZARD DEL CIUDADANO =========
+   Nombre EXACTO: tramite.update (sin prefijo "profile.")
+   Recibe el PUT del formulario por pasos y lo procesa con SolicitudesController@store
+   (si luego querés un método específico, cambiás el controlador/método aquí) */
+Route::put('/profile/tramites/{tramite}', [SolicitudesController::class, 'store'])
+    ->middleware('auth')
+    ->name('tramite.update');
+// ============================================================
 
 // 👔 Ruta home de funcionario
 Route::get('/funcionario', [FuncionarioController::class, 'home'])->name('funcionario.home');

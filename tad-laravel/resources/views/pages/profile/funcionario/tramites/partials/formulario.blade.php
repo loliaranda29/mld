@@ -2,11 +2,44 @@
     // Intenta decodificar JSON hasta 3 veces (por si quedó doble/triple-escapado)
     // Aplica el fix recursivo sobre arrays/objetos
 
+    // Helper local para decodificar robusto
+    $decodeJsonRobusto = function ($val) {
+        if (is_array($val)) return $val;
+        if (is_object($val)) return (array)$val;
+        if (!is_string($val) || $val === '') return null;
+
+        // 1) json_decode directo
+        $j = json_decode($val, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($j)) return $j;
+
+        // 2) stripslashes por si quedó doble encode
+        $j = json_decode(stripslashes($val), true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($j)) return $j;
+
+        // 3) htmlspecialchars_decode por si vienen entidades
+        $j = json_decode(htmlspecialchars_decode($val, ENT_QUOTES), true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($j)) return $j;
+
+        return null;
+    };
 
     // 1) Tomamos lo que venga del modelo
-    $raw      = $tramite->formulario_json ?? null;
+    $raw = $tramite->formulario_json ?? null;
 
-  
+    // 2) Normalización: si el modelo usa casts a 'array' llega como array; si no, puede llegar como string
+    if (is_string($raw)) {
+        $formInit = $decodeJsonRobusto($raw);
+    } elseif (is_array($raw)) {
+        $formInit = $raw;
+    } else {
+        $formInit = null;
+    }
+
+    // 3) Si aún está vacío, intentamos legacy ($formulario->estructura) si existiera
+    if (!$formInit && isset($formulario) && !empty($formulario->estructura)) {
+        $formInit = $decodeJsonRobusto($formulario->estructura);
+    }
+
     // 4) Fallback seguro
     if (!isset($formInit['sections']) || !is_array($formInit['sections'])) {
         $formInit = ['sections' => [ ['name' => 'Inicio del trámite', 'fields' => []] ]];
@@ -397,7 +430,7 @@
   </div>
 
   {{-- Hidden que envía el JSON al back --}}
-  <input type="hidden" name="formulario_json" x-ref="formularioJson" :value="JSON.stringify(state)">
+  <input type="hidden" name="formulario_json" x-ref="formularioJson" :value="JSON.stringify(state)" x-model="(function(){ try { return JSON.stringify(state); } catch(e){ return ''; } })()">
 </div>
 
 <!-- Trix -->

@@ -14,6 +14,7 @@ class Solicitud extends Model
 
     protected $casts = [
         'datos' => 'array',
+        'respuestas_json' => 'array',
     ];
 
     public function tramite()

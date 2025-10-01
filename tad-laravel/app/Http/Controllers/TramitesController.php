@@ -38,40 +38,25 @@ class TramitesController extends Controller
         ]);
     }
 
-     public function ficha($id)
-    {
-        $t = Tramite::findOrFail($id);
+    // app/Http/Controllers/TramitesController.php
+public function ficha(Tramite $tramite)
+{
+    $config  = json_decode($tramite->config_json ?? '[]', true) ?: [];
+    $etapas  = json_decode($tramite->etapas_json ?? '[]', true) ?: [];
 
-        // helpers para decodificar json que puede llegar como string o como array
-        $docs   = $this->json($t->documento_json);
-        $config = $this->json($t->config_json);
+    // Si usás tabla de requisitos, traelos; si no, podés leerlos de documento_json
+    $requisitos = \DB::table('requerimientos')
+        ->where('tramite_id', $tramite->id)
+        ->orderBy('id')
+        ->pluck('nombre'); // ajustá el campo
 
-        // Fallback a columnas si no está en config_json
-        $tutorial     = $t->tutorial_html       ?? ($config['tutorial_html']      ?? null);
-        $modalidad    = $t->modalidad           ?? ($config['modalidad']          ?? null);
-        $implicaCosto = isset($t->implica_costo) ? (int)$t->implica_costo : (int)($config['implica_costo'] ?? 0);
-        $telefono     = $t->telefono_oficina    ?? ($config['telefono_oficina']   ?? null);
-        $horario      = $t->horario_atencion    ?? ($config['horario_atencion']   ?? null);
-        $detalleCosto = $t->detalle_costo_html  ?? ($config['detalle_costo_html'] ?? null);
+    $puedeIniciar = (bool) ($tramite->acepta_solicitudes && ($tramite->disponible ?? 1));
 
-        // Habilitado para iniciar (usa ambas opciones por compatibilidad)
-        $puedeIniciar = (bool)(
-            ($t->acepta_solicitudes ?? $config['acepta_solicitudes'] ?? 1) &&
-            ($t->disponible         ?? $config['disponible']         ?? 1)
-        );
+    return view('pages.profile.ciudadano.ficha', compact(
+        'tramite','config','etapas','requisitos','puedeIniciar'
+    ));
+}
 
-        return view('pages.profile.ciudadano.ficha', [
-            't'            => $t,
-            'docs'         => $docs,
-            'tutorial'     => $tutorial,
-            'modalidad'    => $modalidad,
-            'implicaCosto' => $implicaCosto,
-            'telefono'     => $telefono,
-            'horario'      => $horario,
-            'detalleCosto' => $detalleCosto,
-            'puedeIniciar' => $puedeIniciar,
-        ]);
-    }
 
     private function getFormularioSchema(\App\Models\Tramite $tramite): array
 {

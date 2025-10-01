@@ -1,94 +1,248 @@
-@extends('layouts.app-funcionario')
+@extends('layouts.app')
 
-@section('profile_content')
-<div class="container py-4" x-data="formBuilder()">
-    <h2>Constructor de Formulario para: {{ $tramite->nombre }}</h2>
+@section('content')
+<div class="container py-4"
+     x-data="wizardForm(
+        // schema del builder (array con {sections:[...]})
+        @json(is_string($tramite->formulario_json) ? json_decode($tramite->formulario_json, true) : ($tramite->formulario_json ?? [])),
+        {{ json_encode($tramite->id) }}
+     )" x-init="init()">
 
-    <div class="row mt-4">
-        <!-- Panel de herramientas -->
-        <div class="col-md-3">
-            <h5>Campos disponibles</h5>
-            <div class="d-grid gap-2">
-                <button class="btn btn-outline-primary" @click="addField('text')">Texto</button>
-                <button class="btn btn-outline-primary" @click="addField('textarea')">Párrafo</button>
-                <button class="btn btn-outline-primary" @click="addField('select')">Lista</button>
-                <button class="btn btn-outline-primary" @click="addField('file')">Archivo</button>
-                <button class="btn btn-outline-primary" @click="addField('api')">API externa</button>
-                <button class="btn btn-outline-primary" @click="addField('code')">Código personalizado</button>
-            </div>
-        </div>
+  <h3 class="mb-3">{{ $tramite->nombre }}</h3>
 
-        <!-- Formulario dinámico -->
-        <div class="col-md-9">
-            <form method="POST" action="{{ route('funcionario.formulario.update', $tramite->id) }}">
-                @csrf
+  <form method="POST" action="{{ route('tramite.update', $tramite->id) }}" enctype="multipart/form-data" @submit="beforeSubmit">
+    @csrf
+    @method('PUT')
 
-                <input type="hidden" name="estructura" :value="JSON.stringify(fields)">
+    {{-- hidden requerido por tu update ciudadano --}}
+    <input type="hidden" name="tramite_id" value="{{ $tramite->id }}">
+    <input type="hidden" name="respuestas_json" x-ref="answers">
 
-                <template x-for="(field, index) in fields" :key="index">
-                    <div class="card mb-3">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <strong x-text="field.label || 'Campo sin nombre'"></strong>
-                            <button type="button" class="btn-close" @click="removeField(index)"></button>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-2">
-                                <label>Etiqueta</label>
-                                <input type="text" class="form-control" x-model="field.label">
-                            </div>
+    {{-- barra de pasos --}}
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <template x-for="(s, i) in visibleSteps" :key="'tab-'+i">
+        <span class="badge" :class="i === step ? 'bg-primary' : 'bg-secondary'"
+              x-text="(i+1)+'. '+(s.name || 'Paso')"></span>
+      </template>
+    </div>
 
-                            <template x-if="field.type === 'text' || field.type === 'textarea'">
-                                <div class="mb-2">
-                                    <label>Nombre del campo</label>
-                                    <input type="text" class="form-control" x-model="field.name">
-                                </div>
-                            </template>
+    {{-- PASO ACTUAL --}}
+    <div class="card">
+      <div class="card-header">
+        <strong x-text="currentSection?.name || 'Paso'"></strong>
+      </div>
 
-                            <template x-if="field.type === 'select'">
-                                <div class="mb-2">
-                                    <label>Opciones (separadas por coma)</label>
-                                    <input type="text" class="form-control" x-model="field.options">
-                                </div>
-                            </template>
+      <div class="card-body">
+        {{-- Campos del paso --}}
+        <template x-if="currentFields.length">
+          <div class="vstack gap-3">
+            <template x-for="(f, idx) in currentFields" :key="idx">
+              <div>
+                <label class="form-label" x-text="f.label || f.name || 'Campo'"></label>
 
-                            <template x-if="field.type === 'api'">
-                                <div>
-                                    <label>URL de API</label>
-                                    <input type="text" class="form-control mb-2" x-model="field.api_url">
-                                    <label>Token / Credencial</label>
-                                    <input type="text" class="form-control" x-model="field.api_token">
-                                </div>
-                            </template>
-
-                            <template x-if="field.type === 'code'">
-                                <div>
-                                    <label>Código personalizado</label>
-                                    <textarea class="form-control" x-model="field.code" rows="4" placeholder="// JS o lógica específica..."></textarea>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
+                {{-- tipos básicos --}}
+                <template x-if="['text','date','search'].includes(f.type)">
+                  <input class="form-control" type="text"
+                         :name="inputName(f)"
+                         :required="!!f.required"
+                         x-model="answers[inputName(f)]">
                 </template>
 
-                <button type="submit" class="btn btn-success mt-3">Guardar Formulario</button>
-                <a href="{{ route('funcionario.tramite_config') }}" class="btn btn-secondary mt-3">Cancelar</a>
-            </form>
+                <template x-if="f.type === 'textarea'">
+                  <textarea class="form-control" rows="3"
+                            :name="inputName(f)"
+                            :required="!!f.required"
+                            x-model="answers[inputName(f)]"></textarea>
+                </template>
+
+                {{-- lista / radio / checkbox --}}
+                <template x-if="['select'].includes(f.type)">
+                  <select class="form-select"
+                          :name="inputName(f)"
+                          x-model="answers[inputName(f)]">
+                    <option value="">-- Seleccionar --</option>
+                    <template x-for="opt in (Array.isArray(f.options)?f.options:[])">
+                      <option :value="opt" x-text="opt"></option>
+                    </template>
+                  </select>
+                </template>
+
+                <template x-if="f.type === 'radio'">
+                  <div class="d-flex flex-wrap gap-3">
+                    <template x-for="opt in (Array.isArray(f.options)?f.options:[])">
+                      <label class="form-check">
+                        <input class="form-check-input" type="radio" :name="inputName(f)" :value="opt"
+                               x-model="answers[inputName(f)]">
+                        <span class="form-check-label" x-text="opt"></span>
+                      </label>
+                    </template>
+                  </div>
+                </template>
+
+                <template x-if="f.type === 'checkbox'">
+                  <div class="d-flex flex-column gap-2">
+                    <template x-for="opt in (Array.isArray(f.options)?f.options:[])">
+                      <label class="form-check">
+                        <input class="form-check-input" type="checkbox"
+                               :value="opt"
+                               @change="toggleCheckbox(inputName(f), opt)">
+                        <span class="form-check-label" x-text="opt"></span>
+                      </label>
+                    </template>
+                  </div>
+                </template>
+
+                {{-- archivo --}}
+                <template x-if="f.type === 'file'">
+                  <input class="form-control" type="file"
+                         :name="inputName(f)+(f.multiple? '[]':'')"
+                         :multiple="!!f.multiple"
+                         :accept="f.accept || undefined">
+                </template>
+
+                {{-- texto enriquecido solo lectura en este flujo --}}
+                <template x-if="f.type === 'richtext'">
+                  <div class="border rounded p-2" x-html="tryParseRich(f.content)"></div>
+                </template>
+
+              </div>
+            </template>
+          </div>
+        </template>
+
+        {{-- Paso de confirmación --}}
+        <template x-if="isConfirm">
+          <div>
+            <h5 class="mb-3">Confirmar</h5>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <tbody>
+                  <template x-for="(val, key) in answers" :key="key">
+                    <tr>
+                      <th class="w-25" x-text="key"></th>
+                      <td x-text="Array.isArray(val) ? val.join(', ') : val"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <div class="alert alert-info mb-0">
+              Revisá tus datos y presioná <strong>Guardar</strong> para enviar.
+            </div>
+          </div>
+        </template>
+
+      </div>
+
+      <div class="card-footer d-flex justify-content-between">
+        <button type="button" class="btn btn-outline-secondary" :disabled="!canBack" @click="prev">Volver</button>
+
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-primary" x-show="!isConfirm" @click="next">Siguiente</button>
+          <button type="submit" class="btn btn-success" x-show="isConfirm">Guardar</button>
         </div>
+      </div>
     </div>
+  </form>
 </div>
 
 <script>
-function formBuilder() {
-    return {
-        fields: @json(json_decode($formulario->estructura ?? '[]')),
-        addField(type) {
-            const field = { type, label: '', name: '', options: '', api_url: '', api_token: '', code: '' };
-            this.fields.push(field);
-        },
-        removeField(index) {
-            this.fields.splice(index, 1);
+function wizardForm(schema, tramiteId){
+  return {
+    raw: schema && schema.sections ? schema : { sections: [] },
+    // sólo se muestran secciones NO activables
+    steps: [],
+    step: 0,
+    answers: {},
+
+    init(){
+      // normalizar
+      this.steps = (this.raw.sections || []).filter(s => !s.activable);
+      if (!this.steps.length) this.steps = [{ name: 'Inicio del trámite', fields: [] }];
+      this.step = 0;
+    },
+
+    get visibleSteps(){ return this.steps; },
+    get currentSection(){ return this.isConfirm ? { name:'Confirmar', fields: [] } : this.steps[this.step] || null; },
+    get currentFields(){ return (this.currentSection?.fields || []); },
+    get canBack(){ return this.step > 0; },
+    get isConfirm(){ return this.step === this.steps.length; },
+
+    inputName(f){
+      const sName = (this.currentSection?.name || 'seccion').trim();
+      const base  = (f.name || f.label || 'campo').trim();
+      return `${sName}::${base}`;
+    },
+
+    toggleCheckbox(key, opt){
+      const arr = Array.isArray(this.answers[key]) ? this.answers[key] : [];
+      const idx = arr.indexOf(opt);
+      if (idx === -1) arr.push(opt); else arr.splice(idx,1);
+      this.answers[key] = arr;
+    },
+
+    // JSON de EditorJS a HTML mínimo (solo para vista)
+    tryParse(value){ try { return JSON.parse(value); } catch { return null; } },
+    tryParseRich(content){
+      const data = this.tryParse(content);
+      if(!data || !Array.isArray(data.blocks)) return '';
+      return data.blocks.map(b=>{
+        if (b.type==='header')  return `<h5>${b.data.text||''}</h5>`;
+        if (b.type==='paragraph') return `<p>${b.data.text||''}</p>`;
+        if (b.type==='list'){
+          const tag = b.data.style==='ordered' ? 'ol' : 'ul';
+          const items = (b.data.items||[]).map(i=>`<li>${i}</li>`).join('');
+          return `<${tag}>${items}</${tag}>`;
         }
+        return '';
+      }).join('');
+    },
+
+    // ---------- navegación con ramificación ----------
+    next(){
+      // Buscar destino por regla general del último campo con condition
+      // o por regla por opción (conditions)
+      let target = null;
+
+      for (const f of this.currentFields){
+        const val = this.answers[this.inputName(f)];
+        // Regla por opción (si aplica)
+        if (f.conditions && typeof f.conditions==='object' && val){
+          const key = Array.isArray(val) ? val[0] : String(val);
+          if (key && f.conditions[key]) {
+            target = f.conditions[key];
+          }
+        }
+        // Regla general
+        if (!target && f.condition){
+          target = f.condition;
+        }
+      }
+
+      if (target === '__CONFIRM__'){
+        this.step = this.steps.length; // ir a confirmar
+        return;
+      }
+
+      if (target){
+        const idx = this.steps.findIndex(s => (s.name||'').trim() === String(target).trim());
+        if (idx >= 0){ this.step = idx; return; }
+      }
+
+      // avance lineal
+      if (this.step < this.steps.length) this.step += 1;
+    },
+
+    prev(){ if (this.step > 0) this.step -= 1; },
+
+    beforeSubmit(){
+      // empaqueta respuestas + snapshot del schema por si hace falta en back
+      this.$refs.answers.value = JSON.stringify({
+        schema: this.raw,
+        values: this.answers
+      });
     }
+  }
 }
 </script>
 @endsection

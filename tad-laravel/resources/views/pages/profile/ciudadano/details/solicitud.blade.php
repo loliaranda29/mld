@@ -1,34 +1,58 @@
 @extends('layouts.profile')
 
 @section('profile_content')
-<div class="card shadow rounded-4 p-4 mb-4">
-  <div class="row gy-4 align-items-start">
-    <div class="col-12 col-md-5">
-      <div class="d-flex flex-column h-100 justify-content-between">
-        <div>
-          <p class="text-muted mb-1">Folio/Prefolio del Expediente</p>
-          <h5 class="fw-bold">{{ $solicitud->expediente }}</h5>
+<div class="card shadow rounded-4 px-4 py-5">
+  <h5 class="fw-semibold mb-1">{{ $solicitud->tramite->nombre }}</h5>
+  <div class="text-muted small mb-4">Expediente: {{ $solicitud->expediente }} — Estado: {{ ucfirst($solicitud->estado) }}</div>
 
-          <p class="text-muted mt-4 mb-1">Trámite</p>
-          <p class="fw-semibold">{{ $solicitud->tramite->nombre ?? '—' }}</p>
+  <form method="POST" action="{{ route('solicitudes.update', $solicitud->id) }}">
+    @csrf @method('PUT')
 
-          <p class="text-muted mt-4 mb-1">Estado</p>
-          <span class="badge bg-secondary">{{ $solicitud->estado }}</span>
+    @forelse(($schema['sections'] ?? []) as $si => $sec)
+      <h6 class="mt-4">{{ $sec['name'] ?? 'Sección '.($si+1) }}</h6>
+
+      @foreach(($sec['fields'] ?? []) as $fi => $f)
+        @php
+          $name    = $f['name'] ?? "s{$si}_f{$fi}";
+          $label   = $f['label'] ?? $name;
+          $type    = $f['type']  ?? 'text';
+          $value   = $f['value'] ?? null;
+          $opts    = $f['options'] ?? [];
+        @endphp
+
+        <div class="mb-3">
+          <label class="form-label">{{ $label }}</label>
+
+          @if($type === 'textarea')
+            <textarea class="form-control" name="form[{{ $name }}]">{{ old("form.$name", $value) }}</textarea>
+
+          @elseif($type === 'select')
+            <select class="form-select" name="form[{{ $name }}]">
+              <option value="">— Seleccionar —</option>
+              @foreach($opts as $opt)
+                @php
+                  $ov = is_array($opt) ? ($opt['value'] ?? $opt['label'] ?? $opt) : $opt;
+                  $ol = is_array($opt) ? ($opt['label'] ?? $ov) : $opt;
+                @endphp
+                <option value="{{ $ov }}" @selected(old("form.$name",$value)==$ov)>{{ $ol }}</option>
+              @endforeach
+            </select>
+
+          @else
+            <input type="text" class="form-control" name="form[{{ $name }}]" value="{{ old("form.$name", $value) }}">
+          @endif
+
+          @if(!empty($f['help'])) <div class="form-text">{{ $f['help'] }}</div> @endif
         </div>
-        <div class="mt-4">
-          <a href="{{ route('profile.solicitudes.index') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
-        </div>
-      </div>
-    </div>
+      @endforeach
+    @empty
+      <div class="alert alert-info">Este formulario no tiene campos configurados.</div>
+    @endforelse
 
-    <div class="col-12 col-md-7">
-      <div class="border rounded-4 p-4 h-100 bg-light">
-        <h6 class="fw-semibold text-secondary mb-3">
-          <i class="mdi mdi-information-outline text-primary me-2"></i> Datos del formulario (JSON)
-        </h6>
-        <pre class="small mb-0" style="white-space: pre-wrap;">{{ json_encode($solicitud->datos, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) }}</pre>
-      </div>
+    <div class="d-flex gap-2 mt-3">
+      <a href="{{ route('profile.tramites') }}" class="btn btn-outline-secondary">Volver</a>
+      <button class="btn btn-primary">Guardar</button>
     </div>
-  </div>
+  </form>
 </div>
 @endsection

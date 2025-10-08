@@ -44,13 +44,12 @@
     </div>
   @endif
 
-  {{-- Botón Iniciar --}}
+    {{-- Botón Iniciar --}}
   <div class="d-flex justify-content-end">
     @if($habilitado)
-      <form method="POST" action="{{ route('profile.tramites.iniciar', $tramite->id) }}">
-        @csrf
-        <button class="btn btn-primary">Iniciar trámite</button>
-      </form>
+      <a href="{{ route('profile.tramites.iniciar', $tramite->id) }}" class="btn btn-primary">
+        Iniciar trámite
+      </a>
     @else
       <button class="btn btn-outline-secondary" disabled>No disponible para iniciar</button>
     @endif

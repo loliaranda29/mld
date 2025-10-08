@@ -1,154 +1,90 @@
-@extends('layouts.profile')
+{{-- resources/views/pages/profile/ciudadano/solicitud_show.blade.php --}}
+@extends('layouts.app')
 
-@section('profile_content')
-<div class="card shadow rounded-4 px-4 py-4 mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <div class="text-muted small">Folio/Prefolio del Expediente</div>
-      <h5 class="mb-0 fw-semibold">{{ $solicitud->expediente }}</h5>
-      <div class="mt-2">
-        <div class="small text-muted">Trámite</div>
-        <div class="fw-semibold">{{ $solicitud->tramite->nombre ?? '—' }}</div>
-      </div>
-      <div class="mt-2">
-        <span class="badge bg-secondary">{{ $solicitud->estado }}</span>
-      </div>
-    </div>
-
-    <a href="{{ route('profile.tramites') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
+@section('content')
+<div class="container py-4">
+  <h4 class="mb-3">{{ $solicitud->tramite->nombre }}</h4>
+  <div class="text-muted mb-3">
+    Expediente: <strong>{{ $solicitud->expediente }}</strong>
+    — Estado: <span class="badge bg-secondary text-uppercase">{{ $solicitud->estado }}</span>
   </div>
 
-  {{-- IMPORTANTE: enctype para campos tipo "file" --}}
-  <form method="POST"
-        action="{{ route('profile.solicitudes.update', $solicitud->id) }}"
-        enctype="multipart/form-data">
-    @csrf
-    @method('PUT')
+  @php
+    // Fallback al formato viejo (si existía)
+    $answersLegacy = is_array($solicitud->respuestas_json ?? null) ? $solicitud->respuestas_json : [];
+    $sections = is_array($schema['sections'] ?? null) ? $schema['sections'] : [];
+    $printDash = fn($v) => isset($v) && $v !== '' ? $v : '—';
 
-    @php
-      $schema = $schema ?? ($solicitud->datos ?? ['sections' => []]);
-    @endphp
+    $fieldValue = function ($field) use ($answersLegacy) {
+        // 1) nuevo: value dentro de cada field
+        if (array_key_exists('value', $field)) {
+            return $field['value'];
+        }
+        // 2) legacy: respuestas_json[name]
+        $name = $field['name'] ?? null;
+        if ($name && array_key_exists($name, $answersLegacy)) {
+            return $answersLegacy[$name];
+        }
+        return null;
+    };
+  @endphp
 
-    @forelse(($schema['sections'] ?? []) as $si => $sec)
-      <div class="card border-0 mb-3 shadow-sm rounded-4">
-        <div class="card-header bg-white fw-semibold">
-          {{ $sec['name'] ?? ('Sección '.($si+1)) }}
-        </div>
-        <div class="card-body">
+  @forelse($sections as $sec)
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white fw-semibold">
+        {{ $sec['name'] ?? 'Sección' }}
+      </div>
+      <div class="card-body">
+        @forelse(($sec['fields'] ?? []) as $f)
+          @php
+            $label = $f['label'] ?? $f['name'] ?? 'Campo';
+            $type  = strtolower($f['type'] ?? 'text');
+            $val   = $fieldValue($f);
+          @endphp
 
-          @foreach(($sec['fields'] ?? []) as $fi => $f)
-            @php
-              $type     = $f['type'] ?? 'text';
-              $label    = $f['label'] ?? ($f['name'] ?? 'Campo');
-              $help     = $f['help']  ?? '';
-              $required = !empty($f['required']);
-              $oldKey   = "sections.$si.fields.$fi.value";
-              $value    = old($oldKey, $f['value'] ?? null);
-            @endphp
+          <div class="mb-3">
+            <div class="text-muted small">{{ $label }}</div>
 
-            <div class="mb-3">
-              {{-- Label (salvo checkboxes que llevan label al lado) --}}
-              @if($type !== 'checkbox')
-                <label class="form-label">
-                  {{ $label }} @if($required) <span class="text-danger">*</span> @endif
-                </label>
+            @if($type === 'file')
+              @php
+                $files = is_array($val) ? $val : ($val ? [$val] : []);
+              @endphp
+
+              @if(count($files))
+                <ul class="list-unstyled mb-0">
+                  @foreach($files as $ix => $file)
+                    @php
+                      $url  = $file['url']  ?? null;
+                      $name = $file['name'] ?? ('Archivo '.($ix+1));
+                    @endphp
+                    <li>
+                      @if($url)
+                        <a href="{{ $url }}" target="_blank" rel="noopener">{{ $name }}</a>
+                      @else
+                        {{ $name }}
+                      @endif
+                    </li>
+                  @endforeach
+                </ul>
+              @else
+                <div>—</div>
               @endif
 
-              @switch($type)
-                @case('textarea')
-                  <textarea
-                    class="form-control"
-                    name="sections[{{ $si }}][fields][{{ $fi }}][value]"
-                    rows="4"
-                    {{ $required ? 'required' : '' }}
-                  >{{ $value }}</textarea>
-                  @break
-
-                @case('select')
-                  <select
-                    class="form-select"
-                    name="sections[{{ $si }}][fields][{{ $fi }}][value]"
-                    {{ $required ? 'required' : '' }}
-                  >
-                    <option value="">-- Seleccionar --</option>
-                    @foreach(($f['options'] ?? []) as $opt)
-                      @php
-                        $optVal = is_array($opt) ? ($opt['value'] ?? $opt['label'] ?? reset($opt)) : $opt;
-                        $optLbl = is_array($opt) ? ($opt['label'] ?? $optVal) : $opt;
-                      @endphp
-                      <option value="{{ $optVal }}" {{ (string)$value === (string)$optVal ? 'selected' : '' }}>
-                        {{ $optLbl }}
-                      </option>
-                    @endforeach
-                  </select>
-                  @break
-
-                @case('checkbox')
-                  <div class="form-check">
-                    {{-- hidden para forzar "0" cuando no se tilde --}}
-                    <input type="hidden" name="sections[{{ $si }}][fields][{{ $fi }}][value]" value="0">
-                    <input
-                      type="checkbox"
-                      class="form-check-input"
-                      id="f{{$si}}_{{$fi}}"
-                      name="sections[{{ $si }}][fields][{{ $fi }}][value]"
-                      value="1"
-                      {{ (int)$value === 1 ? 'checked' : '' }}
-                    >
-                    <label class="form-check-label" for="f{{$si}}_{{$fi}}">
-                      {{ $label }}
-                      @if($required) <span class="text-danger">*</span> @endif
-                    </label>
-                  </div>
-                  @break
-
-                @case('date')
-                  <input
-                    type="date"
-                    class="form-control"
-                    name="sections[{{ $si }}][fields][{{ $fi }}][value]"
-                    value="{{ $value }}"
-                    {{ $required ? 'required' : '' }}
-                  >
-                  @break
-
-                @case('file')
-                  <input
-                    type="file"
-                    class="form-control"
-                    name="sections[{{ $si }}][fields][{{ $fi }}][value]"
-                    {{ $required ? 'required' : '' }}
-                  >
-                  @break
-
-                @default
-                  <input
-                    type="text"
-                    class="form-control"
-                    name="sections[{{ $si }}][fields][{{ $fi }}][value]"
-                    value="{{ $value }}"
-                    {{ $required ? 'required' : '' }}
-                  >
-              @endswitch
-
-              @if($help)
-                <div class="form-text">{{ $help }}</div>
-              @endif
-            </div>
-          @endforeach
-
-        </div>
+            @else
+              <div>{{ $printDash(is_array($val) ? json_encode($val, JSON_UNESCAPED_UNICODE) : $val) }}</div>
+            @endif
+          </div>
+        @empty
+          <div class="text-muted">—</div>
+        @endforelse
       </div>
-    @empty
-      <div class="alert alert-info">
-        Este trámite aún no tiene campos configurados para completar.
-      </div>
-    @endforelse
-
-    <div class="d-flex gap-2">
-      <button class="btn btn-primary">Guardar</button>
-      <a href="{{ route('profile.tramites') }}" class="btn btn-outline-secondary">Cancelar</a>
     </div>
-  </form>
+  @empty
+    <div class="alert alert-warning">Este trámite no tiene secciones configuradas.</div>
+  @endforelse
+
+  <div class="mt-3">
+    <a href="{{ route('profile.solicitudes.index') }}" class="btn btn-outline-secondary">Volver a mis trámites</a>
+  </div>
 </div>
 @endsection

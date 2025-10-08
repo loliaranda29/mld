@@ -6,6 +6,8 @@
   <title>@yield('title', 'Mi Luján Digital')</title>
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
+  {{-- Oculta bloques Alpine hasta que inicialice --}}
+  <style>[x-cloak]{ display:none !important; }</style>
 
   {{-- Bootstrap 5 --}}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,7 +20,7 @@
   <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
 
-  {{-- Alpine: principal por jsDelivr, con fallback a unpkg si falla --}}
+  {{-- Alpine: CDN principal con fallback --}}
   <script defer
           src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
           onerror="
@@ -29,7 +31,7 @@
           ">
   </script>
   <script>
-    // Aviso en consola si Alpine no cargó (ayuda a diagnosticar si un firewall bloquea ambos CDNs)
+    // Aviso en consola si Alpine no cargó
     window.addEventListener('DOMContentLoaded', function () {
       setTimeout(function () {
         if (!window.Alpine) {
@@ -39,7 +41,6 @@
     });
   </script>
 
-  {{-- (opcional) estilos empujados desde vistas hijas --}}
   @stack('styles')
 </head>
 <body>
@@ -54,7 +55,6 @@
   {{-- JS base (Bootstrap bundle) --}}
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-  {{-- Aquí se inyectan los scripts pusheados desde sublayouts/páginas (EditorJS, etc.) --}}
   @stack('scripts')
 </body>
 </html>

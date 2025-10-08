@@ -9,16 +9,24 @@ class BandejaController extends Controller
 {
     public function index(Request $request)
     {
-        $search = $request->input('search');
+        $search = trim((string) $request->input('search', ''));
 
         $q = Solicitud::with(['tramite', 'usuario'])->latest();
 
-        if ($search) {
-            $q->where('expediente', 'like', "%{$search}%");
+        if ($search !== '') {
+            $q->where(function ($qq) use ($search) {
+                $qq->where('expediente', 'like', "%{$search}%")
+                   ->orWhereHas('tramite', function ($tq) use ($search) {
+                       $tq->where('nombre', 'like', "%{$search}%");
+                   })
+                   ->orWhereHas('usuario', function ($uq) use ($search) {
+                       $uq->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%");
+                   });
+            });
         }
 
-        // TODO: Filtrar por asignaciones reales cuando implementes "etapas → responsables"
-        $solicitudes = $q->paginate(20)->withQueryString();
+        $solicitudes = $q->paginate(10);
 
         return view('pages.profile.funcionario.bandeja', [
             'active'      => 'bandeja',
@@ -30,6 +38,7 @@ class BandejaController extends Controller
     {
         $solicitud = Solicitud::with(['tramite', 'usuario'])->findOrFail($id);
 
+        // Placeholder de documentos hasta vincular con el JSON real del trámite
         $documentos = [
             'DNI frontal',
             'DNI dorso',
@@ -45,4 +54,3 @@ class BandejaController extends Controller
         ]);
     }
 }
-

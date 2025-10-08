@@ -1,58 +1,83 @@
-@extends('layouts.profile')
+@extends('layouts.app')
 
-@section('profile_content')
-<div class="card shadow rounded-4 px-4 py-5">
-  <h5 class="fw-semibold mb-1">{{ $solicitud->tramite->nombre }}</h5>
-  <div class="text-muted small mb-4">Expediente: {{ $solicitud->expediente }} — Estado: {{ ucfirst($solicitud->estado) }}</div>
+@section('content')
+<div class="container py-4">
 
-  <form method="POST" action="{{ route('solicitudes.update', $solicitud->id) }}">
-    @csrf @method('PUT')
-
-    @forelse(($schema['sections'] ?? []) as $si => $sec)
-      <h6 class="mt-4">{{ $sec['name'] ?? 'Sección '.($si+1) }}</h6>
-
-      @foreach(($sec['fields'] ?? []) as $fi => $f)
-        @php
-          $name    = $f['name'] ?? "s{$si}_f{$fi}";
-          $label   = $f['label'] ?? $name;
-          $type    = $f['type']  ?? 'text';
-          $value   = $f['value'] ?? null;
-          $opts    = $f['options'] ?? [];
-        @endphp
-
-        <div class="mb-3">
-          <label class="form-label">{{ $label }}</label>
-
-          @if($type === 'textarea')
-            <textarea class="form-control" name="form[{{ $name }}]">{{ old("form.$name", $value) }}</textarea>
-
-          @elseif($type === 'select')
-            <select class="form-select" name="form[{{ $name }}]">
-              <option value="">— Seleccionar —</option>
-              @foreach($opts as $opt)
-                @php
-                  $ov = is_array($opt) ? ($opt['value'] ?? $opt['label'] ?? $opt) : $opt;
-                  $ol = is_array($opt) ? ($opt['label'] ?? $ov) : $opt;
-                @endphp
-                <option value="{{ $ov }}" @selected(old("form.$name",$value)==$ov)>{{ $ol }}</option>
-              @endforeach
-            </select>
-
-          @else
-            <input type="text" class="form-control" name="form[{{ $name }}]" value="{{ old("form.$name", $value) }}">
-          @endif
-
-          @if(!empty($f['help'])) <div class="form-text">{{ $f['help'] }}</div> @endif
+  <div class="card mb-3">
+    <div class="card-body d-flex justify-content-between align-items-center">
+      <div>
+        <div class="h5 mb-1">{{ $solicitud->tramite->nombre ?? 'Trámite' }}</div>
+        <div class="text-muted small">
+          <span class="me-2"><strong>Expediente:</strong> {{ $solicitud->expediente }}</span>
+          <span class="me-2"><strong>Creado:</strong> {{ $solicitud->created_at?->format('d/m/Y H:i') }}</span>
         </div>
-      @endforeach
-    @empty
-      <div class="alert alert-info">Este formulario no tiene campos configurados.</div>
-    @endforelse
-
-    <div class="d-flex gap-2 mt-3">
-      <a href="{{ route('profile.tramites') }}" class="btn btn-outline-secondary">Volver</a>
-      <button class="btn btn-primary">Guardar</button>
+      </div>
+      <span class="badge bg-secondary">{{ strtoupper($solicitud->estado) }}</span>
     </div>
-  </form>
+  </div>
+
+  <div class="mb-3">
+    <a href="{{ route('profile.solicitudes.index') }}" class="btn btn-outline-secondary btn-sm">Volver a mis trámites</a>
+  </div>
+
+  @php
+    $schema   = is_array($schema ?? null) ? $schema : (json_decode($schema ?? '[]', true) ?: []);
+    $sections = is_array($schema['sections'] ?? null) ? $schema['sections'] : [];
+
+    $print = function($v) {
+      if (is_array($v)) return implode(', ', array_map(fn($x)=>is_scalar($x)?(string)$x:json_encode($x, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), $v));
+      if ($v === true) return 'Sí';
+      if ($v === false) return 'No';
+      $s = trim((string)($v ?? ''));
+      return $s === '' ? '—' : e($s);
+    };
+  @endphp
+
+  @forelse($sections as $sec)
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white fw-semibold">{{ $sec['name'] ?? 'Sección' }}</div>
+      <div class="card-body">
+        @forelse(($sec['fields'] ?? []) as $f)
+          @php
+            $label = $f['label'] ?? ($f['name'] ?? 'Campo');
+            $type  = strtolower($f['type'] ?? 'text');
+            $val   = $f['value'] ?? null;  // <- ya viene fusionado
+          @endphp
+          <div class="mb-3">
+            <div class="text-muted small">{{ $label }}</div>
+
+            @if($type === 'file')
+              @php $files = is_array($val) ? $val : ($val ? [$val] : []); @endphp
+              @if(count($files))
+                <ul class="list-unstyled mb-0">
+                  @foreach($files as $ix => $file)
+                    @php
+                      $url  = is_array($file) ? ($file['url'] ?? null) : null;
+                      $name = is_array($file) ? ($file['name'] ?? 'Archivo '.($ix+1)) : ('Archivo '.($ix+1));
+                    @endphp
+                    <li>
+                      @if($url) <a href="{{ $url }}" target="_blank" rel="noopener">{{ $name }}</a>
+                      @else    {{ $name }}
+                      @endif
+                    </li>
+                  @endforeach
+                </ul>
+              @else
+                <div>—</div>
+              @endif
+            @elseif($type === 'richtext')
+              <div>{!! $print($val) !!}</div>
+            @else
+              <div>{{ $print($val) }}</div>
+            @endif
+          </div>
+        @empty
+          <div class="text-muted">—</div>
+        @endforelse
+      </div>
+    </div>
+  @empty
+    <div class="alert alert-warning">Este trámite no tiene secciones configuradas.</div>
+  @endforelse
 </div>
 @endsection

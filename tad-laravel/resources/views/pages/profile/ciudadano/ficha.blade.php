@@ -47,10 +47,9 @@
 
   <div class="mt-4">
     @if($puedeIniciar)
-      <form method="POST" action="{{ route('profile.tramites.iniciar', $tramite->id) }}" class="d-inline">
-        @csrf
-        <button class="btn btn-primary btn-sm">Iniciar trámite</button>
-      </form>
+      <form method="GET" action="{{ route('profile.tramites.iniciar', $tramite->id) }}">
+    <button type="submit" class="btn btn-primary">Iniciar trámite</button>
+</form>
     @else
       <button class="btn btn-outline-secondary btn-sm" disabled>Este trámite todavía no está habilitado</button>
     @endif

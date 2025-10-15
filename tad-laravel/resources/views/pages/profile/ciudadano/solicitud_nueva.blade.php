@@ -1,456 +1,378 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4"
+@php
+    $sections = $sections ?? ($schema['sections'] ?? []);
+@endphp
+
+<div class="min-vh-100 bg-light py-5"
      x-data="wizardForm(@js($sections))"
      x-init="init()"
-     x-effect="$refs.answersJson && ($refs.answersJson.value = JSON.stringify(model))">
-
-  {{-- CABECERA --}}
-  <div class="card mb-3">
-    <div class="card-body d-flex justify-content-between align-items-center">
-      <div>
-        <div class="h5 mb-1">{{ $tramite->nombre }}</div>
-        <div class="text-muted small">
-          @if(!empty($tramite->oficina_nombre))
-            <span class="me-2"><i class="bi bi-building"></i> {{ $tramite->oficina_nombre }}</span>
-          @endif
-          <span class="me-2"><i class="bi bi-calendar3"></i> {{ now()->format('d/m/Y') }}</span>
-        </div>
-      </div>
-      <span class="badge bg-warning text-dark">Borrador</span>
-    </div>
-  </div>
-
-  {{-- Sin secciones --}}
-  <template x-if="!steps.length">
-    <div class="alert alert-warning">Este trámite todavía no tiene formulario configurado.</div>
-  </template>
-
-  {{-- Wizard --}}
-  <template x-if="steps.length">
-   <form method="POST"
-      action="{{ route('profile.solicitudes.store') }}"
-      enctype="multipart/form-data"
-      @submit="return beforeSubmit($event)">
-    @csrf
-    <input type="hidden" name="tramite_id" value="{{ $tramite->id }}">
-    <input type="hidden" name="answers_json" x-ref="answersJson">
-
-      <div class="card">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-          <div>
-            Paso <span x-text="displayStep()"></span> de <span x-text="totalStepsDisplay()"></span>
-          </div>
-
-          <div class="d-flex flex-wrap gap-2">
-            <template x-for="(s, i) in steps" :key="i">
-              <button type="button"
-                      class="btn btn-sm"
-                      :class="i===current ? 'btn-primary' : 'btn-outline-primary'"
-                      @click="goTo(i)"
-                      x-text="s.name || ('Sección '+(i+1))"></button>
-            </template>
-            <button type="button"
-                    class="btn btn-sm"
-                    :class="isReview() ? 'btn-primary' : 'btn-outline-primary'"
-                    @click="goToReview()">
-              Repaso final
-            </button>
-          </div>
-        </div>
-
-        <div class="card-body">
-          {{-- Sección actual --}}
-          <template x-if="!isReview() && steps[current]">
-            <div>
-              <h5 class="mb-3" x-text="steps[current].name || ('Sección '+(current+1))"></h5>
-
-              <template x-for="(f, i) in (steps[current].fields || [])" :key="i">
-                <div class="mb-3">
-                  {{-- Espejo: siempre viaja form[name] (excepto file) --}}
-                  <template x-if="(f.type||'text').toLowerCase() !== 'file'">
-                    <input type="hidden"
-                           :name="`form[${keyFor(f, current, i)}]`"
-                           :value="Array.isArray(getVal(f, current, i)) ? JSON.stringify(getVal(f, current, i)) : (getVal(f, current, i) ?? '')">
-                  </template>
-
-                  <label class="form-label d-flex align-items-center gap-2">
-                    <span x-text="f.label || ('Campo '+(i+1))"></span>
-                    <span class="badge bg-danger" x-show="!!f.required">obligatorio</span>
-                  </label>
-
-                  {{-- TEXT --}}
-                  <template x-if="(f.type||'').toLowerCase()==='text'">
-                    <input type="text" class="form-control"
-                           :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                           :value="getVal(f, current, i)"
-                           @input="setVal(f, $event.target.value, current, i)">
-                  </template>
-
-                  {{-- TEXTAREA --}}
-                  <template x-if="(f.type||'').toLowerCase()==='textarea'">
-                    <textarea class="form-control"
-                              :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                              rows="3"
-                              @input="setVal(f, $event.target.value, current, i)"
-                              x-text="getVal(f, current, i)"></textarea>
-                  </template>
-
-                  {{-- SELECT --}}
-                  <template x-if="(f.type||'').toLowerCase()==='select'">
-                    <select class="form-select"
-                            :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                            @change="onSelectChange(f, $event.target.value, current, i)"
-                            x-init="$nextTick(()=>onSelectChange(f, getVal(f, current, i), current, i))">
-                      <option value="">— Seleccionar —</option>
-                      <template x-for="opt in (f.options||[])" :key="opt">
-                        <option :value="opt" x-text="opt" :selected="getVal(f, current, i)===opt"></option>
-                      </template>
-                    </select>
-                    <small class="text-muted" x-show="f.condition || (f.conditions && Object.keys(f.conditions||{}).length)">
-                      Esta respuesta puede derivar a otra sección.
-                    </small>
-                  </template>
-
-                  {{-- DATE --}}
-                  <template x-if="(f.type||'').toLowerCase()==='date'">
-                    <input type="date" class="form-control"
-                           :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                           :value="getVal(f, current, i) || ''"
-                           @input="setVal(f, $event.target.value, current, i)">
-                  </template>
-
-                  {{-- NUMBER --}}
-                  <template x-if="(f.type||'').toLowerCase()==='number'">
-                    <input type="number" class="form-control"
-                           :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                           :value="getVal(f, current, i) || ''"
-                           @input="setVal(f, $event.target.value, current, i)">
-                  </template>
-
-                  {{-- CHECKBOX simple --}}
-                  <template x-if="(f.type||'').toLowerCase()==='checkbox' && !(f.options && f.options.length)">
-                    <div class="form-check">
-                      <input type="checkbox" class="form-check-input"
-                             :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                             :checked="!!getVal(f, current, i)"
-                             @change="setVal(f, $event.target.checked, current, i)">
-                      <label class="form-check-label" x-text="f.help || 'Seleccionar'"></label>
-                    </div>
-                  </template>
-
-                  {{-- CHECKBOX multiple --}}
-                  <template x-if="(f.type||'').toLowerCase()==='checkbox' && (f.options && f.options.length)">
-                    <div>
-                      <template x-for="opt in (f.options||[])" :key="opt">
-                        <div class="form-check">
-                          <input type="checkbox" class="form-check-input"
-                                 :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                                 :checked="Array.isArray(getVal(f, current, i)) ? getVal(f, current, i).includes(opt) : false"
-                                 @change="
-                                   const cur = Array.isArray(getVal(f, current, i)) ? [...getVal(f, current, i)] : [];
-                                   if ($event.target.checked && !cur.includes(opt)) cur.push(opt);
-                                   if (!$event.target.checked) cur.splice(cur.indexOf(opt),1);
-                                   setVal(f, cur, current, i);
-                                 ">
-                          <label class="form-check-label" x-text="opt"></label>
-                        </div>
-                      </template>
-                    </div>
-                  </template>
-
-                  {{-- FILE --}}
-                  <template x-if="(f.type||'').toLowerCase()==='file'">
-                    <input type="file" class="form-control"
-                           :name="fileInputName(f, current, i)"
-                           :multiple="!!f.multiple"
-                           @change="setFileVal(f, $event.target.files, current, i)">
-                  </template>
-
-                  {{-- RICHTEXT --}}
-                  <template x-if="(f.type||'').toLowerCase()==='richtext'">
-                    <textarea class="form-control" rows="6"
-                              :name="'_dummy_'+(f.name||('s'+current+'_f'+i))"
-                              @input="setVal(f, $event.target.value, current, i)"
-                              x-text="getVal(f, current, i)"></textarea>
-                  </template>
-
-                  <template x-if="f.help">
-                    <div class="form-text" x-text="f.help"></div>
-                  </template>
-
-                  <div class="text-danger small mt-1" x-show="!!f.required && !isFieldValid(f, getVal(f, current, i))">
-                    Este campo es obligatorio.
-                  </div>
+>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9 col-xl-8">
+                
+                {{-- Header --}}
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold mb-2">{{ $tramite->nombre ?? 'Nuevo trámite' }}</h2>
+                    <p class="text-muted">Complete los siguientes pasos para enviar su solicitud</p>
                 </div>
-              </template>
-            </div>
-          </template>
 
-          {{-- Repaso final --}}
-          <template x-if="isReview()">
-            <div>
-              <h5 class="mb-3">Repaso final</h5>
-              <template x-for="(sec, si) in steps" :key="si">
-                <div class="mb-3">
-                  <div class="fw-bold mb-2" x-text="sec.name || ('Sección '+(si+1))"></div>
-                  <div class="list-group">
-                    <template x-for="(f, fi) in (sec.fields||[])" :key="fi">
-                      <div class="list-group-item">
-                        <div class="small text-muted d-flex align-items-center gap-2">
-                          <span x-text="f.label || (f.name || 'Campo')"></span>
-                          <span class="badge bg-danger" x-show="!!f.required">obligatorio</span>
+                <form method="POST"
+                      action="{{ route('profile.solicitudes.store') }}"
+                      enctype="multipart/form-data"
+                      x-on:submit.prevent="beforeSubmit($event)"
+                >
+                    @csrf
+                    <input type="hidden" name="tramite_id" value="{{ $tramite->id }}">
+                    <input type="hidden" x-ref="answersJson" name="answers_json" value="{}">
+
+                    {{-- Progress Steps --}}
+                    <div class="mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <template x-for="(section, idx) in sections" :key="idx">
+                                <div class="d-flex flex-column align-items-center flex-fill position-relative">
+                                    {{-- Step Circle --}}
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-2 position-relative"
+                                         :class="idx <= stepIndex ? 'bg-primary text-white' : 'bg-white border border-2 text-muted'"
+                                         style="width: 48px; height: 48px; z-index: 2; transition: all 0.3s ease;">
+                                        <span class="fw-bold" x-text="idx + 1"></span>
+                                    </div>
+                                    
+                                    {{-- Step Label --}}
+                                    <small class="text-center fw-medium" 
+                                           :class="idx === stepIndex ? 'text-primary' : 'text-muted'"
+                                           style="max-width: 100px; font-size: 0.75rem;"
+                                           x-text="section.name || `Paso ${idx + 1}`">
+                                    </small>
+                                    
+                                    {{-- Connector Line --}}
+                                    <div x-show="idx < sections.length - 1"
+                                         class="position-absolute top-0 start-50 translate-middle-y"
+                                         style="height: 2px; width: 100%; margin-top: 24px; margin-left: 24px; z-index: 1;"
+                                         :class="idx < stepIndex ? 'bg-primary' : 'bg-secondary opacity-25'">
+                                    </div>
+                                </div>
+                            </template>
                         </div>
-                        <div class="fw-semibold">
-                          <template x-if="(f.type||'').toLowerCase()==='file'">
-                            <span>(El/los archivo/s se adjuntarán)</span>
-                          </template>
-                          <template x-if="(f.type||'text').toLowerCase()!=='file'">
-                            <span x-text="pretty(getVal(f, si, fi))"></span>
-                          </template>
+                        
+                        {{-- Progress Bar --}}
+                        <div class="progress" style="height: 6px; border-radius: 10px;">
+                            <div class="progress-bar bg-primary" 
+                                 role="progressbar"
+                                 :style="`width:${progress()}%; transition: width 0.4s ease;`"
+                                 :aria-valuenow="stepIndex+1"
+                                 aria-valuemin="1"
+                                 :aria-valuemax="sections.length">
+                            </div>
                         </div>
-                      </div>
+                    </div>
+
+                    {{-- Form Section --}}
+                    <template x-if="currentSection()">
+                        <div class="card border-0 shadow-sm mb-4" 
+                             style="border-radius: 16px; transition: all 0.3s ease;"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform scale-95"
+                             x-transition:enter-end="opacity-100 transform scale-100">
+                            
+                            <div class="card-header bg-white border-0 py-4 px-4" style="border-radius: 16px 16px 0 0;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h5 class="mb-0 fw-semibold" x-text="currentSection().name || `Sección ${stepIndex+1}`"></h5>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" 
+                                          style="border-radius: 20px;"
+                                          x-text="`${stepIndex+1} de ${sections.length}`">
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body p-4 p-md-5">
+                                <template x-for="(field, idx) in (currentSection().fields || [])" :key="idx">
+                                    <div class="mb-4" x-show="isFieldVisible(field)">
+                                        <label class="form-label fw-medium mb-2">
+                                            <span x-text="field.label || field.name"></span>
+                                            <span x-show="field.required" class="text-danger ms-1">*</span>
+                                        </label>
+
+                                        {{-- Text inputs --}}
+                                        <template x-if="['text','search','code','richtext'].includes((field.type||'text').toLowerCase())">
+                                            <input type="text"
+                                                   class="form-control form-control-lg"
+                                                   style="border-radius: 10px; border: 1px solid #e0e0e0;"
+                                                   :name="`form[${field._name||field.name}]`"
+                                                   :placeholder="field.placeholder || ''"
+                                                   x-model="model[field._name||field.name]">
+                                        </template>
+
+                                        {{-- Textarea --}}
+                                        <template x-if="(field.type||'')==='textarea'">
+                                            <textarea class="form-control form-control-lg"
+                                                      style="border-radius: 10px; border: 1px solid #e0e0e0;"
+                                                      rows="4"
+                                                      :name="`form[${field._name||field.name}]`"
+                                                      x-model="model[field._name||field.name]"></textarea>
+                                        </template>
+
+                                        {{-- Number --}}
+                                        <template x-if="(field.type||'')==='number'">
+                                            <input type="number"
+                                                   class="form-control form-control-lg"
+                                                   style="border-radius: 10px; border: 1px solid #e0e0e0;"
+                                                   :name="`form[${field._name||field.name}]`"
+                                                   x-model="model[field._name||field.name]">
+                                        </template>
+
+                                        {{-- Date --}}
+                                        <template x-if="(field.type||'')==='date'">
+                                            <input type="date"
+                                                   class="form-control form-control-lg"
+                                                   style="border-radius: 10px; border: 1px solid #e0e0e0;"
+                                                   :name="`form[${field._name||field.name}]`"
+                                                   x-model="model[field._name||field.name]">
+                                        </template>
+
+                                        {{-- Select --}}
+                                        <template x-if="(field.type||'')==='select'">
+                                            <select class="form-select form-select-lg"
+                                                    style="border-radius: 10px; border: 1px solid #e0e0e0;"
+                                                    :name="`form[${field._name||field.name}]`"
+                                                    x-model="model[field._name||field.name]">
+                                                <option value="" x-show="!field.required">-- Seleccionar --</option>
+                                                <template x-for="(opt, i2) in (field.options || [])" :key="i2">
+                                                    <option
+                                                        :value="(typeof opt==='object') ? (opt.value ?? opt.label ?? '') : opt"
+                                                        x-text="(typeof opt==='object') ? (opt.label ?? opt.value ?? '') : opt">
+                                                    </option>
+                                                </template>
+                                            </select>
+                                        </template>
+
+                                        {{-- Single Checkbox --}}
+                                        <template x-if="(field.type||'')==='checkbox' && !field.multiple">
+                                            <div class="form-check p-3 bg-light" style="border-radius: 10px;">
+                                                <input class="form-check-input" 
+                                                       type="checkbox"
+                                                       style="width: 20px; height: 20px; border-radius: 5px;"
+                                                       :name="`form[${field._name||field.name}]`"
+                                                       :value="1"
+                                                       x-model="model[field._name||field.name]">
+                                                <label class="form-check-label ms-2" x-text="field.help || 'Seleccionar'"></label>
+                                            </div>
+                                        </template>
+
+                                        {{-- Multiple Checkboxes --}}
+                                        <template x-if="(field.type||'')==='checkbox' && field.multiple">
+                                            <div class="d-flex flex-column gap-2">
+                                                <template x-for="(opt, i3) in (field.options || [])" :key="i3">
+                                                    <div class="form-check p-3 bg-light" style="border-radius: 10px;">
+                                                        <input class="form-check-input" 
+                                                               type="checkbox"
+                                                               style="width: 20px; height: 20px; border-radius: 5px;"
+                                                               :name="`form[${field._name||field.name}][]`"
+                                                               :value="(typeof opt==='object') ? (opt.value ?? opt.label ?? '') : opt"
+                                                               x-model="model[field._name||field.name]">
+                                                        <label class="form-check-label ms-2"
+                                                               x-text="(typeof opt==='object') ? (opt.label ?? opt.value ?? '') : opt"></label>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        {{-- File Upload --}}
+                                        <template x-if="(field.type||'')==='file' && !field.multiple">
+                                            <div class="position-relative">
+                                                <input type="file"
+                                                       class="form-control form-control-lg"
+                                                       style="border-radius: 10px; border: 2px dashed #e0e0e0; padding: 20px;"
+                                                       :name="`files[${field._name||field.name}]`"
+                                                       x-on:change="onFileChange($event, field)">
+                                            </div>
+                                        </template>
+
+                                        <template x-if="(field.type||'')==='file' && field.multiple">
+                                            <div class="position-relative">
+                                                <input type="file"
+                                                       multiple
+                                                       class="form-control form-control-lg"
+                                                       style="border-radius: 10px; border: 2px dashed #e0e0e0; padding: 20px;"
+                                                       :name="`files[${field._name||field.name}][]`"
+                                                       x-on:change="onFileChange($event, field)">
+                                            </div>
+                                        </template>
+
+                                        {{-- Help Text --}}
+                                        <small class="text-muted d-block mt-2" 
+                                               x-show="field.help"
+                                               x-text="field.help || ''">
+                                        </small>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </template>
-                  </div>
-                </div>
-              </template>
 
-              <div class="alert" :class="globalValid ? 'alert-success' : 'alert-warning'">
-                <template x-if="!globalValid">
-                  <div>Faltan completar campos obligatorios. Volvé y completalos para poder enviar.</div>
-                </template>
-                <template x-if="globalValid">
-                  <div>Todo listo. Podés enviar tu trámite.</div>
-                </template>
-              </div>
+                    {{-- Navigation Buttons --}}
+                    <div class="d-flex justify-content-between align-items-center gap-3 mb-5">
+                        <button type="button" 
+                                class="btn btn-lg btn-outline-secondary px-4"
+                                style="border-radius: 10px; min-width: 120px;"
+                                :disabled="stepIndex === 0"
+                                @click="prevStep">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                            </svg>
+                            Anterior
+                        </button>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" 
+                                    class="btn btn-lg btn-primary px-5"
+                                    style="border-radius: 10px; min-width: 140px;"
+                                    x-show="!isLastStep()"
+                                    :disabled="!canGoNext()"
+                                    @click="nextStep">
+                                Siguiente
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right ms-2" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                                </svg>
+                            </button>
+
+                            <button type="submit" 
+                                    class="btn btn-lg btn-success px-5"
+                                    style="border-radius: 10px; min-width: 140px;"
+                                    x-show="isLastStep()"
+                                    :disabled="!canSubmit()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle me-2" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                </svg>
+                                Enviar solicitud
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
             </div>
-          </template>
         </div>
-
-        <div class="card-footer d-flex justify-content-between">
-          {{-- Navegación / Acciones --}}
-<div class="d-flex gap-2 mt-3">
-    <button type="button" class="btn btn-outline-secondary" @click="prev()" :disabled="stepIndex===0">
-        ← Anterior
-    </button>
-
-    <button type="button" class="btn btn-primary" @click="next()" x-show="stepKey!=='review'">
-        Siguiente →
-    </button>
-
-    {{-- Solo en Repaso final aparece el submit real --}}
-    <button type="submit"
-            class="btn btn-success"
-            x-show="stepKey==='review'"
-            :disabled="!isValidToSubmit">
-        Enviar solicitud
-    </button>
+    </div>
 </div>
 
-        </div>
-      </div>
-      {{-- (overlay eliminado) --}}
-    </form>
-  </template>
-</div>
-@endsection
+<style>
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn {
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
 
-@push('scripts')
 <script>
-function wizardForm(initialSections){
-  return {
-    steps: Array.isArray(initialSections) ? initialSections : [],
-    current: 0,
-    model: {},
-    sectionValid: false,
-    globalValid: false,
+document.addEventListener('alpine:init', () => {
+    Alpine.data('wizardForm', (sections) => ({
+        sections: sections || [],
+        stepIndex: 0,
+        model: {},
 
-    init(){
-      (this.steps||[]).forEach((s,si)=>{
-        (s.fields||[]).forEach((f,fi)=>{
-          const key = this.keyFor(f, si, fi);
-          if (this.model[key] === undefined) this.model[key] = f.value ?? '';
-        });
-      });
-      this.renderHiddenInputs();
-      this.recalcValidity();
-    },
+        init(){
+            const used = new Set();
+            (this.sections || []).forEach((sec, si) => {
+                (sec.fields || []).forEach((f, fi) => {
+                    // normalizar nombre único
+                    let name = (f.name || '').trim();
+                    if (!name || used.has(name)) { name = `s${si}_f${fi}`; }
+                    f._name = name;
+                    used.add(name);
 
-    // ---- helpers de clave/valor
-    keyFor(f, si, fi){ return (f && f.name) ? String(f.name) : `s${si}_f${fi}`; },
-    getVal(f, si, fi){ const k = this.keyFor(f, si??this.current, fi??0); return this.model[k] ?? ''; },
-    setVal(f, v, si, fi){
-      const k = this.keyFor(f, si??this.current, fi??0);
-      this.model[k] = v;
-      this.renderHiddenInputs();
-      this.recalcValidity();
-    },
-    fileInputName(f, si, fi){ return `files[${this.keyFor(f, si ?? this.current, fi ?? 0)}]${f.multiple ? '[]' : ''}`; },
-    setFileVal(f, fileList, si, fi){
-      const k = this.keyFor(f, si??this.current, fi??0);
-      // Guardamos una marca válida (+ nombres para el repaso)
-      const names = Array.from(fileList || []).map(x => x.name);
-      this.model[k] = { __file__: true, names };
-      this.renderHiddenInputs();
-      this.recalcValidity();
-    },
+                    if (!name) return;
+                    if ((f.type||'') === 'checkbox' && f.multiple) {
+                        this.model[f._name] = [];
+                    } else if ((f.type||'') === 'checkbox') {
+                        this.model[f._name] = false;
+                    } else {
+                        this.model[f._name] = '';
+                    }
+                });
+            });
+            this.syncJson();
+        },
 
-    pretty(v){
-      if (Array.isArray(v)) return v.join(', ');
-      if (v === true) return 'Sí';
-      if (v === false) return 'No';
-      const s = String(v ?? '').trim();
-      return s.length ? s : '—';
-    },
+        currentSection(){ return (this.sections || [])[this.stepIndex] || null; },
+        isLastStep(){ return this.stepIndex >= (this.sections.length - 1); },
+        progress(){ if (!this.sections.length) return 0; return Math.round(((this.stepIndex + 1) / this.sections.length) * 100); },
 
-    // ---- navegación / validación
-    onSelectChange(f, value, si, fi){
-      this.setVal(f, value, si, fi);
-      const condMap = (f.conditions && typeof f.conditions === 'object') ? f.conditions : {};
-      const direct   = f.condition || '';
+        isFieldVisible(field){
+            if (!field) return true;
+            if ((!field.condition || field.condition === '') && (!field.conditions || Object.keys(field.conditions||{}).length===0)) {
+                return true;
+            }
+            const dep = field.dependsOn || null;
+            if (dep && Object.prototype.hasOwnProperty.call(this.model, dep)) {
+                const val = this.model[dep];
+                if (field.conditions && typeof field.conditions === 'object') {
+                    return Object.prototype.hasOwnProperty.call(field.conditions, val);
+                }
+            }
+            return true;
+        },
 
-      let goto = '';
-      if (value && condMap[value]) goto = condMap[value];
-      else if (direct) goto = direct;
+        nextStep(){ if (this.stepIndex < this.sections.length - 1) { this.stepIndex++; this.syncJson(); } },
+        prevStep(){ if (this.stepIndex > 0) { this.stepIndex--; this.syncJson(); } },
 
-      if (goto){
-        const idx = (this.steps || []).findIndex(s => (s.name||'').trim() === String(goto).trim());
-        if (idx >= 0) this.current = idx;
-      }
-      this.recalcValidity();
-    },
+        canGoNext(){
+            const sec = this.currentSection(); if (!sec) return false;
+            for (const f of (sec.fields || [])) {
+                if (!f || !f.required) continue;
+                if (!this.isFieldVisible(f)) continue;
+                const v = this.model[f._name];
+                if ((f.type||'') === 'file') continue;
+                if ((f.type||'') === 'checkbox' && f.multiple) {
+                    if (!Array.isArray(v) || v.length === 0) return false;
+                } else if (v === '' || v === null || v === false) {
+                    return false;
+                }
+            }
+            return true;
+        },
 
-    isFieldValid(f, v){
-      if (!f || !f.required) return true;
-      const t = (f.type||'text').toLowerCase();
+        canSubmit(){ return this.canGoNext(); },
 
-      if (t === 'file') {
-        // Consideramos válido si seleccionaron algo (marcado por setFileVal)
-        if (v == null) return false;
-        if (typeof v === 'object' && v.__file__) return true;
-        if (typeof v === 'string') return v.trim() !== '';
-        if (Array.isArray(v)) return v.length > 0;
-        return !!v;
-      }
+        onFileChange(e, field){
+            if (field && (field._name||field.name)) {
+                const files = e.target.files;
+                this.model[field._name||field.name] = files && files.length ? '[archivo seleccionado]' : '';
+                this.syncJson();
+            }
+        },
 
-      if (Array.isArray(v)) return v.length > 0;
-      return String(v ?? '').trim() !== '';
-    },
+        syncJson(){
+            try { if (this.$refs['answersJson']) this.$refs['answersJson'].value = JSON.stringify(this.model || {}); } catch (e) {}
+        },
 
-    sectionHasMissingRequired(si = this.current){
-      if (this.isReview()) return false;
-      const sec = this.steps[si] || {};
-      for (const [fi, f] of (sec.fields || []).entries()){
-        if (!this.isFieldValid(f, this.getVal(f, si, fi))) return true;
-      }
-      return false;
-    },
-
-    missingRequiredGlobal(){
-      for (let si = 0; si < this.steps.length; si++){
-        if (this.sectionHasMissingRequired(si)) return true;
-      }
-      return false;
-    },
-
-    recalcValidity(){
-      this.sectionValid = !this.sectionHasMissingRequired(this.current);
-      this.globalValid  = !this.missingRequiredGlobal();
-    },
-
-    prevStep(){
-      if (this.isReview()){ this.current = this.steps.length - 1; this.recalcValidity(); return; }
-      if (this.current > 0) this.current--;
-      this.recalcValidity();
-    },
-    nextStep(){
-      if (this.isReview()) return;
-      if (this.current < this.steps.length - 1) this.current++;
-      this.recalcValidity();
-    },
-    goTo(i){ this.current = Math.max(0, Math.min(i, this.steps.length - 1)); this.recalcValidity(); },
-    goToReview(){ this.current = this.steps.length; this.recalcValidity(); },
-    isReview(){ return this.current === this.steps.length; },
-
-    displayStep(){ return this.isReview() ? (this.steps.length + 1) : (this.current + 1); },
-    totalStepsDisplay(){ return this.steps.length + 1; },
-
-    // ---- hidden inputs form[...]
-    renderHiddenInputs(){
-      const holder = this.$refs.answers; if (!holder) return;
-      const parts = [];
-      Object.entries(this.model).forEach(([k, v])=>{
-        if (!(v && typeof v === 'object' && v.__file__)) { // no inyectamos archivos en form[...]
-          const safe = Array.isArray(v) ? JSON.stringify(v) : String(v ?? '');
-          parts.push(`<input type="hidden" name="form[${this.escape(k)}]" value="${this.escape(safe)}">`);
-        }
-      });
-      holder.innerHTML = parts.join('');
-    },
-    escape(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); },
-
-    beforeSubmit(e) {
-      // 1) Solo permitimos submit en la pestaña de repaso
-      if (this.stepKey !== 'review') {
-        e.preventDefault();
-        this.next(); // avanza a siguiente paso
-        return false;
-      }
-
-      // 2) Serializar respuestas al hidden answers_json
-      const flat = {};
-      this.sections.forEach((sec, si) => {
-        (sec.fields || []).forEach((f, fi) => {
-          const name = f.name || `s${si}_f${fi}`;
-          flat[name] = (typeof f.value === 'undefined') ? null : f.value;
-        });
-      });
-      if (this.$refs.answersJson) {
-        this.$refs.answersJson.value = JSON.stringify(flat);
-      }
-
-      // 3) NO cancelar el submit si estamos en review
-      return true;
-    },
-  
-  }
-}
-
-// Fallback vanilla: serializa visibles a answers_json
-document.addEventListener('DOMContentLoaded', function(){
-  const form = document.querySelector('form[enctype="multipart/form-data"]'); if(!form) return;
-  let answersHidden = form.querySelector('input[name="answers_json"]');
-  if (!answersHidden){
-    answersHidden = document.createElement('input');
-    answersHidden.type = 'hidden';
-    answersHidden.name = 'answers_json';
-    form.appendChild(answersHidden);
-  }
-  form.addEventListener('submit', function(){
-    const model = {};
-    const fields = form.querySelectorAll('input, textarea, select');
-    fields.forEach(el=>{
-      if (el.disabled) return;
-      if (el.type === 'file') return;
-      let key = (el.getAttribute('name') || '').trim();
-      if (!key) return;
-      if (key.startsWith('_dummy_')) key = key.substring('_dummy_'.length);
-      let val;
-      if (el.tagName === 'SELECT') val = el.value;
-      else if (el.type === 'checkbox'){
-        const group = form.querySelectorAll(`input[type="checkbox"][name="${el.getAttribute('name')}"]`);
-        if (group.length > 1){
-          if (!Array.isArray(model[key])) model[key] = [];
-          if (el.checked && !model[key].includes(el.value)) model[key].push(el.value);
-          return;
-        } else { val = !!el.checked; }
-      } else if (el.type === 'radio'){ if (!el.checked) return; val = el.value; }
-      else { val = el.value; }
-      model[key] = val;
-    });
-    try { answersHidden.value = JSON.stringify(model); } catch { answersHidden.value = '{}'; }
-  }, { capture: true });
+        beforeSubmit(e){
+            if (!this.isLastStep()) { this.nextStep(); e.preventDefault(); return false; }
+            this.$nextTick(() => { this.syncJson(); e.target.submit(); });
+            return false;
+        },
+    }));
 });
 </script>
-@endpush
+@endsection

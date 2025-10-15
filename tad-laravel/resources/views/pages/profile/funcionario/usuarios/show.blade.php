@@ -32,10 +32,10 @@
         <div class="col-12 col-md-3 text-center mb-4">
           <div class="d-inline-flex align-items-center justify-content-center rounded-circle"
                style="width:110px;height:110px;background:#0b2e4e;color:#fff;font-size:36px;">
-            {{ $c['iniciales'] ?? 'AA' }}
+            {{ data_get($c, 'iniciales', 'AA') }}
           </div>
           <div class="mt-3 small text-muted">Correo electrónico</div>
-          <div class="fw-semibold">{{ $c['email'] }}</div>
+          <div class="fw-semibold">{{ data_get($c, 'email', '—') }}</div>
         </div>
 
         {{-- Columna formulario --}}
@@ -44,29 +44,29 @@
           <div class="row g-3">
             <div class="col-md-12">
               <label class="form-label small">CUIL</label>
-              <input type="text" class="form-control" value="{{ $c['cuil'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'cuil', '—') }}" readonly>
             </div>
 
             <div class="col-md-6">
               <label class="form-label small">Nombre</label>
-              <input type="text" class="form-control" value="{{ $c['nombre'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'nombre', '—') }}" readonly>
             </div>
             <div class="col-md-6">
               <label class="form-label small">Apellido paterno</label>
-              <input type="text" class="form-control" value="{{ $c['apellido'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'apellido', '—') }}" readonly>
             </div>
 
             <div class="col-md-6">
               <label class="form-label small">Fecha de nacimiento</label>
               <div class="input-group">
-                <input type="text" class="form-control" value="{{ $c['fecha_nac'] }}" readonly>
+                <input type="text" class="form-control" value="{{ data_get($c, 'fecha_nac', '—') }}" readonly>
                 <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
               </div>
             </div>
             <div class="col-md-6">
               <label class="form-label small">Teléfono celular</label>
               <div class="input-group">
-                <input type="text" class="form-control" value="{{ $c['telefono_celular'] }}" readonly>
+                <input type="text" class="form-control" value="{{ data_get($c, 'telefono_celular', '—') }}" readonly>
                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
               </div>
             </div>
@@ -77,29 +77,29 @@
 
             <div class="col-md-6">
               <label class="form-label small">Código postal</label>
-              <input type="text" class="form-control" value="{{ $c['direccion']['cp'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'direccion.cp', '—') }}" readonly>
             </div>
             <div class="col-md-6">
               <label class="form-label small">Barrio</label>
-              <input type="text" class="form-control" value="{{ $c['direccion']['barrio'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'direccion.barrio', '—') }}" readonly>
             </div>
 
             <div class="col-md-6">
               <label class="form-label small">Calle</label>
-              <input type="text" class="form-control" value="{{ $c['direccion']['calle'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'direccion.calle', '—') }}" readonly>
             </div>
             <div class="col-md-6">
               <label class="form-label small">Número exterior</label>
-              <input type="text" class="form-control" value="{{ $c['direccion']['numero'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'direccion.numero', '—') }}" readonly>
             </div>
 
             <div class="col-md-6">
               <label class="form-label small">Depto.</label>
-              <input type="text" class="form-control" value="{{ $c['direccion']['depto'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'direccion.depto', '—') }}" readonly>
             </div>
             <div class="col-md-6">
               <label class="form-label small">Referencias</label>
-              <input type="text" class="form-control" value="{{ $c['direccion']['referencias'] }}" readonly>
+              <input type="text" class="form-control" value="{{ data_get($c, 'direccion.referencias', '—') }}" readonly>
             </div>
           </div>
 

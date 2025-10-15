@@ -18,27 +18,16 @@ class Solicitud extends Model
         'respuestas_json',
     ];
 
-    // 👇 Estos sí deben ser 'array' (no '[]')
     protected $casts = [
         'datos'           => 'array',
         'respuestas_json' => 'array',
     ];
 
-    // Valores por defecto seguros
     protected $attributes = [
-        'estado'          => 'iniciado',
-        'datos'           => '[]',
-        'respuestas_json' => '[]',
+        'estado' => 'iniciado',
     ];
 
-    public function tramite(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\Tramite::class, 'tramite_id');
-    }
-
-    public function usuario(): BelongsTo
-    {
-        // 🔧 Antes apuntaba a App\Models\User (no existe en tu repo)
-        return $this->belongsTo(\App\Models\Usuario::class, 'usuario_id');
-    }
+    public function tramite(): BelongsTo { return $this->belongsTo(\App\Models\Tramite::class, 'tramite_id'); }
+    public function usuario(): BelongsTo { return $this->belongsTo(\App\Models\Usuario::class, 'usuario_id'); }
 }
+

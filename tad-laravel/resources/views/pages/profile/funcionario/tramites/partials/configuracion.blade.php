@@ -1,9 +1,18 @@
-<div x-data="configuracionTramite()" x-init="init()" class="row g-4"
-    @isset($tramite)
-    data-preview-url="{{ route('funcionario.tramites.config.folio.preview', $tramite->id) }}"
-    data-gen-url="{{ route('funcionario.tramites.config.folio.generar', $tramite->id) }}"
-    data-reset-url="{{ route('funcionario.tramites.config.folio.reset', $tramite->id) }}"
-    @endisset
+<div x-data="configuracionTramite()" x-init="init()" class="row g-4">
+    @if(isset($tramite) && $tramite->id)
+        <div
+            data-preview-url="{{ route('funcionario.tramites.config.folio.preview', ['tramite' => $tramite->id]) }}"
+            data-gen-url="{{ route('funcionario.tramites.config.folio.generar', ['tramite' => $tramite->id]) }}"
+            data-reset-url="{{ route('funcionario.tramites.config.folio.reset', ['tramite' => $tramite->id]) }}"
+        ></div>
+    @else
+        {{-- En modo crear NO hay ID aún; evitamos generar URLs inválidas --}}
+        <div
+            data-preview-url=""
+            data-gen-url=""
+            data-reset-url=""
+        ></div>
+    @endif
 >
     <!-- Panel izquierdo con tabs -->
     <div class="col-md-4">

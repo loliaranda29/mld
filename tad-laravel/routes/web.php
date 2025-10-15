@@ -34,6 +34,8 @@ use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\Funcionario\TramiteConfigController;
 use App\Http\Controllers\Funcionario\TramiteRelacionesController;
 use App\Http\Controllers\SolicitudesController;
+// 👇 agregado para acciones de bandeja (aceptar, rechazar, etc.)
+use App\Http\Controllers\Funcionario\SolicitudAccionesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +84,8 @@ Route::prefix('profile')->name('profile.')->group(function () {
     Route::prefix('solicitudes')->middleware('auth')->name('solicitudes.')->group(function () {
         Route::get('/', [SolicitudesController::class, 'index'])->name('index');
         Route::get('/{id}', [SolicitudesController::class, 'show'])->name('show');
+        // Descarga segura de archivos adjuntos de una solicitud del ciudadano
+        Route::get('/{id}/archivo/{field}/{index?}', [SolicitudesController::class, 'downloadFile'])->name('file');
     });
 
     // Alias “Mis trámites”
@@ -172,6 +176,25 @@ Route::get('/tramite_config', [Tramite_configController::class, 'indexFuncionari
 // Bandeja (funcionario)
 Route::get('/bandeja',      [BandejaController::class, 'index'])->name('funcionario.bandeja');
 Route::get('/bandeja/{id}', [BandejaController::class, 'show'])->name('funcionario.bandeja.show');
+
+// 👇 Acciones de bandeja (aceptar/rechazar/guardar/descargas/salida/historial/asignación)
+Route::middleware(['auth'])
+    ->prefix('funcionario/bandeja')
+    ->name('funcionario.bandeja.')
+    ->group(function () {
+        Route::post('{id}/aceptar',  [SolicitudAccionesController::class, 'aceptar'])->name('aceptar');
+        Route::post('{id}/rechazar', [SolicitudAccionesController::class, 'rechazar'])->name('rechazar');
+        Route::post('{id}/guardar',  [SolicitudAccionesController::class, 'guardar'])->name('guardar');
+
+        Route::get('{id}/descargas',  [SolicitudAccionesController::class, 'descargasZip'])->name('descargas');
+        Route::post('{id}/salida',    [SolicitudAccionesController::class, 'uploadSalida'])->name('salida.upload');
+
+        Route::get('{id}/historial',  [SolicitudAccionesController::class, 'historial'])->name('historial');
+        Route::get('{id}/asignacion', [SolicitudAccionesController::class, 'asignacion'])->name('asignacion');
+
+        // 👇 Descarga segura de adjuntos por campo / índice (usado en la vista de bandeja_show)
+        Route::get('{id}/archivo/{field}/{index?}', [SolicitudAccionesController::class, 'downloadFile'])->name('file');
+    });
 
 // Inspectores / Pagos / Citas (módulos aparte)
 Route::get('/inspectores', [InspectorController::class, 'index'])->name('inspectores.index');

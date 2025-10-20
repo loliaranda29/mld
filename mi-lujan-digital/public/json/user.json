@@ -1,0 +1,347 @@
+{
+    "userData": {
+        "id": 1,
+        "email": "juan.perez@example.com",
+        "cuil": "20-12345678-9",
+        "nombre": "Juan",
+        "apellido_paterno": "Pérez",
+        "fecha_nacimiento": "1985-06-15",
+        "telefono_celular": "+54 9 261 555-1234",
+        "telefono_fijo": "0261 444-5678",
+        "calle": "Patricias Mendocinas",
+        "numero_exterior": "256565566",
+        "departamento": "Lujan de cuyo",
+        "barrio": "Palmares",
+        "codigo_postal": "5501",
+        "referencias": "",
+        "direccion": "Av. San Martín 1234, Luján de Cuyo, Mendoza",
+        "wallet": "0xAbC1234567890DefABC1234567890defABC12345",
+        "llave_publica": "04bfcabf9e3a1c2d...f3a9c2d1e4b5c6d7e8f9",
+        "roles": ["ciudadano", "funcionario"],
+        "created_at": "2024-03-01T12:34:56Z",
+        "updated_at": "2025-07-10T09:00:00Z"
+    },
+    "tramites": [
+        {
+            "id": 1,
+            "titulo": "Solicitud de habilitación comercial",
+            "numero": "EXP-2025-00123456-LDC",
+            "fecha_emision": "2025-06-20",
+            "tipo": "Habilitación",
+            "estatus": "Observado",
+            "etapa_actual": 2,
+            "etapas_totales": 5,
+            "created_at": "2025-06-20T10:15:00Z",
+            "updated_at": "2025-07-09T14:30:00Z"
+        },
+        {
+            "id": 2,
+            "titulo": "Renovación de licencia de conducir",
+            "numero": "EXP-2025-00123457-LDC",
+            "fecha_emision": "2025-05-10",
+            "tipo": "Licencia",
+            "estatus": "En proceso",
+            "etapa_actual": 1,
+            "etapas_totales": 3,
+            "created_at": "2025-05-10T08:00:00Z",
+            "updated_at": "2025-06-01T11:45:00Z"
+        },
+        {
+            "id": 3,
+            "titulo": "Solicitud de exención impositiva",
+            "numero": "EXP-2025-00123458-LDC",
+            "fecha_emision": "2025-04-15",
+            "tipo": "Exención",
+            "estatus": "Aprobado",
+            "etapa_actual": 3,
+            "etapas_totales": 3,
+            "created_at": "2025-04-15T09:30:00Z",
+            "updated_at": "2025-05-20T13:00:00Z"
+        },
+        {
+            "id": 4,
+            "titulo": "Permiso de obra menor",
+            "numero": "EXP-2025-00123459-LDC",
+            "fecha_emision": "2025-03-22",
+            "tipo": "Obra",
+            "estatus": "Rechazado",
+            "etapa_actual": 1,
+            "etapas_totales": 4,
+            "created_at": "2025-03-22T14:10:00Z",
+            "updated_at": "2025-04-05T10:20:00Z"
+        },
+        {
+            "id": 5,
+            "titulo": "Inscripción en el registro de proveedores",
+            "numero": "EXP-2025-00123460-LDC",
+            "fecha_emision": "2025-02-28",
+            "tipo": "Registro",
+            "estatus": "Pendiente",
+            "etapa_actual": 0,
+            "etapas_totales": 2,
+            "created_at": "2025-02-28T16:45:00Z",
+            "updated_at": "2025-03-01T09:00:00Z"
+        },
+        {
+            "id": 6,
+            "titulo": "Solicitud de beca municipal",
+            "numero": "EXP-2025-00123461-LDC",
+            "fecha_emision": "2025-01-10",
+            "tipo": "Beca",
+            "estatus": "Finalizado",
+            "etapa_actual": 3,
+            "etapas_totales": 3,
+            "created_at": "2025-01-10T11:00:00Z",
+            "updated_at": "2025-02-15T12:00:00Z"
+        },
+        {
+            "id": 7,
+            "titulo": "Reclamo por alumbrado público",
+            "numero": "EXP-2025-00123462-LDC",
+            "fecha_emision": "2025-07-01",
+            "tipo": "Reclamo",
+            "estatus": "En revisión",
+            "etapa_actual": 1,
+            "etapas_totales": 2,
+            "created_at": "2025-07-01T08:30:00Z",
+            "updated_at": "2025-07-05T10:00:00Z"
+        },
+        {
+            "id": 8,
+            "titulo": "Solicitud de poda de árbol",
+            "numero": "EXP-2025-00123463-LDC",
+            "fecha_emision": "2025-06-05",
+            "tipo": "Servicios Urbanos",
+            "estatus": "Programado",
+            "etapa_actual": 2,
+            "etapas_totales": 3,
+            "created_at": "2025-06-05T07:45:00Z",
+            "updated_at": "2025-06-25T09:15:00Z"
+        }
+    ],
+    "documentos": [
+        {
+            "Nombre": "prueba10",
+            "Tipo": "jpg",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "reporte_inspeccion",
+            "Tipo": "png",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "firma_digital_2024",
+            "Tipo": "pdf",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "comprobante_pago_ago",
+            "Tipo": "jpg",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "certificado_catastral",
+            "Tipo": "pdf",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "foto_predio",
+            "Tipo": "png",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "doc_adjuntado",
+            "Tipo": "jpg",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        },
+        {
+            "Nombre": "declaracion_jurada",
+            "Tipo": "pdf",
+            "Fecha de creación": "2025-06-25T09:15:00Z"
+        }
+    ],
+
+    "pagos": [
+        {
+            "Número de folio": "azlp73MqCiuab1iYKqIj",
+            "Trámite": "Altas Padrones de Inmueble",
+            "Folio de trámite": "PRUEBA-4989927-004",
+            "Número de transacción": "TXN-20250712123601",
+            "Costo": "$ 0.00",
+            "Fecha": "12/05/2025 12:36:04",
+            "CUIT": "27291146967",
+            "Estado": "Pagado"
+        },
+        {
+            "Número de folio": "bxlm82NqTjuac3kZLpHo",
+            "Trámite": "Modificación de Datos Catastrales",
+            "Folio de trámite": "PRUEBA-4989930-002",
+            "Número de transacción": "TXN-20250712124522",
+            "Costo": "$ 150.00",
+            "Fecha": "12/05/2025 12:45:22",
+            "CUIT": "20345678901",
+            "Estado": "Pendiente"
+        },
+        {
+            "Número de folio": "cdnw94OrVjabs9vXMjTq",
+            "Trámite": "Baja de Propiedad",
+            "Folio de trámite": "PRUEBA-4989935-001",
+            "Número de transacción": "TXN-20250712130011",
+            "Costo": "$ 75.00",
+            "Fecha": "12/05/2025 13:00:11",
+            "CUIT": "27333344556",
+            "Estado": "Pagado"
+        },
+        {
+            "Número de folio": "depx85PqWkubd7sYLpJs",
+            "Trámite": "Consulta de Estado",
+            "Folio de trámite": "PRUEBA-4989940-005",
+            "Número de transacción": "TXN-20250712131545",
+            "Costo": "$ 0.00",
+            "Fecha": "12/05/2025 13:15:45",
+            "CUIT": "27222211333",
+            "Estado": "Pagado"
+        },
+        {
+            "Número de folio": "efqy92TqYludf6rZMnKu",
+            "Trámite": "Reinscripción de Propiedad",
+            "Folio de trámite": "PRUEBA-4989950-003",
+            "Número de transacción": "TXN-20250712133055",
+            "Costo": "$ 200.00",
+            "Fecha": "12/05/2025 13:30:55",
+            "CUIT": "20444556677",
+            "Estado": "Pendiente"
+        },
+        {
+            "Número de folio": "fgzr88UsZmvej4xXNoLp",
+            "Trámite": "Actualización de Titularidad",
+            "Folio de trámite": "PRUEBA-4989960-006",
+            "Número de transacción": "TXN-20250712134533",
+            "Costo": "$ 50.00",
+            "Fecha": "12/05/2025 13:45:33",
+            "CUIT": "27277788990",
+            "Estado": "Pagado"
+        },
+        {
+            "Número de folio": "ghas77VtXnkfc2yZLpKr",
+            "Trámite": "Solicitud de Certificado",
+            "Folio de trámite": "PRUEBA-4989970-007",
+            "Número de transacción": "TXN-20250712140000",
+            "Costo": "$ 100.00",
+            "Fecha": "12/05/2025 14:00:00",
+            "CUIT": "27123456789",
+            "Estado": "Pagado"
+        },
+        {
+            "Número de folio": "hijb69WrYoluq0wAMpLt",
+            "Trámite": "Inscripción Inicial",
+            "Folio de trámite": "PRUEBA-4989980-008",
+            "Número de transacción": "TXN-20250712141517",
+            "Costo": "$ 0.00",
+            "Fecha": "12/05/2025 14:15:17",
+            "CUIT": "27345678901",
+            "Estado": "Pendiente"
+        }
+    ],
+    "inspecciones": [
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989950 / 4989916-010",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Aprobado"
+        },
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989951 / 4989916-011",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Pendiente"
+        },
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989952 / 4989916-012",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Rechazado"
+        },
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989953 / 4989916-013",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Aprobado"
+        },
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989954 / 4989916-014",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Pendiente"
+        },
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989955 / 4989916-015",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Aprobado"
+        },
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989956 / 4989916-016",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Rechazado"
+        },
+        {
+            "Trámite": "Permisos Eléctricos",
+            "Folio": "PRUEBA-4989957 / 4989916-017",
+            "Fecha de la inspección": "2025-02-28",
+            "Estatus": "Pendiente"
+        }
+    ],
+    "citas": [
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-005",
+            "Día de la cita": "05/05/2025 10:00",
+            "Estatus": "Programada"
+        },
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-006",
+            "Día de la cita": "06/05/2025 09:30",
+            "Estatus": "Reprogramada"
+        },
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-007",
+            "Día de la cita": "08/05/2025 13:45",
+            "Estatus": "Atendida"
+        },
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-008",
+            "Día de la cita": "10/05/2025 11:15",
+            "Estatus": "Cancelada"
+        },
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-009",
+            "Día de la cita": "12/05/2025 14:00",
+            "Estatus": "Pendiente"
+        },
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-010",
+            "Día de la cita": "15/05/2025 08:30",
+            "Estatus": "Atendida"
+        },
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-011",
+            "Día de la cita": "16/05/2025 16:00",
+            "Estatus": "Programada"
+        },
+        {
+            "Trámite": "Denuncias de Protección al Consumidor",
+            "Folio": "PRUEBA-4989943-012",
+            "Día de la cita": "18/05/2025 10:45",
+            "Estatus": "Requiere Reprogramación"
+        }
+    ]
+}

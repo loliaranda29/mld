@@ -20,6 +20,19 @@
   };
   $tabId = fn($i) => 'tab-'.($i+1);
   $paneId = fn($i) => 'pane-'.($i+1);
+  // Observaciones del funcionario
+  $metaAll = is_array($solicitud->respuestas_json ?? null) ? $solicitud->respuestas_json : (json_decode($solicitud->respuestas_json ?? '[]', true) ?: []);
+  $validMap = (array)($metaAll['_funcionario']['validaciones'] ?? []);
+  $secInvalid = [];
+  $secMotivo  = [];
+  foreach ($sections as $i => $_) {
+      $k = 'sec'.$i;
+      if (isset($validMap[$k]) && empty($validMap[$k]['ok'])) {
+          $secInvalid[$i] = true;
+          $secMotivo[$i]  = (string)($validMap[$k]['motivo'] ?? '');
+      }
+  }
+  $isObserved = (strtolower((string)($solicitud->estado ?? '')) === 'observado');
 @endphp
 
 <div class="container-xxl py-4">
@@ -79,6 +92,12 @@
         <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#msgs-pane" type="button">Mensajes</button></li>
       </ul>
 
+      @php $hasEdit = $isObserved && count($secInvalid)>0; @endphp
+      @if($hasEdit)
+      <form method="POST" action="{{ route('solicitudes.update', $solicitud->id) }}" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+      @endif
       <div class="tab-content">
         @foreach($sections as $i => $sec)
           <div class="tab-pane fade @if($i===0) show active @endif" id="{{ $paneId($i) }}" role="tabpanel">
@@ -112,9 +131,14 @@
                                 $path = is_array($file) ? ($file['path'] ?? null) : null;
                                 $url  = is_array($file) ? ($file['url'] ?? null)   : null;
                                 $name = is_array($file) ? ($file['name'] ?? '')     : '';
-                                if(!$name && $path) $name = basename($path);
-                                if(!$name) $name = 'Archivo '.($ix+1);
+                                // Completar URL desde path si falta
                                 if(!$url && $path) { try { $url = \Storage::disk('public')->url($path); } catch (\Throwable $e) { $url = null; } }
+                                // Completar nombre desde path o URL si falta
+                                if(!$name) {
+                                  if($path) { $name = basename($path); }
+                                  elseif($url) { try { $bn = basename(parse_url($url, PHP_URL_PATH)); if ($bn) $name = $bn; } catch (\Throwable $e) {} }
+                                }
+                                if(!$name) $name = 'Archivo '.($ix+1);
                                 $secure = $path ? route('profile.solicitudes.file', [$solicitud->id, $fname, $ix]) : null;
                               @endphp
                               <li>
@@ -146,7 +170,82 @@
         @endforeach
 
         <div class="tab-pane fade" id="docs-pane" role="tabpanel">
-          <div class="card shadow-sm"><div class="card-body text-muted">Sin documentos adicionales.</div></div>
+          @php
+            use Illuminate\Support\Facades\Storage;
+
+            $docItems = [];
+            foreach (($sections ?? []) as $sec) {
+              foreach (($sec['fields'] ?? []) as $f) {
+                if (strtolower($f['type'] ?? '') !== 'file') continue;
+                $label = $f['label'] ?? ($f['name'] ?? 'Documento');
+                $fname = $f['_name'] ?? ($f['name'] ?? null);
+                $val   = $f['value'] ?? null;
+                $arr   = [];
+                if (is_array($val)) {
+                  $arr = array_keys($val)!==range(0,count($val)-1) ? [$val] : $val;
+                } elseif ($val) {
+                  $arr = [$val];
+                }
+                foreach ($arr as $ix => $one) {
+                  if (!is_array($one)) { $one = ['path'=>is_string($one)?$one:null]; }
+                  $p = $one['path'] ?? null; $u = $one['url'] ?? null; $n = $one['name'] ?? null;
+                  if (!$u && $p) { try { $u = Storage::disk('public')->url($p); } catch (\Throwable $e) { $u = null; } }
+                  if (!$n) {
+                    if ($p) { $n = basename($p); }
+                    elseif ($u) { try { $bn = basename(parse_url($u, PHP_URL_PATH)); if ($bn) $n = $bn; } catch (\Throwable $e) {} }
+                    if (!$n) { $n = 'Archivo '.($ix+1); }
+                  }
+                  $secure = $p && $fname ? route('profile.solicitudes.file', [$solicitud->id, $fname, $ix]) : null;
+                  $docItems[] = ['label'=>$label,'name'=>$n,'url'=>$u,'path'=>$p,'secure'=>$secure];
+                }
+              }
+            }
+            if (!count($docItems)) {
+              // Fallback: listar archivos detectados en storage si existen
+              // Primero intento definitivos; solo si no hay, muestro tmp
+              $def = 'solicitudes/'.($solicitud->id ?? 0);
+              $tmp = $solicitud->usuario_id ? 'solicitudes/tmp/'.$solicitud->usuario_id : null;
+              $dirs = [$def];
+              foreach ($dirs as $d) {
+                try {
+                  foreach (Storage::disk('public')->files($d) as $p) {
+                    $name = basename($p);
+                    $url  = null; try { $url = Storage::disk('public')->url($p); } catch (\Throwable $e) { $url = null; }
+                    $docItems[] = ['label'=>'Adjuntos','name'=>$name,'url'=>$url,'path'=>$p,'secure'=>null];
+                  }
+                } catch (\Throwable $e) {}
+              }
+              if (!count($docItems) && $tmp) {
+                try {
+                  foreach (Storage::disk('public')->files($tmp) as $p) {
+                    $name = basename($p);
+                    $url  = null; try { $url = Storage::disk('public')->url($p); } catch (\Throwable $e) { $url = null; }
+                    $docItems[] = ['label'=>'Adjuntos (temporal)','name'=>$name,'url'=>$url,'path'=>$p,'secure'=>null];
+                  }
+                } catch (\Throwable $e) {}
+              }
+            }
+          @endphp
+          <div class="card shadow-sm">
+            <div class="card-body">
+              @if(count($docItems))
+                <ul class="list-unstyled mb-0">
+                  @foreach($docItems as $it)
+                    <li class="mb-1">
+                      @php $href = $it['secure'] ?: ($it['url'] ?? null); @endphp
+                      @if(!empty($href))
+                        <a href="{{ $href }}" target="_blank" rel="noopener">{{ $it['label'] }} — {{ $it['name'] }}</a>
+                      @else
+                        {{ $it['label'] }} — {{ $it['name'] }}
+                      @endif
+                    </li>
+                  @endforeach
+                </ul>
+              @else
+                <div class="text-muted">Sin documentos adicionales.</div>
+              @endif
+            </div>
+          </div>
         </div>
         <div class="tab-pane fade" id="msgs-pane" role="tabpanel">
           <div class="card shadow-sm"><div class="card-body text-muted">Aún no hay mensajes.</div></div>

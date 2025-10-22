@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Tramite_configController;
 use App\Http\Controllers\BandejaController;
+use App\Http\Controllers\Funcionario\SolicitudArchivosController;
 use App\Http\Controllers\UsuariosController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -36,6 +37,7 @@ use App\Http\Controllers\Funcionario\TramiteRelacionesController;
 use App\Http\Controllers\SolicitudesController;
 // 👇 agregado para acciones de bandeja (aceptar, rechazar, etc.)
 use App\Http\Controllers\Funcionario\SolicitudAccionesController;
+use App\Http\Controllers\Funcionario\SolicitudValidacionesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +88,8 @@ Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/{id}', [SolicitudesController::class, 'show'])->name('show');
         // Descarga segura de archivos adjuntos de una solicitud del ciudadano
         Route::get('/{id}/archivo/{field}/{index?}', [SolicitudesController::class, 'downloadFile'])->name('file');
+        // Responder observaciones (vuelve a revisión)
+        Route::post('/{id}/responder', [SolicitudesController::class, 'responderObservaciones'])->name('responder');
     });
 
     // Alias “Mis trámites”
@@ -176,6 +180,7 @@ Route::get('/tramite_config', [Tramite_configController::class, 'indexFuncionari
 // Bandeja (funcionario)
 Route::get('/bandeja',      [BandejaController::class, 'index'])->name('funcionario.bandeja');
 Route::get('/bandeja/{id}', [BandejaController::class, 'show'])->name('funcionario.bandeja.show');
+Route::post('/bandeja/{id}/normalize', [SolicitudArchivosController::class, 'normalize'])->name('funcionario.bandeja.normalize');
 
 // 👇 Acciones de bandeja (aceptar/rechazar/guardar/descargas/salida/historial/asignación)
 Route::middleware(['auth'])
@@ -194,6 +199,13 @@ Route::middleware(['auth'])
 
         // 👇 Descarga segura de adjuntos por campo / índice (usado en la vista de bandeja_show)
         Route::get('{id}/archivo/{field}/{index?}', [SolicitudAccionesController::class, 'downloadFile'])->name('file');
+
+        // Comunicaciones (notas internas y mensajes con el ciudadano)
+        Route::post('{id}/nota',    [\App\Http\Controllers\Funcionario\SolicitudComunicacionesController::class, 'storeNota'])->name('nota.store');
+        Route::post('{id}/mensaje', [\App\Http\Controllers\Funcionario\SolicitudComunicacionesController::class, 'storeMensaje'])->name('mensaje.store');
+
+        // Devolver con observaciones
+        Route::post('{id}/devolver', [\App\Http\Controllers\Funcionario\SolicitudFlujoController::class, 'devolver'])->name('devolver');
     });
 
 // Inspectores / Pagos / Citas (módulos aparte)
@@ -217,6 +229,10 @@ Route::prefix('usuarios')->name('usuarios.')->group(function () {
   // Detalle
   Route::get('/{id}', [UsuariosController::class, 'show'])->name('show');
 });
+
+// Validaciones de adjuntos (funcionario)
+Route::post('/funcionario/bandeja/{id}/validar', [\App\Http\Controllers\Funcionario\SolicitudValidacionesController::class, 'store'])
+  ->name('funcionario.bandeja.validar');
 
 Route::prefix('usuarios')->name('usuarios.')->group(function () {
   Route::post('{id}/deactivate', [UsuariosController::class, 'deactivate'])->name('deactivate');
@@ -322,3 +338,4 @@ Route::prefix('funcionario/tramites')
         Route::post('{tramite}/relaciones', [TramiteRelacionesController::class, 'update'])
             ->name('relaciones.update');
     });
+

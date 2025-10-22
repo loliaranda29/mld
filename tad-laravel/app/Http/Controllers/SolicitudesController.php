@@ -158,6 +158,10 @@ class SolicitudesController extends Controller
     {
         $data = is_array($solicitud->datos) ? $solicitud->datos : json_decode($solicitud->datos ?? '[]', true);
         $changed = false;
+        $destDir = 'solicitudes/' . $solicitud->id;
+
+        // Asegurar el directorio destino para evitar fallos de move()
+        try { \Storage::disk('public')->makeDirectory($destDir); } catch (\Throwable $e) { /* noop */ }
 
         foreach (($data['sections'] ?? []) as &$sec) {
             foreach (($sec['fields'] ?? []) as &$f) {
@@ -168,12 +172,18 @@ class SolicitudesController extends Controller
 
                 foreach ($vals as $v) {
                     if (!empty($v['tmp']) && !empty($v['path'])) {
-                        $newPath = "solicitudes/{$solicitud->id}/".basename($v['path']);
-                        \Storage::disk('public')->move($v['path'], $newPath);
-                        $v['path'] = $newPath;
-                        $v['url']  = \Storage::disk('public')->url($newPath);
-                        unset($v['tmp']);
-                        $changed = true;
+                        $newPath = $destDir . '/' . basename($v['path']);
+                        try {
+                            // intentar mover, si falla, dejar el tmp pero mantener visible
+                            \Storage::disk('public')->move($v['path'], $newPath);
+                            $v['path'] = $newPath;
+                            $v['url']  = \Storage::disk('public')->url($newPath);
+                            unset($v['tmp']);
+                            $changed = true;
+                        } catch (\Throwable $e) {
+                            // Si no se pudo mover, al menos exponer URL temporal
+                            try { $v['url'] = $v['url'] ?? \Storage::disk('public')->url($v['path']); } catch (\Throwable $ee) { /* noop */ }
+                        }
                     }
                     $new[] = $v;
                 }
@@ -244,11 +254,32 @@ class SolicitudesController extends Controller
             : (json_decode($solicitud->datos ?? '[]', true) ?: ['sections' => []]);
 
         $posted = $request->input('form', []);
+        $allFiles    = $request->allFiles();
+        $filesByName = $allFiles['files'] ?? ($allFiles['form'] ?? []);
 
         foreach (($schema['sections'] ?? []) as $si => &$sec) {
             foreach (($sec['fields'] ?? []) as $fi => &$f) {
                 $name       = $f['_name'] ?? ($f['name'] ?? "s{$si}_f{$fi}");
-                $f['value'] = $posted[$name] ?? ($f['value'] ?? null);
+                $type       = strtolower($f['type'] ?? 'text');
+                $multiple   = !empty($f['multiple']);
+
+                if ($type === 'file') {
+                    $uploads = $filesByName[$name] ?? null;
+                    $stored  = [];
+                    if ($uploads) {
+                        if ($multiple && is_array($uploads)) {
+                            foreach ($uploads as $u) { if ($u) $stored[] = $this->storeSolicitudFileTemp($u); }
+                        } else {
+                            $stored[] = $this->storeSolicitudFileTemp($uploads);
+                        }
+                        $f['value'] = $multiple ? $stored : ($stored[0] ?? null);
+                    } else {
+                        // si no se sube nada, mantener el valor actual
+                        $f['value'] = $f['value'] ?? null;
+                    }
+                } else {
+                    $f['value'] = $posted[$name] ?? ($f['value'] ?? null);
+                }
             }
         }
         unset($sec, $f);
@@ -257,6 +288,34 @@ class SolicitudesController extends Controller
         $solicitud->save();
 
         return back()->with('success', 'Datos guardados.');
+    }
+
+    // Responder observaciones: vuelve a revisión para el funcionario
+    public function responderObservaciones(Request $request, $id)
+    {
+        $solicitud = Solicitud::where('usuario_id', auth()->id())->findOrFail($id);
+
+        $solicitud->estado = 'en_revision';
+
+        $meta = is_array($solicitud->respuestas_json)
+            ? $solicitud->respuestas_json
+            : (json_decode($solicitud->respuestas_json ?? '[]', true) ?: []);
+
+        $wf = (array)($meta['_wf'] ?? []);
+        $hist = (array)($wf['history'] ?? []);
+        $hist[] = [
+            'at' => now()->toDateTimeString(),
+            'by' => auth()->id(),
+            'action' => 'responder',
+        ];
+        $wf['history'] = $hist;
+        $meta['_wf'] = $wf;
+
+        $solicitud->respuestas_json = $meta;
+        $solicitud->save();
+
+        return redirect()->route('profile.solicitudes.show', $solicitud->id)
+            ->with('success', 'Observaciones respondidas. En revisión.');
     }
 
     /**

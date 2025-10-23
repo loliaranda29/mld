@@ -137,7 +137,8 @@
                                             <select class="form-select form-select-lg"
                                                     style="border-radius: 10px; border: 1px solid #e0e0e0;"
                                                     :name="`form[${field._name||field.name}]`"
-                                                    x-model="model[field._name||field.name]">
+                                                    x-model="model[field._name||field.name]"
+                                                    x-on:change="onSelectChange(field, $event.target.value)">
                                                 <option value="" x-show="!field.required">-- Seleccionar --</option>
                                                 <template x-for="(opt, i2) in (field.options || [])" :key="i2">
                                                     <option
@@ -292,6 +293,9 @@ document.addEventListener('alpine:init', () => {
         stepIndex: 0,
         model: {},
 
+        // NUEVO: mapa de saltos "fieldName::optionValue(normalizado)" => targetSectionIndex
+        jumpMap: {},
+
         init(){
             const used = new Set();
             (this.sections || []).forEach((sec, si) => {
@@ -312,6 +316,23 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
             });
+
+            // NUEVO: construir jumpMap desde las condiciones del schema
+            (this.sections || []).forEach((sec, si) => {
+                (sec.fields || []).forEach((f) => {
+                    if (!f) return;
+                    if ((f.type || '') === 'select' && f.conditions && typeof f.conditions === 'object') {
+                        Object.entries(f.conditions).forEach(([optionLabel, targetSectionName]) => {
+                            const targetIdx = (this.sections || []).findIndex(s => (s.name || '') === targetSectionName);
+                            if (targetIdx >= 0) {
+                                const key = this._jumpKey(f._name || f.name, optionLabel);
+                                this.jumpMap[key] = targetIdx;
+                            }
+                        });
+                    }
+                });
+            });
+
             this.syncJson();
         },
 
@@ -361,6 +382,28 @@ document.addEventListener('alpine:init', () => {
                 this.model[field._name||field.name] = files && files.length ? '[archivo seleccionado]' : '';
                 this.syncJson();
             }
+        },
+
+        // NUEVO: manejar cambios de <select> y ejecutar salto si hay mapeo
+        onSelectChange(field, value){
+            const name = field?._name || field?.name;
+            if (!name) return;
+            this.model[name] = value;
+            this.syncJson();
+
+            const key = this._jumpKey(name, value);
+            if (Object.prototype.hasOwnProperty.call(this.jumpMap, key)) {
+                const target = this.jumpMap[key];
+                if (typeof target === 'number' && target >= 0 && target < this.sections.length) {
+                    this.stepIndex = target;
+                }
+            }
+        },
+
+        // helper para normalizar clave del salto
+        _jumpKey(fieldName, optionValue){
+            const norm = (s) => (s ?? '').toString().trim().toLowerCase();
+            return `${norm(fieldName)}::${norm(optionValue)}`;
         },
 
         syncJson(){

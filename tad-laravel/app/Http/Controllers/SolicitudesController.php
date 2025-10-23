@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Usuario;
 
 class SolicitudesController extends Controller
 {
@@ -111,7 +112,8 @@ class SolicitudesController extends Controller
     unset($sec, $f);
 
     // 5) Generar expediente y guardar
-    $expediente = $this->generarExpediente($tramite);
+  $user       = $request->user();               // devolverá un App\Models\Usuario
+$expediente = $this->generarExpediente($user);
 
     $solicitud = Solicitud::create([
         'tramite_id' => $tramite->id,
@@ -318,20 +320,85 @@ class SolicitudesController extends Controller
             ->with('success', 'Observaciones respondidas. En revisión.');
     }
 
-    /**
-     * Genera un código de expediente simple: TRAM-{id}-{Ymd}-{seq}
-     * (Si luego querés, lo reemplazamos por tu lógica/tabla de folios).
-     */
-    protected function generarExpediente(Tramite $tramite): string
-    {
-        $prefix = 'TRAM-' . $tramite->id . '-' . now()->format('Ymd');
-        $countHoy = Solicitud::where('tramite_id', $tramite->id)
-            ->whereDate('created_at', now()->toDateString())
-            ->count();
+  /**
+ * EXP-(aleatorio + últimos 3 del CUIL/CUIT)-(mes/año).
+ * Solo acepta CUIL/CUIT de 11 dígitos. Si no lo encuentra ⇒ '000'.
+ */
+private function generarExpediente(Usuario $user): string
+{
+    $rand    = random_int(10000, 99999);
+    $last3   = $this->ultimos3Cuil($user);
+    $mesAnio = now()->format('m/Y');
 
-        $seq = str_pad((string)($countHoy + 1), 3, '0', STR_PAD_LEFT);
-        return $prefix . '-' . $seq;
+    return "EXP-{$rand}{$last3}-{$mesAnio}";
+}
+
+/** Devuelve los últimos 3 dígitos del CUIL/CUIT (11 dígitos) o '000' si no lo encuentra. */
+private function ultimos3Cuil(Usuario $user): string
+{
+    // 1) Claves comunes en el propio modelo
+    $candidatos = [
+        $user->cuil  ?? null, $user->CUIL  ?? null,
+        $user->cuit  ?? null, $user->CUIT  ?? null,
+        $user->cuil_cuit ?? null, $user->CUIL_CUIT ?? null,
+    ];
+    foreach ($candidatos as $v) {
+        if (!$v) continue;
+        $digits = preg_replace('/\D+/', '', (string)$v);
+        if (strlen($digits) === 11) {
+            return substr($digits, -3);
+        }
     }
+
+    // 2) Atributos “crudos” del modelo (por si viene de casts/alias)
+    if ($user instanceof \Illuminate\Database\Eloquent\Model) {
+        foreach ($user->getAttributes() as $k => $v) {
+            if (!is_scalar($v) || $v === null) continue;
+            $digits = preg_replace('/\D+/', '', (string)$v);
+            if (strlen($digits) === 11) {
+                Log::info('CUIL detectado en atributo', ['attr' => $k]);
+                return substr($digits, -3);
+            }
+        }
+    }
+
+    // 3) Búsqueda recursiva en toArray() (incluye relaciones/JSON del usuario)
+    $arr = method_exists($user, 'toArray') ? $user->toArray() : [];
+    $found = $this->buscar11DigitosRecursivo($arr);
+    if ($found) {
+        Log::info('CUIL detectado recursivo', ['hint' => 'toArray']);
+        return substr($found, -3);
+    }
+
+    // 4) Nada: devolvemos '000' (evita romper flujo)
+    Log::warning('No se encontró CUIL/CUIT de 11 dígitos para el usuario', ['id' => $user->id ?? null]);
+    return '000';
+}
+
+/** Devuelve el primer string con exactamente 11 dígitos dentro de un array (recursivo). */
+private function buscar11DigitosRecursivo($data): ?string
+{
+    if (is_array($data)) {
+        // priorizar claves evidentes
+        foreach (['cuil','CUIL','cuit','CUIT','cuil_cuit','CUIL_CUIT'] as $k) {
+            if (array_key_exists($k, $data) && $data[$k]) {
+                $digits = preg_replace('/\D+/', '', (string)$data[$k]);
+                if (strlen($digits) === 11) return $digits;
+            }
+        }
+        foreach ($data as $v) {
+            $res = $this->buscar11DigitosRecursivo($v);
+            if ($res) return $res;
+        }
+        return null;
+    }
+    if (is_scalar($data) && $data !== null) {
+        $digits = preg_replace('/\D+/', '', (string)$data);
+        if (strlen($digits) === 11) return $digits;
+    }
+    return null;
+}
+
 
     public function create(Tramite $tramite)
     {

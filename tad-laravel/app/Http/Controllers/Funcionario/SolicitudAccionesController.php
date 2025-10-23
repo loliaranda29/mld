@@ -157,70 +157,108 @@ class SolicitudAccionesController extends Controller
     }
 
     /** Descarga segura de un adjunto (por nombre de campo o índice de campo file) */
-    public function downloadFile($id, $field, $index = null)
-    {
-        $s = Solicitud::findOrFail($id);
+    public function downloadFile($id, string $field, $index = null)
+{
+    $solicitud = \App\Models\Solicitud::with('tramite','usuario')->findOrFail($id);
 
-        $schema = is_array($s->datos)
-            ? $s->datos
-            : (json_decode($s->datos ?? '[]', true) ?: ['sections' => []]);
+    // Helper para PHP < 8.1
+    if (!function_exists('array_is_list')) {
+        function array_is_list($array) {
+            if (!is_array($array)) return false;
+            return array_keys($array) === range(0, count($array) - 1);
+        }
+    }
 
-        $entry   = null;
-        $byIndex = ctype_digit((string) $field);
-        $fileFieldPos = 0;
+    // 1) Buscar primero en schema -> sections -> fields[type=file]
+    $schema = is_array($solicitud->datos)
+        ? $solicitud->datos
+        : (json_decode($solicitud->datos ?? '[]', true) ?: ['sections' => []]);
 
-        foreach (($schema['sections'] ?? []) as $sec) {
-            foreach (($sec['fields'] ?? []) as $f) {
-                if (strtolower($f['type'] ?? '') !== 'file') {
-                    continue;
+    $entry = null;
+    $targetByIndex = ctype_digit((string)$field);
+    $fileFieldPos  = 0;
+
+    foreach (($schema['sections'] ?? []) as $sec) {
+        foreach (($sec['fields'] ?? []) as $f) {
+            if (strtolower($f['type'] ?? '') !== 'file') continue;
+
+            $match = false;
+            if ($targetByIndex) {
+                $match = ((int)$field === $fileFieldPos);
+            } else {
+                $fname = $f['_name'] ?? ($f['name'] ?? '');
+                $match = ($fname === $field);
+            }
+
+            if (!$match) { $fileFieldPos++; continue; }
+
+            $val = $f['value'] ?? null;
+            if (is_array($val)) {
+                if (!array_is_list($val)) {
+                    $entry = $val;
+                } else {
+                    $i = is_null($index) ? 0 : (int)$index;
+                    $entry = $val[$i] ?? null;
                 }
+            }
+            break 2;
+        }
+    }
 
-                $match = $byIndex
-                    ? ((int) $field === $fileFieldPos)
-                    : (($f['_name'] ?? ($f['name'] ?? '')) === $field);
-
-                if (!$match) {
-                    $fileFieldPos++;
-                    continue;
-                }
-
-                $val = $f['value'] ?? null;
-                if (is_array($val)) {
-                    $isAssoc = array_keys($val) !== range(0, count($val) - 1);
-                    $entry   = $isAssoc
-                        ? $val
-                        : ($val[is_null($index) ? 0 : (int) $index] ?? null);
-                }
-                break 2;
+    // 2) Fallback: buscar en respuestas_json bajo la misma clave
+    if (!$entry) {
+        $answers = is_array($solicitud->respuestas_json)
+            ? $solicitud->respuestas_json
+            : (json_decode($solicitud->respuestas_json ?? '[]', true) ?: []);
+        if (array_key_exists($field, $answers)) {
+            $val = $answers[$field];
+            if (is_array($val)) {
+                $items = array_is_list($val) ? $val : [$val];
+                $i = is_null($index) ? 0 : (int)$index;
+                $entry = $items[$i] ?? null;
             }
         }
-
-        if (!$entry || !is_array($entry)) {
-            abort(404);
-        }
-
-        $path = $entry['path'] ?? null;
-        if (!$path) {
-            abort(404);
-        }
-
-        // Evita que descarguen paths fuera de la carpeta de la solicitud
-        $expectedPrefix = 'solicitudes/' . $s->id . '/';
-        if (strpos($path, $expectedPrefix) !== 0 && strpos($path, 'solicitudes/tmp/') !== 0) {
-            abort(403);
-        }
-
-        if (!Storage::disk('public')->exists($path)) {
-            abort(404);
-        }
-
-        $name = $entry['name'] ?? basename($path);
-        $mime = $entry['mime'] ?? (Storage::disk('public')->mimeType($path) ?: 'application/octet-stream');
-
-        return Storage::disk('public')->download($path, $name, [
-            'Content-Type' => $mime,
-        ]);
     }
+
+    if (!$entry || !is_array($entry)) abort(404);
+
+    // 3) Resolver path
+    $path = $entry['path'] ?? null;
+    if (!$path && !empty($entry['url'])) {
+        // Derivar desde /storage/...
+        $pos = strpos($entry['url'], '/storage/');
+        if ($pos !== false) {
+            $maybe = substr($entry['url'], $pos + 9);
+            if ($maybe) $path = $maybe;
+        }
+    }
+    if (!$path) abort(404);
+
+    // 4) Seguridad/alcance:
+    //    - Permitimos definitivos:   storage/app/public/solicitudes/{id}/...
+    //    - Permitimos temporales:    storage/app/public/solicitudes/tmp/{usuario_id}/...
+    //    - Nunca permitimos salir de "solicitudes/" ni ".."
+    if (str_contains($path, '..')) abort(403);
+    if (strpos($path, 'solicitudes/') !== 0) abort(403);
+
+    $prefixDef = 'solicitudes/' . $solicitud->id . '/';
+    $prefixTmp = 'solicitudes/tmp/' . ($solicitud->usuario_id ?? '0') . '/';
+
+    if (strpos($path, $prefixDef) !== 0 && strpos($path, $prefixTmp) !== 0) {
+        // Si no encaja en ninguno de los prefijos válidos, rechazamos
+        abort(403);
+    }
+
+    if (!\Storage::disk('public')->exists($path)) abort(404);
+
+    $name = $entry['name'] ?? basename($path);
+    $mime = $entry['mime'] ?? (\Storage::disk('public')->mimeType($path) ?: 'application/octet-stream');
+
+    return \Storage::disk('public')->download($path, $name, [
+        'Content-Type' => $mime,
+    ]);
+}
+
 
     public function historial($id)
     {

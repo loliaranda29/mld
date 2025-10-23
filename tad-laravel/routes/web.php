@@ -208,6 +208,18 @@ Route::middleware(['auth'])
         Route::post('{id}/devolver', [\App\Http\Controllers\Funcionario\SolicitudFlujoController::class, 'devolver'])->name('devolver');
     });
 
+/* ====== ALIAS DE COMPATIBILIDAD PARA LAS VISTAS EXISTENTES ======
+   Mantienen los nombres usados en blades anteriores sin romper nada.
+   Apuntan a los mismos controladores/acciones ya definidos arriba. */
+Route::middleware(['auth'])->group(function () {
+    // Aceptar / Rechazar etapa (alias)
+    Route::post('/bandeja/{id}/etapas/aceptar',  [SolicitudAccionesController::class, 'aceptar'])->name('bandeja.etapas.aceptar');
+    Route::post('/bandeja/{id}/etapas/rechazar', [SolicitudAccionesController::class, 'rechazar'])->name('bandeja.etapas.rechazar');
+    // Adjuntar documentos de salida (alias)
+    Route::post('/bandeja/{id}/adjuntos', [SolicitudAccionesController::class, 'uploadSalida'])->name('bandeja.adjuntos.agregar');
+});
+// ================================================================
+
 // Inspectores / Pagos / Citas (módulos aparte)
 Route::get('/inspectores', [InspectorController::class, 'index'])->name('inspectores.index');
 
@@ -338,4 +350,3 @@ Route::prefix('funcionario/tramites')
         Route::post('{tramite}/relaciones', [TramiteRelacionesController::class, 'update'])
             ->name('relaciones.update');
     });
-

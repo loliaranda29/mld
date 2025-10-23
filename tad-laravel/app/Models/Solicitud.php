@@ -21,6 +21,9 @@ class Solicitud extends Model
     protected $casts = [
         'datos'           => 'array',
         'respuestas_json' => 'array',
+        'etapas_history'     => 'array',
+        'operadores_asignados' => 'array',
+
     ];
 
     protected $attributes = [

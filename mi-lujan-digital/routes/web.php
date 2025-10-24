@@ -34,10 +34,12 @@ use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\CiudadanoController;
+use App\Http\Controllers\EmpresasController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\Funcionario\TramiteConfigController;
 use App\Http\Controllers\Funcionario\TramiteController;
 use App\Http\Controllers\Funcionario\TramiteRelacionesController;
+use App\Http\Controllers\RepresentantesController;
 use App\Http\Controllers\SolicitudesController;
 
 
@@ -340,11 +342,24 @@ Route::prefix('ciudadano')->name('ciudadano.')->group(
     Route::prefix('tramites')->name('tramites.')->group(
       function () {
         Route::get('/solicitudes', [TramitesController::class, 'solicitudes'])->name('solicitudes');
+        Route::get('/solicitudes/{id}', [SolicitudesController::class, 'show'])->name('solicitudes.detail');
         Route::get('/catalogo', [TramitesController::class, 'catalogo'])->name('catalogo');
         Route::get('/edit', [CitaController::class, 'edit'])->name('edit');
         Route::get('/edit/{id}', [CitaController::class, 'show'])->name('show');
         Route::put('/edit/{id}', [CitaController::class, 'update'])->name('update');
         Route::get('/{id}/iniciar', [SolicitudesController::class, 'catalogo'])->name('iniciar');
+      }
+    );
+    Route::prefix('representantes')->name('representantes.')->group(
+      function () {
+        Route::get('/', [RepresentantesController::class, 'index'])->name('index');
+        Route::get('/representantes/{id}', [RepresentantesController::class, 'show'])->name('detail');
+      }
+    );
+    Route::prefix('empresas')->name('empresas.')->group(
+      function () {
+        Route::get('/', [EmpresasController::class, 'index'])->name('index');
+        Route::get('/empresas/{id}', [EmpresasController::class, 'show'])->name('detail');
       }
     );
   }

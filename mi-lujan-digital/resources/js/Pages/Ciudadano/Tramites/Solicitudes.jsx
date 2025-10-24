@@ -113,7 +113,7 @@ export default function Solicitudes() {
 
                                         <Link
                                             href={route(
-                                                "profile.solicitudes.show",
+                                                "ciudadano.tramites.solicitudes.detail",
                                                 s.id
                                             )}
                                             className="inline-flex items-center gap-2 bg-[#2ba29f] text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-[#298e8c] transition text-sm"

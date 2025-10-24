@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { Edit2, Lock, Monitor, AlertTriangle } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 
+import CiudadanoLayout from "./Ciudadano";
+import UpdateProfileInformationForm from "@/Components/profile/update-profile-information-form";
 import UpdatePasswordForm from "@/components/profile/update-password-form";
 import TwoFactorAuthenticationForm from "@/components/profile/two-factor-authentication-form";
 import LogoutOtherBrowserSessionsForm from "@/components/profile/logout-other-browser-sessions-form";
 import DeleteUserForm from "@/components/profile/delete-user-form";
-import CiudadanoLayout from "./Ciudadano";
-import { usePage } from "@inertiajs/react";
-import UpdateProfileInformationForm from "@/Components/profile/update-profile-information-form";
 
 export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState("profile");
@@ -40,46 +40,50 @@ export default function ProfilePage() {
 
     return (
         <CiudadanoLayout>
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-sky-50/30 to-blue-50/20 p-4 lg:p-8">
-                <div className="max-w-6xl mx-auto space-y-6">
-                    {/* Header */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                        <h1 className="text-3xl font-bold text-slate-900">
-                            Configuración de Perfil
-                        </h1>
-                        <p className="text-slate-600 mt-2">
-                            Administra tu información personal y configuración
-                            de seguridad
-                        </p>
-                    </div>
-
+            <div
+                className="relative flex flex-col min-h-[calc(100vh-72px)] px-3 sm:px-6 lg:px-10 py-6 lg:py-10 overflow-y-auto"
+                style={{
+                    background:
+                        "linear-gradient(180deg, #f9fafb 0%, rgba(41,162,159,0.04) 45%, rgba(41,162,159,0.02) 100%)",
+                }}
+            >
+                <div className="w-full max-w-6xl mx-auto space-y-6 lg:space-y-8">
                     {/* Tabs */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="flex overflow-x-auto border-b border-slate-200">
+                    <div className="bg-white/95 backdrop-blur-sm border border-[#e6f7f6] rounded-2xl shadow-sm overflow-hidden">
+                        <div className="flex overflow-x-auto border-b border-[#e6f7f6] scrollbar-thin scrollbar-thumb-[#cfeee9]/60 scrollbar-track-transparent">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
+                                const active = activeTab === tab.id;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
-                                            activeTab === tab.id
-                                                ? "text-sky-600 border-b-2 border-sky-600 bg-sky-50/50"
-                                                : "text-slate-600 hover:text-sky-600 hover:bg-slate-50"
+                                        className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
+                                            active
+                                                ? "text-[#176261] bg-[#2ba29f]/10 border-b-2 border-[#2ba29f]"
+                                                : "text-[#176261]/80 hover:text-[#176261] hover:bg-[#f0fbfa]"
                                         }`}
                                     >
-                                        <Icon className="w-5 h-5" />
+                                        <Icon
+                                            className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                                                active
+                                                    ? "text-[#298e8c]"
+                                                    : "text-[#176261]/60"
+                                            }`}
+                                        />
                                         {tab.label}
                                     </button>
                                 );
                             })}
                         </div>
 
-                        <div className="p-6 lg:p-8">
+                        {/* Content */}
+                        <div className="p-4 sm:p-6 lg:p-8">
                             {activeTab === "profile" && (
-                                <UpdateProfileInformationForm user={user} />
+                                <div className="space-y-6">
+                                    <UpdateProfileInformationForm user={user} />
+                                </div>
                             )}
-
                             {activeTab === "security" && (
                                 <div className="space-y-8">
                                     <UpdatePasswordForm />
@@ -88,14 +92,18 @@ export default function ProfilePage() {
                                     />
                                 </div>
                             )}
-
                             {activeTab === "sessions" && (
-                                <LogoutOtherBrowserSessionsForm
-                                    sessions={sessions}
-                                />
+                                <div className="space-y-6">
+                                    <LogoutOtherBrowserSessionsForm
+                                        sessions={sessions}
+                                    />
+                                </div>
                             )}
-
-                            {activeTab === "danger" && <DeleteUserForm />}
+                            {activeTab === "danger" && (
+                                <div className="space-y-6">
+                                    <DeleteUserForm />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

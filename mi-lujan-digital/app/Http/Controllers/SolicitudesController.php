@@ -98,7 +98,7 @@ class SolicitudesController extends Controller
     $answers = is_array($solicitud->respuestas_json) ? $solicitud->respuestas_json : [];
     $schema  = $this->mergeAnswersForDisplay($schema, $answers);
 
-    return view('pages.profile.ciudadano.details.solicitud', [
+    return Inertia::render('Ciudadano/Tramites/DetalleSolicitud', [
       'solicitud' => $solicitud,
       'schema'    => $schema,
     ]);

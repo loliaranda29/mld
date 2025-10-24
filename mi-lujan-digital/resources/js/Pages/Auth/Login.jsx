@@ -12,7 +12,7 @@ import AuthLayout from "@/Layouts/AuthLayout";
 
 export default function Login({ canResetPassword = true, status = "" }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        email: "",
+        cuit: "",
         password: "",
         remember: false,
     });
@@ -35,21 +35,21 @@ export default function Login({ canResetPassword = true, status = "" }) {
                 </p>
             </div>
             <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-                {/* EMAIL */}
+                {/* cuit */}
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="cuit" value="C.U.I.T" />
                     <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
+                        id="cuit"
+                        type="cuit"
+                        name="cuit"
+                        value={data.cuit}
                         className="mt-1 block w-full"
                         autoComplete="username"
                         required
                         autoFocus
-                        onChange={(e) => setData("email", e.target.value)}
+                        onChange={(e) => setData("cuit", e.target.value)}
                     />
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.cuit} className="mt-2" />
                 </div>
 
                 {/* PASSWORD */}

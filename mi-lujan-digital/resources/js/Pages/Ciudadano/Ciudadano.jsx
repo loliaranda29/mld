@@ -5,6 +5,8 @@ import {
     LayoutDashboard,
     Calendar,
     Users,
+    User,
+    Briefcase,
     Settings,
     FileText,
 } from "lucide-react";
@@ -28,23 +30,33 @@ export default function CiudadanoLayout({ children }) {
             href: "/ciudadano/tramites/solicitudes",
         },
         { icon: Calendar, label: "Mis citas", href: "/ciudadano/citas" },
-        { icon: Users, label: "Perfil", href: "/ciudadano/perfil" },
+        { icon: User, label: "Perfil", href: "/ciudadano/perfil" },
         { icon: FileText, label: "Reportes", href: "/ciudadano/reportes" },
         {
             icon: Settings,
             label: "Configuración",
             href: "/ciudadano/configuracion",
         },
+        {
+            icon: Users,
+            label: "Representantes",
+            href: "/ciudadano/representantes",
+        },
+        {
+            icon: Briefcase,
+            label: "Empresas",
+            href: "/ciudadano/empresas",
+        },
     ];
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#f9fafb]">
+        <div className="h-screen flex flex-col bg-[#f9fafb]">
             {/* Header fijo */}
             <div className="fixed top-0 left-0 right-0 z-50">
                 <Header user={user} setSidebarOpen={setSidebarOpen} />
             </div>
 
-            {/* Layout general debajo del header */}
+            {/* Contenedor general */}
             <div className="flex flex-1 pt-[72px]">
                 {/* Overlay móvil */}
                 {sidebarOpen && (
@@ -54,7 +66,7 @@ export default function CiudadanoLayout({ children }) {
                     />
                 )}
 
-                {/* Sidebar */}
+                {/* Sidebar fija */}
                 <aside
                     className={`fixed lg:static top-[72px] left-0 z-40 w-64 lg:w-72 h-[calc(100vh-72px)] bg-white border-r border-gray-200 shadow-lg lg:shadow-none
                     transform transition-transform duration-300 ease-in-out
@@ -95,6 +107,7 @@ export default function CiudadanoLayout({ children }) {
                             })}
                         </nav>
 
+                        {/* Perfil inferior */}
                         <div className="p-3 border-t border-gray-200 bg-gray-50">
                             <div className="flex items-center gap-3 px-3 py-3 rounded-lg bg-white border border-gray-100 shadow-sm hover:shadow transition-shadow">
                                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#298e8c] to-[#176261] flex items-center justify-center text-white font-bold text-sm">
@@ -114,8 +127,11 @@ export default function CiudadanoLayout({ children }) {
                     </div>
                 </aside>
 
-                {/* Contenido principal */}
-                <main className="flex-1 overflow-y-auto px-4 lg:px-8 py-6">
+                {/* Contenido principal con scroll interno */}
+                <main
+                    className="flex-1 ml-0 lg:ml-62 overflow-y-auto px-4 lg:px-8 py-6"
+                    style={{ height: "calc(100vh - 72px)" }}
+                >
                     <div className="max-w-7xl mx-auto w-full">{children}</div>
                 </main>
             </div>

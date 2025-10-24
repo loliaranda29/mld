@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use App\Models\User;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class OverwritesController extends Controller
 {
@@ -53,5 +55,37 @@ class OverwritesController extends Controller
         'error' => __($status),
       ],
     ]);
+  }
+
+
+  public function login(Request $request)
+  {
+    $request->validate([
+      'cuit' => ['required', 'string'],
+      'password' => ['required', 'string'],
+    ]);
+
+    $user = User::where('cuit', $request->cuit)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+      return back()->withErrors([
+        'cuit' => 'Las credenciales no coinciden con nuestros registros.',
+      ]);
+    }
+
+    Auth::login($user, $request->boolean('remember'));
+
+    $request->session()->regenerate();
+
+    return redirect()->intended(route('ciudadano.index'));
+  }
+
+  public function logout(Request $request)
+  {
+    Auth::guard('web')->logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect()->route('login');
   }
 }

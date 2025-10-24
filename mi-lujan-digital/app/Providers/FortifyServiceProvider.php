@@ -47,6 +47,14 @@ class FortifyServiceProvider extends ServiceProvider
       return Limit::perMinute(5)->by($request->session()->get('login.id'));
     });
 
+    Route::middleware(['web'])->group(function () {
+
+      Route::post('/login', [OverwritesController::class, 'login'])
+        ->middleware('guest');
+
+      Route::post('/logout', [OverwritesController::class, 'logout'])
+        ->name('logout');
+    });
 
 
     Route::post('/forgot-password', [OverwritesController::class, 'sendResetLink'])

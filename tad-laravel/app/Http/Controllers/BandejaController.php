@@ -69,9 +69,12 @@ class BandejaController extends Controller
             }
         }
 
-        // 2) Documentos planos con fallback de descarga protegida
+       // 2) Documentos definitivos: SOLO los que tengan path dentro de solicitudes/{id}/
         $documentos = [];
         $fileFieldPos = 0;
+
+        $defPrefix = 'solicitudes/' . $solicitud->id . '/';
+
         foreach ($sections as $sec) {
             foreach (($sec['fields'] ?? []) as $f) {
                 if (strtolower($f['type'] ?? '') !== 'file') continue;
@@ -79,10 +82,10 @@ class BandejaController extends Controller
                 $campo = $f['_name'] ?? ($f['name'] ?? 'archivo');
                 $val   = $f['value'] ?? null;
 
+                // normalizamos a lista
                 $items = [];
                 if (is_array($val)) {
-                    $isAssoc = array_keys($val) !== range(0, count($val) - 1);
-                    $items = $isAssoc ? [$val] : $val;
+                    $items = array_keys($val) !== range(0, count($val) - 1) ? [$val] : $val;
                 } elseif ($val) {
                     $items = [$val];
                 }
@@ -97,57 +100,46 @@ class BandejaController extends Controller
                         $url  = $it['url']  ?? null;
                         $path = $it['path'] ?? null;
                     } elseif (is_string($it)) {
-                        $path = $it;
-                        if (preg_match('~^https?://~i', $it)) $url = $it;
-                    }
-
-                    if (!$url && $path) {
-                        try { $url = \Storage::disk('public')->url($path); } catch (\Throwable $e) { $url = null; }
-                    }
-                    if (!$name && $path) $name = basename($path);
-
-                    // Fallback: ruta segura si no hay URL pública
-                    if (!$url) {
-                        try {
-                            $url = route('funcionario.bandeja.file', [$solicitud->id, $campo ?: (string)$fileFieldPos, $idx]);
-                        } catch (\Throwable $e) {
-                            $url = null;
+                        // si viene string, no lo usamos salvo que podamos derivar un path válido
+                        $maybe = $it;
+                        if (preg_match('~^https?://~i', $maybe)) {
+                            $pos = strpos($maybe, '/storage/');
+                            if ($pos !== false) $path = substr($maybe, $pos + 9);
+                        } else {
+                            $path = $maybe;
                         }
                     }
 
-                    $documentos[] = compact('campo','name','mime','url');
+                    // ⛔ filtrar: debe ser definitivo y pertenecer a ESTA solicitud
+                    if (!$path || strpos($path, $defPrefix) !== 0) { $idx++; continue; }
+
+                    // resolver URL pública (si existe symlink)
+                    if (!$url) {
+                        try { $url = \Storage::disk('public')->url($path); } catch (\Throwable $e) { $url = null; }
+                    }
+                    if (!$name) $name = basename($path);
+
+                    $documentos[] = [
+                        'campo' => $campo,
+                        'name'  => $name,
+                        'mime'  => $mime,
+                        'url'   => $url,
+                        'path'  => $path,
+                    ];
                     $idx++;
                 }
                 $fileFieldPos++;
             }
         }
 
-        // 2.b) Fallback a respuestas_json si no se detectaron en sections/value
+        // Fallback final (opcional, pero seguro): listar lo que haya en la carpeta definitiva de la solicitud
         if (empty($documentos)) {
-            $answers = is_array($solicitud->respuestas_json)
-                ? $solicitud->respuestas_json
-                : (json_decode($solicitud->respuestas_json ?? '[]', true) ?: []);
-            foreach ($answers as $campo => $val) {
-                $items = [];
-                if (is_array($val)) {
-                    $isAssoc = array_keys($val) !== range(0, count($val) - 1);
-                    $items = $isAssoc ? [$val] : $val;
+            try {
+                foreach (\Storage::disk('public')->files($defPrefix) as $p) {
+                    $u = null; try { $u = \Storage::disk('public')->url($p); } catch (\Throwable $e) {}
+                    $documentos[] = ['campo' => 'Adjuntos', 'name' => basename($p), 'mime' => null, 'url' => $u, 'path'=>$p];
                 }
-                foreach ($items as $ix => $it) {
-                    if (!is_array($it)) continue;
-                    $name = $it['name'] ?? 'Archivo';
-                    $mime = $it['mime'] ?? null;
-                    $url  = $it['url']  ?? null;
-                    $path = $it['path'] ?? null;
-                    if (!$url && $path) {
-                        try { $url = \Storage::disk('public')->url($path); } catch (\Throwable $e) { $url = null; }
-                    }
-                    if (!$url) {
-                        try { $url = route('funcionario.bandeja.file', [$solicitud->id, $campo, $ix]); } catch (\Throwable $e) { $url = null; }
-                    }
-                    $documentos[] = ['campo' => $campo, 'name' => $name, 'mime' => $mime, 'url' => $url];
-                }
-            }
+            } catch (\Throwable $e) { /* noop */ }
         }
 
         // 3) Etapas (igual que antes)

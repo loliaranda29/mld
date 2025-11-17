@@ -22,7 +22,7 @@
                 <form method="POST"
                       action="{{ route('profile.solicitudes.store') }}"
                       enctype="multipart/form-data"
-                      x-on:submit.prevent="beforeSubmit($event)"
+                      x-ref="form"
                 >
                     @csrf
                     <input type="hidden" name="tramite_id" value="{{ $tramite->id }}">
@@ -70,8 +70,12 @@
                     </div>
 
                     {{-- Form Section --}}
-                    <template x-if="currentSection()">
+                    {{-- Renderizamos TODAS las secciones y ocultamos las no activas con x-show
+                         para mantener los <input type="file"> en el DOM durante todo el wizard --}}
+                    <template x-for="(sec, idxSec) in (sections || [])" :key="idxSec">
                         <div class="card border-0 shadow-sm mb-4" 
+                             x-show="stepIndex === idxSec"
+                             x-cloak
                              style="border-radius: 16px; transition: all 0.3s ease;"
                              x-transition:enter="transition ease-out duration-300"
                              x-transition:enter-start="opacity-0 transform scale-95"
@@ -79,16 +83,16 @@
                             
                             <div class="card-header bg-white border-0 py-4 px-4" style="border-radius: 16px 16px 0 0;">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0 fw-semibold" x-text="currentSection().name || `Sección ${stepIndex+1}`"></h5>
+                                    <h5 class="mb-0 fw-semibold" x-text="sec.name || `Sección ${idxSec+1}`"></h5>
                                     <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2" 
                                           style="border-radius: 20px;"
-                                          x-text="`${stepIndex+1} de ${sections.length}`">
+                                          x-text="`${idxSec+1} de ${sections.length}`">
                                     </span>
                                 </div>
                             </div>
                             
                             <div class="card-body p-4 p-md-5">
-                                <template x-for="(field, idx) in (currentSection().fields || [])" :key="idx">
+                                <template x-for="(field, idx) in (sec.fields || [])" :key="idx">
                                     <div class="mb-4" x-show="isFieldVisible(field)">
                                         <label class="form-label fw-medium mb-2">
                                             <span x-text="field.label || field.name"></span>
@@ -181,26 +185,26 @@
                                         </template>
 
                                         {{-- File Upload --}}
-                                        <template x-if="(field.type||'')==='file' && !field.multiple">
+                                        <div x-show="(field.type||'')==='file' && !field.multiple">
                                             <div class="position-relative">
                                                 <input type="file"
                                                        class="form-control form-control-lg"
                                                        style="border-radius: 10px; border: 2px dashed #e0e0e0; padding: 20px;"
-                                                       :name="`files[${field._name||field.name}]`"
+                                                       :name="(field._name||field.name)"
                                                        x-on:change="onFileChange($event, field)">
                                             </div>
-                                        </template>
+                                        </div>
 
-                                        <template x-if="(field.type||'')==='file' && field.multiple">
+                                        <div x-show="(field.type||'')==='file' && field.multiple">
                                             <div class="position-relative">
                                                 <input type="file"
                                                        multiple
                                                        class="form-control form-control-lg"
                                                        style="border-radius: 10px; border: 2px dashed #e0e0e0; padding: 20px;"
-                                                       :name="`files[${field._name||field.name}][]`"
+                                                       :name="`${(field._name||field.name)}[]`"
                                                        x-on:change="onFileChange($event, field)">
                                             </div>
-                                        </template>
+                                        </div>
 
                                         {{-- Help Text --}}
                                         <small class="text-muted d-block mt-2" 

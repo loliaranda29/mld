@@ -12,16 +12,29 @@ class Usuario extends Authenticatable
   use HasFactory;
   use Notifiable;
   // Nombre de la tabla (por si no sigue la convención "usuarios")
-  protected $table = 'usuarios';
+  protected $table = 'users';
 
   // Campos que se pueden asignar masivamente
   protected $fillable = [
-    'nombre',
-    'apellido',
-    'email',
-    'cuil',
-    'password',
-  ];
+        'name',
+        'email',
+        'password',
+        'email_verified_at',
+        'remember_token',
+        'current_team_id',
+        'profile_photo_path',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
 
   public function permiso()
   {
@@ -29,6 +42,12 @@ class Usuario extends Authenticatable
   }
   public function pago()
   {
-    return $this->hasMany(Pago::class, 'usuario_id');
+    return $this->hasMany(Pago::class, 'user_id');
   }
+  // ...
+public function solicitudes()
+{
+    return $this->hasMany(\App\Models\Solicitud::class, 'usuario_id');
+}
+
 }

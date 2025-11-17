@@ -36,6 +36,7 @@
 <!-- Scripts necesarios para funcionamiento de pestañas -->
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
+<<<<<<< HEAD
 >>>>>>> loli
 
 <!-- Alpine.js -->
@@ -57,4 +58,19 @@
 @endsection
 =======
 
+>>>>>>> loli
+=======
+@push('scripts')
+  <script>
+    // Soporte para tabs Bootstrap en el módulo de trámites
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!window.bootstrap) return;
+      const triggers = document.querySelectorAll('#tabsTramite button[data-bs-toggle="tab"], #tabsTramite button');
+      triggers.forEach((el) => {
+        const tab = new bootstrap.Tab(el);
+        el.addEventListener('click', (e) => { e.preventDefault(); tab.show(); });
+      });
+    });
+  </script>
+@endpush
 >>>>>>> loli

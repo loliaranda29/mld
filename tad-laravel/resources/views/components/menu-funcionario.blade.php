@@ -1,109 +1,237 @@
-<!-- Perfil del funcionario (mock) -->
-<div class="d-flex align-items-center p-3 border-bottom">
-  <div class="me-3">
-    <img src="https://firebasestorage.googleapis.com/v0/b/os-arg-lujan-de-cuyo.appspot.com/o/users%2FEL7ME2E54uccdpCK6xnC7znfFBd2%2FprofilePicture.jpg?alt=media&token=94664911-a337-4c9f-bab7-f0e0c180bf40"
-         alt="Foto de perfil"
-         class="rounded-circle"
-         style="width: 40px; height: 40px; object-fit: cover;">
-  </div>
-  <div>
-    <div class="fw-bold">Alicia Aranda</div>
-    <div class="text-muted small">
-      Nivel 1<br>
-      Funcionario
+@php
+    if (!function_exists('isActive')) {
+        /**
+         * Devuelve clases cuando el item esta activo
+         */
+        function isActive(string $section, ?string $active): string {
+            return $section === ($active ?? '') ? 'fw-bold text-dark' : 'text-secondary';
+        }
+    }
+
+    if (!function_exists('isOpenGroup')) {
+        /**
+         * Abre el acordeon si $active empieza con el prefijo del grupo.
+         * Ej: 'configuracion.apariencia' abre el grupo 'configuracion'
+         */
+        function isOpenGroup(string $groupPrefix, ?string $active): string {
+            $a = $active ?? '';
+            return (\Illuminate\Support\Str::startsWith($a, $groupPrefix)) ? 'show' : '';
+        }
+    }
+@endphp
+
+<div class="px-3">
+    {{-- Header usuario --}}
+    <div class="d-flex align-items-center mb-4">
+        <img src="https://ui-avatars.com/api/?name=Alicia+Aranda" class="rounded-circle me-2" width="40" height="40" alt="Perfil">
+        <div>
+            <strong>Alicia Aranda</strong><br>
+            <small class="text-muted">Nivel 1<br>Funcionario</small>
+        </div>
     </div>
-  </div>
+
+    <div class="accordion mb-3" id="accordionMenu">
+
+        {{-- VENTANILLA DIGITAL --}}
+        <div class="accordion-item border-0">
+            <h6 class="accordion-header">
+                <button class="accordion-button collapsed px-0 py-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseVentanillaDigital">
+                    <i class="bi bi-hdd-stack me-2"></i> Ventanilla Digital
+                </button>
+            </h6>
+            <div id="collapseVentanillaDigital"
+                 class="accordion-collapse collapse {{ isOpenGroup('ventanillaDigital', $active ?? '') }}">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item">
+                        <a href="{{ route('funcionario.tramite_config') }}"
+                           class="nav-link {{ isActive('tramites', $active ?? '') }}">
+                            <i class="bi bi-list-columns-reverse me-2"></i> Listado de trámites
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('funcionario.bandeja') }}"
+                           class="nav-link {{ isActive('bandeja', $active ?? '') }}">
+                            <i class="bi bi-inbox me-2"></i> Bandeja de entrada
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- INSPECTORES --}}
+        <div class="accordion-item border-0">
+            <h6 class="accordion-header">
+                <button class="accordion-button collapsed px-0 py-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseInspectores">
+                    <i class="bi bi-person-badge me-2"></i> Inspectores
+                </button>
+            </h6>
+            <div id="collapseInspectores"
+                 class="accordion-collapse collapse {{ isOpenGroup('inspectores', $active ?? '') }}">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item">
+                        <a href="{{ route('inspectores.index') }}" class="nav-link">
+                            Gestión de Inspectores
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- PAGOS --}}
+        <div class="accordion-item border-0">
+            <h6 class="accordion-header">
+                <button class="accordion-button collapsed px-0 py-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapsePagos">
+                    <i class="bi bi-credit-card me-2"></i> Pagos
+                </button>
+            </h6>
+            <div id="collapsePagos"
+                 class="accordion-collapse collapse {{ isOpenGroup('pagos', $active ?? '') }}">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item">
+                        <a href="{{ route('pagos.index') }}" class="nav-link">
+                            Administración de pagos
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- CITAS --}}
+        <div class="accordion-item border-0">
+            <h6 class="accordion-header">
+                <button class="accordion-button collapsed px-0 py-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseCitas">
+                    <i class="bi bi-calendar-event me-2"></i> Citas
+                </button>
+            </h6>
+            <div id="collapseCitas"
+                 class="accordion-collapse collapse {{ isOpenGroup('citas', $active ?? '') }}">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item">
+                        <a href="{{ route('citas.index') }}" class="nav-link">
+                            Gestión de citas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- USUARIOS --}}
+        <div class="accordion-item border-0">
+            <h6 class="accordion-header">
+                <button class="accordion-button collapsed px-0 py-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseUsuarios">
+                    <i class="bi bi-people me-2"></i> Usuarios
+                </button>
+            </h6>
+            <div id="collapseUsuarios"
+                 class="accordion-collapse collapse {{ isOpenGroup('usuarios', $active ?? '') }}">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item">
+                        <a href="{{ route('usuarios.ciudadanos') }}"
+                           class="nav-link {{ isActive('ciudadanos', $active ?? '') }}">
+                            <i class="bi bi-person me-2"></i> Ciudadanos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('usuarios.permisos') }}"
+                           class="nav-link {{ isActive('permisos', $active ?? '') }}">
+                            <i class="bi bi-shield-lock me-2"></i> Permisos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('usuarios.config') }}"
+                           class="nav-link {{ isActive('configUsuarios', $active ?? '') }}">
+                            <i class="bi bi-gear me-2"></i> Configuración
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        {{-- CONFIGURACIÓN (con subitems) --}}
+        <div class="accordion-item border-0">
+            <h6 class="accordion-header">
+                <button class="accordion-button collapsed px-0 py-2" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseConfiguracion">
+                    <i class="bi bi-gear me-2"></i> Configuración
+                </button>
+            </h6>
+            <div id="collapseConfiguracion"
+                 class="accordion-collapse collapse {{ isOpenGroup('configuracion', $active ?? '') }}">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item">
+                        <a href="{{ route('configuracion.index') }}"
+                           class="nav-link {{ isActive('configuracion.general', $active ?? '') }}">
+                            <i class="bi bi-sliders me-2"></i> General
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('configuracion.apariencia.index') }}"
+                           class="nav-link {{ isActive('configuracion.apariencia', $active ?? '') }}">
+                            <i class="bi bi-palette me-2"></i> Apariencia
+                        </a>
+                    </li>
+                  
+                    <li class="nav-item">
+                        <a href="{{ route('configuracion.seo.index') }}"
+                            class="nav-link {{ isActive('configuracion.seo', $active ?? '') }}">
+                            <i class="bi bi-globe2 me-2"></i> SEO
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                    <a href="{{ route('configuracion.mapa.index') }}"
+                        class="nav-link {{ isActive('configuracion.mapa', $active ?? '') }}">
+                        <i class="bi bi-geo-alt me-2"></i> Ubicación del mapa
+                    </a>
+                    </li>                 
+                </ul>
+            </div>
+        </div>
+    </div>{{-- /accordion --}}
+
+    {{-- Otros enlaces sueltos --}}
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a href="{{ route('catalogos.index') }}"
+               class="nav-link {{ isActive('catalogos', $active ?? '') }}">
+                <i class="bi bi-folder2-open me-2"></i> Catálogos
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('filtros.index') }}"
+               class="nav-link d-flex align-items-center {{ isActive('filtros', $active ?? '') }}">
+                <i class="bi bi-funnel me-2"></i> Filtros
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('registro.cambios') }}"
+                class="nav-link d-flex align-items-center {{ isActive('registro', $active) }}">
+                <i class="bi bi-clock-history me-2"></i> Registro de cambios
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="https://lujandecuyo.gob.ar/instructivos-mld/"
+            target="_blank"
+            class="nav-link d-flex align-items-center">
+                <i class="bi bi-building me-2"></i> Manuales y guías
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('logout') }}"
+               class="nav-link text-danger d-flex align-items-center"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
+        </li>
+    </ul>
 </div>
-
-<!-- Menú lateral del funcionario -->
-<ul class="nav flex-column nav-pills gap-1">
-
-  <!-- Sección: Ventanilla Digital -->
-  <li class="nav-item">
-    <div class="fw-bold text-uppercase small px-3 pt-3">Ventanilla Digital</div>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link {{ $active === 'tramite_config' ? 'active' : '' }}" href="{{ route('funcionario.tramite_config') }}">
-      <i class="bi bi-list-task me-2"></i> Listado de trámites
-    </a>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link {{ $active === 'bandeja' ? 'active' : '' }}" href="{{ route('funcionario.bandeja') }}">
-      <i class="bi bi-inbox me-2"></i> Bandeja de entrada
-    </a>
-  </li>
-
-  <!-- Sección: Inspectores -->
-  <li class="nav-item">
-    <div class="fw-bold text-uppercase small px-3 pt-4">Inspectores</div>
-    <a class="nav-link {{ $active === 'inspectores' ? 'active' : '' }}" href="{{ route('inspectores.index') }}">
-      <i class="bi bi-person-badge me-2"></i> Gestión de Inspectores
-    </a>
-  </li>
-
-  <!-- Sección: Pagos -->
-  <li class="nav-item">
-    <div class="fw-bold text-uppercase small px-3 pt-4">Pagos</div>
-    <a class="nav-link {{ $active === 'pagos' ? 'active' : '' }}" href="{{ route('pagos.index') }}">
-      <i class="bi bi-cash-coin me-2"></i> Administración de pagos
-    </a>
-  </li>
-
-  <!-- Sección: Citas -->
-  <li class="nav-item">
-    <div class="fw-bold text-uppercase small px-3 pt-4">Citas</div>
-    <a class="nav-link {{ $active === 'citas' ? 'active' : '' }}" href="{{ route('citas.index') }}">
-      <i class="bi bi-calendar-check me-2"></i> Gestión de citas
-    </a>
-  </li>
-
-  <hr>
-
-  <!-- Otros enlaces -->
-  <li class="nav-item">
-    <a class="nav-link {{ $active === 'usuarios' ? 'active' : '' }}" href="{{ route('usuarios.index') }}">
-      <i class="bi bi-people me-2"></i> Usuarios
-    </a>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link {{ $active === 'catalogos' ? 'active' : '' }}" href="{{ route('catalogos.index') }}">
-      <i class="bi bi-collection me-2"></i> Catálogos
-    </a>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link {{ $active === 'filtros' ? 'active' : '' }}" href="{{ route('filtros.index') }}">
-      <i class="bi bi-filter me-2"></i> Filtros
-    </a>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link {{ $active === 'estadisticas' ? 'active' : '' }}" href="{{ route('estadisticas') }}">
-      <i class="bi bi-bar-chart-line me-2"></i> Estadísticas
-    </a>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link {{ $active === 'registro' ? 'active' : '' }}" href="{{ route('registro.cambios') }}">
-      <i class="bi bi-clock-history me-2"></i> Registro de cambios
-    </a>
-  </li>
-
-  <li class="nav-item">
-    <a class="nav-link" href="https://www.os.city" target="_blank">
-      <i class="bi bi-box-arrow-up-right me-2"></i> Centro de ayuda +
-    </a>
-  </li>
-
-  <li class="nav-item mt-3">
-    <form method="POST" action="{{ route('logout') }}">
-      @csrf
-      <button class="nav-link text-danger w-100 text-start" type="submit">
-        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-      </button>
-    </form>
-  </li>
-</ul>

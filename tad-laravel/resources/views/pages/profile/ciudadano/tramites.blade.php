@@ -53,6 +53,12 @@
       </div>
     </div>
 
+<form method="POST" action="{{ route('profile.tramites.iniciar', $tramite->id) }}" class="mt-2">
+  @csrf
+  <button type="submit" class="btn btn-sm btn-primary">
+    Iniciar trámite
+  </button>
+</form>
 
 
     @empty

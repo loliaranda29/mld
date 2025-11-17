@@ -10,66 +10,96 @@
     </div>
 </div>
 
-<div class="bg-white rounded shadow p-4">
-    <div class="flex flex-wrap items-center gap-2 mb-4">
-        <select class="form-select w-auto">
-            <option>Todos</option>
-            <option>Activos</option>
-            <option>Inactivos</option>
-        </select>
-        <label class="flex items-center space-x-2">
-            <input type="checkbox" class="form-checkbox">
-            <span class="text-sm">¿Ver solo los publicados en el inicio?</span>
-        </label>
-        <div class="flex-grow relative">
-            <input type="text" class="form-control w-full" placeholder="Buscar">
-            <button class="absolute right-2 top-1/2 -translate-y-1/2">
-                <i class="bi bi-search"></i>
-            </button>
-        </div>
-        <div class="flex items-center space-x-1">
-            <button class="btn btn-outline-secondary p-2"><i class="bi bi-upload"></i></button>
-            <button class="btn btn-outline-secondary p-2"><i class="bi bi-download"></i></button>
-        </div>
-    </div>
+  @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+  @endif
 
-    <div class="overflow-x-auto">
-        <table class="table w-full text-sm text-left">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th><input type="checkbox" /></th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Fecha de creación</th>
-                    <th>Disponible en línea</th>
-                    <th>Trámite publicado</th>
-                    <th>Aceptar solicitudes</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="border-t">
-                    <td><input type="checkbox" /></td>
-                    <td>Asistencia presencial para Licencias</td>
-                    <td>Te ayudamos a cargar tu trámite online...</td>
-                    <td>21/07/2025 08:40:05 hrs</td>
-                    <td><span class="badge bg-success">Activo</span></td>
-                    <td><span class="badge bg-success">Activo</span></td>
-                    <td><span class="badge bg-secondary">Inactivo</span></td>
-                    <td>
-                        <div class="flex space-x-2">
-                            <button class="text-blue-500"><i class="bi bi-pencil"></i></button>
-                            <button class="text-red-500"><i class="bi bi-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-                <!-- Más filas dummy -->
-            </tbody>
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Padre</th>
+              <th>Subtrámites</th>
+              <th>Vínculos</th>
+              <th>Estado</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          @forelse($tramites as $t)
+            <tr>
+              <td>
+                <strong>{{ $t->nombre }}</strong>
+                @if($t->descripcion)
+                  <div class="text-muted small">{{ Str::limit($t->descripcion, 80) }}</div>
+                @endif
+              </td>
+              <td class="text-muted">
+                {{ $t->parent?->nombre ?? '—' }}
+              </td>
+              <td>
+                {{-- mostramos count rápido; si querés listado, podés expandir --}}
+                {{ $t->hijos()->count() }}
+              </td>
+              <td>
+                {{-- vínculos como origen --}}
+                {{ $t->relacionados()->count() }}
+              </td>
+              <td>
+                @if($t->publicado)
+                  <span class="badge bg-success">Publicado</span>
+                @else
+                  <span class="badge bg-secondary">Borrador</span>
+                @endif
+              </td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{{ route('funcionario.tramites.edit', $t->id) }}">Editar</a>
+
+                <form action="{{ route('funcionario.tramites.destroy', $t->id) }}" method="POST" class="d-inline"
+                      onsubmit="return confirm('¿Eliminar definitivamente este trámite?');">
+                  @csrf @method('DELETE')
+                  <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+
+            {{-- Si querés mostrar subtrámites en línea (nivel 1) --}}
+            @foreach($t->hijos as $h)
+              <tr class="table-sm">
+                <td>
+                  <span class="text-muted">↳</span> {{ $h->nombre }}
+                </td>
+                <td class="text-muted">{{ $h->parent?->nombre ?? '—' }}</td>
+                <td>{{ $h->hijos()->count() }}</td>
+                <td>{{ $h->relacionados()->count() }}</td>
+                <td>
+                  @if($h->publicado)
+                    <span class="badge bg-success">Publicado</span>
+                  @else
+                    <span class="badge bg-secondary">Borrador</span>
+                  @endif
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" href="{{ route('funcionario.tramites.edit', $h->id) }}">Editar</a>
+                  <form action="{{ route('funcionario.tramites.destroy', $h->id) }}" method="POST" class="d-inline"
+                        onsubmit="return confirm('¿Eliminar este subtrámite?');">
+                    @csrf @method('DELETE')
+                    <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  </form>
+                </td>
+              </tr>
+            @endforeach
+
+          @empty
+            <tr><td colspan="6" class="text-center text-muted py-4">No hay trámites aún.</td></tr>
+          @endforelse
+          </tbody>
         </table>
+      </div>
     </div>
-
-    <div class="mt-4 text-center">
-        <button class="btn btn-outline-primary">Mostrar más</button>
-    </div>
+  </div>
 </div>
 @endsection

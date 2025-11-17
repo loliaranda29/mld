@@ -29,14 +29,12 @@ steve/identidad-digital
 
 1. **Actualizar `dev` localmente:**
 
-```bash
 git checkout dev
 git pull origin dev
 ```
 
 2. **Crear tu rama de trabajo:**
 
-```bash
 git checkout -b tu-nombre/feature
 ```
 
@@ -47,7 +45,7 @@ git add .
 git commit -m "Descripción clara del cambio"
 ```
 
-4. **Pushear tu rama al repositorio:**
+Pushear tu rama al repositorio
 
 ```bash
 git push origin tu-nombre/feature

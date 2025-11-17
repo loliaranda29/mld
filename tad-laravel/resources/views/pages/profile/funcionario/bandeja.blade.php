@@ -3,37 +3,57 @@
 @section('title', 'Bandeja de entrada')
 
 @section('profile_content')
-<div class="container px-4 mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4">Bandeja de entrada</h2>
-  </div>
+<div class="container mt-4">
+  <h2 class="h5 mb-4">Bandeja de entrada</h2>
 
-  <div class="card mb-3 p-3">
-    <div class="row g-3">
+  <!-- Filtros superiores -->
+  <div class="card p-3 mb-3">
+    <div class="row g-2 align-items-end mb-3">
       <div class="col-md-4">
+        <label class="form-label">Tareas</label>
         <select class="form-select">
           <option selected>Mis tareas</option>
           <option>Todos los trámites</option>
           <option>Trámites asignados</option>
         </select>
       </div>
-      <div class="col-md-8 d-flex justify-content-end align-items-center gap-2">
-        <div class="form-check me-3">
+      <div class="col-md-8 d-flex flex-wrap justify-content-end align-items-end gap-2">
+        <div class="form-check">
           <input class="form-check-input" type="radio" name="tipoBusqueda" id="buscarFolio" checked>
           <label class="form-check-label" for="buscarFolio">Buscar por folio</label>
         </div>
-        <div class="form-check me-3">
+        <div class="form-check">
           <input class="form-check-input" type="radio" name="tipoBusqueda" id="buscarPrefolio">
           <label class="form-check-label" for="buscarPrefolio">Buscar por prefolio</label>
         </div>
-        <input type="text" class="form-control w-50" placeholder="Buscar por folio">
-        <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+        <input type="text" class="form-control w-auto" placeholder="Buscar por folio">
+        <button class="btn btn-dark"><i class="bi bi-search"></i></button>
         <button class="btn btn-outline-secondary"><i class="bi bi-sliders"></i></button>
+      </div>
+    </div>
+
+    <!-- Filtros adicionales -->
+    <div class="row g-2">
+      <div class="col-md-5">
+        <input type="text" class="form-control" placeholder="Buscar un trámite, servicio, ...">
+      </div>
+      <div class="col-md-2">
+        <input type="text" class="form-control" placeholder="Rango de fechas">
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Buscar por CUIL del solicitante">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-outline-dark w-100"><i class="bi bi-download me-1"></i>Buscar</button>
       </div>
     </div>
   </div>
 
+  <!-- Tabs -->
   <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a class="nav-link" href="#">Todos <span class="badge bg-secondary">146</span></a>
+    </li>
     <li class="nav-item">
       <a class="nav-link active" href="#">Abiertos <span class="badge bg-secondary">146</span></a>
     </li>
@@ -79,7 +99,12 @@
         </tbody>
       </table>
     </div>
-    <div class="card-footer d-flex justify-content-between align-items-center">
+  @else
+    <div class="alert alert-info mb-0">No hay solicitudes para mostrar.</div>
+  @endif
+</div>
+ 
+<div class="card-footer d-flex justify-content-between align-items-center">
       <div>
         Filas por página:
         <select class="form-select d-inline w-auto ms-2">
